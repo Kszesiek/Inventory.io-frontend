@@ -11,11 +11,15 @@ import { ColorSchemeName, Pressable } from 'react-native';
 
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
-import ModalScreen from '../screens/ModalScreen';
-import NotFoundScreen from '../screens/NotFoundScreen';
-import TabOneScreen from '../screens/TabOneScreen';
-import TabTwoScreen from '../screens/TabTwoScreen';
-import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
+import ModalScreen from '../screens/old screens/ModalScreen';
+import NotFoundScreen from '../screens/old screens/NotFoundScreen';
+import TabOneScreen from '../screens/old screens/TabOneScreen';
+import TabTwoScreen from '../screens/old screens/TabTwoScreen';
+import {LoginStackParamList, RootStackParamList, RootTabParamList, RootTabScreenProps} from '../types';
+import SignInScreen from "../screens/login/SignInScreen";
+import RegisterScreen from "../screens/login/RegisterScreen";
+import ForgotPasswordScreen from "../screens/login/ForgotPassword";
+import ResetPasswordScreen from "../screens/login/ResetPassword";
 // import LinkingConfiguration from './LinkingConfiguration';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
@@ -23,10 +27,31 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
     <NavigationContainer
       // linking={LinkingConfiguration}
       theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <RootNavigator />
+      {/*<RootNavigator />*/}
+      <LoginNavigator />
     </NavigationContainer>
   );
 }
+
+const LoginStack = createNativeStackNavigator<LoginStackParamList>();
+
+function LoginNavigator() {
+  return (
+    <LoginStack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <LoginStack.Screen name="SignIn" component={SignInScreen} />
+      <LoginStack.Screen name="Register" component={RegisterScreen} />
+      <LoginStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <LoginStack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ title: 'aPjz' }} />
+    </LoginStack.Navigator>
+  );
+}
+
+
+
 
 /**
  * A root stack navigator is often used for displaying modals on top of all other content.
