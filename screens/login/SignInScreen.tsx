@@ -1,11 +1,14 @@
-import {StyleSheet, TouchableOpacity, Image, Platform, KeyboardAvoidingView} from 'react-native';
+import {StyleSheet, Image, Platform, KeyboardAvoidingView} from 'react-native';
 
-import { Text, View, TextInput } from '../../components/Themed';
+import {Text, View} from '../../components/Themed';
 import {LoginStackScreenProps} from '../../types';
-import Card from "../../components/Card";
+import Card from "../../components/Themed/Card";
 import {useState} from "react";
 
 import Logo from '../../assets/images/inventory.png';
+import {OpacityButton} from "../../components/Themed/OpacityButton";
+import {TouchableText} from "../../components/Themed/TouchableText";
+import {InputCard} from "../../components/Themed/InputCard";
 
 export default function SignInScreen({ navigation, route }: LoginStackScreenProps<'SignIn'>) {
   const [username, setUsername] = useState('');
@@ -13,6 +16,7 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
 
   const onSignInPressed = () => {
     console.log("Sign in pressed");
+    navigation.getParent()!.navigate("Home");
   }
 
   const onRegisterPressed = () => {
@@ -26,63 +30,55 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
   }
 
   return (
-    <View style={styles.screenView} lightColor="#F9FBFC" darkColor="#1E2E3D" >
+    <View style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardAvoidingView}>
+        style={styles.keyboardAvoidingView}
+      >
         <View style={styles.logoContainer}>
           <Image source={Logo} style={styles.logo} resizeMode='contain' />
         </View>
 
-        <Card
-          style={styles.mainCard}
-          lightColor="white"
-          darkColor="#273444"
-        >
+        <Card style={styles.mainCard} >
           <View style={styles.formRow}>
             <Text style={textStyles.label}>Login</Text>
-            <Card
-              style={styles.inputCard}
-              darkColor="#1E2835"
-            >
-              <TextInput
-                value={username}
-                onChangeText={setUsername}
-                placeholder='Wprowadź nazwę użytkownika...'
-                style={textStyles.input}
-              />
-            </Card>
+            <InputCard cardProps={{style: styles.inputCard}}
+              textInputProps={{
+                value: username,
+                onChangeText: setUsername,
+                placeholder: 'Wprowadź nazwę użytkownika...',
+            }} />
           </View>
           <View style={styles.formRow}>
             <Text style={textStyles.label}>Hasło</Text>
-            <Card
-              style={styles.inputCard}
-              darkColor="#1E2835"
-            >
-              <TextInput
-                value={password}
-                onChangeText={setPassword}
-                placeholder='Wprowadź hasło...'
-                style={textStyles.input}
-                secureTextEntry={true}
-              />
-            </Card>
+            <InputCard cardProps={{style: styles.inputCard}}
+                textInputProps={{
+                value: password,
+                onChangeText: setPassword,
+                placeholder: 'Wprowadź hasło...',
+                secureTextEntry: true,
+            }} />
             <View style={styles.touchableTextContainer}>
-              <Text>Nie pamiętasz hasła?</Text>
-              <TouchableOpacity style={{padding: 5}} onPress={onResetPasswordPressed}>
-                <Text style={textStyles.touchableText}>Zresetuj hasło</Text>
-              </TouchableOpacity>
+              <Text style={textStyles.resetPassword}>Nie pamiętasz hasła?</Text>
+              <TouchableText
+                onPress={onResetPasswordPressed}
+                props={{ style: {padding: 4} }}
+                textProps={{ style: textStyles.resetPassword }}
+              >
+                Zresetuj hasło
+              </TouchableText>
             </View>
           </View>
-          <TouchableOpacity style={styles.resetPasswordButton} onPress={onSignInPressed} >
-            <Text style={textStyles.resetPassword}>Zaloguj</Text>
-          </TouchableOpacity>
+          <OpacityButton
+            onPress={onSignInPressed}
+            style={styles.signInButton}
+          >
+            Zaloguj
+          </OpacityButton>
         </Card>
         <View style={styles.touchableTextContainer}>
           <Text>Nie masz konta?</Text>
-          <TouchableOpacity style={{padding: 5}} onPress={onRegisterPressed}>
-            <Text style={textStyles.touchableText}>Zarejestruj się</Text>
-          </TouchableOpacity>
+          <TouchableText onPress={onRegisterPressed}>Zarejestruj się</TouchableText>
         </View>
 
         <View style={{flex: 1}} />
@@ -92,26 +88,23 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
 }
 
 const textStyles = StyleSheet.create({
-  resetPassword: {
-    color: 'white',
-  },
-  touchableText: {
-    color: '#4285F4',
-  },
   label: {
     fontSize: 22,
     textAlign: 'center',
   },
-  input: {
+  textInput: {
     flex: 1,
     textAlign: 'center',
   },
+  resetPassword: {
+    fontSize: 12,
+  }
 })
 
 
 
 const styles = StyleSheet.create({
-  screenView: {
+  container: {
     flex: 1,
   },
   keyboardAvoidingView: {
@@ -119,6 +112,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 25,
+    backgroundColor: 'transparent',
   },
   logoContainer: {
     flex: 3,
@@ -132,7 +126,6 @@ const styles = StyleSheet.create({
   },
   mainCard: {
     width: '100%',
-    overflow: 'hidden',
     padding: 15,
     alignItems: 'center',
     borderRadius: 20,
@@ -148,20 +141,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   inputCard: {
-    // flex: 1,
     height: 40,
     paddingHorizontal: 5,
     marginTop: 10,
     width: '85%',
   },
-  resetPasswordButton: {
-    margin: 0,
-    paddingVertical: 10,
+  signInButton: {
+    paddingVertical: 8,
     paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
-    backgroundColor: '#4285F4',
   },
   touchableTextContainer: {
     flexDirection: 'row',

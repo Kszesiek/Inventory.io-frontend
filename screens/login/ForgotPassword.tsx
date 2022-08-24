@@ -1,12 +1,15 @@
 import {LoginStackScreenProps} from "../../types";
-import {Text, TextInput, View} from "../../components/Themed";
-import {KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity} from "react-native";
-import Card from "../../components/Card";
+import {Text, View} from "../../components/Themed";
+import {KeyboardAvoidingView, Platform, StyleSheet} from "react-native";
+import Card from "../../components/Themed/Card";
 import {useState} from "react";
+import {OpacityButton} from "../../components/Themed/OpacityButton";
+import {TouchableText} from "../../components/Themed/TouchableText";
+import {InputCard} from "../../components/Themed/InputCard";
 
 export default function ForgotPasswordScreen({ navigation, route }: LoginStackScreenProps<'ForgotPassword'>) {
   const [username, setUsername] = useState('');
-  const [Email, setEmail] = useState('');
+  const [email, setEmail] = useState('');
 
   const onSignInPressed = () => {
     console.log("Sign in pressed");
@@ -19,7 +22,7 @@ export default function ForgotPasswordScreen({ navigation, route }: LoginStackSc
   };
 
   return (
-    <View style={styles.screenView} lightColor="#F9FBFC" darkColor="#1E2E3D">
+    <View style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoidingView}
@@ -27,50 +30,36 @@ export default function ForgotPasswordScreen({ navigation, route }: LoginStackSc
         <View style={{flex: 2}} />
         <Text style={textStyles.title}>Resetowanie hasła</Text>
         <View style={{flex: 1}} />
-        <Card
-          style={styles.mainCard}
-          lightColor="white"
-          darkColor="#273444"
-        >
+        <Card style={styles.mainCard} >
           <View style={styles.formRow}>
             <Text style={textStyles.label}>Login</Text>
-            <Card
-              style={styles.inputCard}
-              lightColor="white"
-              darkColor="#1E2835"
-            >
-              <TextInput
-                value={username}
-                onChangeText={setUsername}
-                placeholder='Wprowadź nazwę użytkownika...'
-                style={textStyles.input}
-              />
-            </Card>
+            <InputCard cardProps={{style: styles.inputCard}}
+              textInputProps={{
+                value: username,
+                onChangeText: setUsername,
+                placeholder: 'Wprowadź nazwę użytkownika...',
+                secureTextEntry: true,
+            }} />
           </View>
           <View style={styles.formRow}>
             <Text style={textStyles.label}>Adres e-mail</Text>
-            <Card
-              style={styles.inputCard}
-              darkColor="#1E2835"
-            >
-              <TextInput
-                value={Email}
-                onChangeText={setEmail}
-                placeholder='Wprowadź adres e-mail...'
-                style={textStyles.input}
-                secureTextEntry={true}
-              />
-            </Card>
+            <InputCard cardProps={{style: styles.inputCard}}
+              textInputProps={{
+                value: email,
+                onChangeText: setEmail,
+                placeholder: 'Wprowadź adres e-mail...',
+            }} />
           </View>
-          <TouchableOpacity style={styles.resetPasswordButton} onPress={onResetPasswordPressed} >
-            <Text style={textStyles.resetPassword}>Resetuj hasło</Text>
-          </TouchableOpacity>
+          <OpacityButton
+            onPress={onResetPasswordPressed}
+            style={styles.resetPasswordButton}
+          >
+            Resetuj hasło
+          </OpacityButton>
         </Card>
         <View style={styles.touchableTextContainer}>
           <Text>O, hasło ci się przypomniało?</Text>
-          <TouchableOpacity style={{padding: 5}} onPress={onSignInPressed}>
-            <Text style={textStyles.touchableText}>Zaloguj się</Text>
-          </TouchableOpacity>
+          <TouchableText onPress={onSignInPressed}>Zaloguj się</TouchableText>
         </View>
 
         <View style={{flex: 2}} />
@@ -80,14 +69,8 @@ export default function ForgotPasswordScreen({ navigation, route }: LoginStackSc
 };
 
 const textStyles = StyleSheet.create({
-  resetPassword: {
-    color: 'white',
-  },
-  touchableText: {
-    color: '#4285F4',
-  },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     textAlign: 'center',
     padding: 20,
   },
@@ -95,7 +78,7 @@ const textStyles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
   },
-  input: {
+  textInput: {
     flex: 1,
     textAlign: 'center',
   },
@@ -104,7 +87,7 @@ const textStyles = StyleSheet.create({
 
 
 const styles = StyleSheet.create({
-  screenView: {
+  container: {
     flex: 1,
   },
   keyboardAvoidingView: {
@@ -112,16 +95,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 25,
-  },
-  logoContainer: {
-    flex: 3,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-  },
-  logo: {
-    flex: 1,
-    maxWidth: '40%',
   },
   mainCard: {
     width: '100%',
@@ -149,13 +122,11 @@ const styles = StyleSheet.create({
   },
   resetPasswordButton: {
     margin: 0,
-    // height: 40,
     paddingVertical: 10,
     paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
-    backgroundColor: '#4285F4',
   },
   touchableTextContainer: {
     flexDirection: 'row',

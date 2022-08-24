@@ -1,12 +1,16 @@
 import {LoginStackScreenProps} from "../../types";
 import {useState} from "react";
 import {Text, TextInput, View} from "../../components/Themed";
-import {KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity} from "react-native";
-import Card from "../../components/Card";
+import {KeyboardAvoidingView, Platform, StyleSheet} from "react-native";
+import Card from "../../components/Themed/Card";
+import Colors from "../../constants/Colors";
+import {OpacityButton} from "../../components/Themed/OpacityButton";
+import {TouchableText} from "../../components/Themed/TouchableText";
 
 export default function SignInScreen({ navigation, route }: LoginStackScreenProps<'Register'>) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordRepeated, setPasswordRepeated] = useState('');
 
   const onSignInPressed = () => {
     console.log("Sign in pressed");
@@ -19,7 +23,7 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
   };
 
   return (
-    <View style={styles.screenView} lightColor="#F9FBFC" darkColor="#1E2E3D">
+    <View style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoidingView}
@@ -27,23 +31,19 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
         <View style={{flex: 2}} />
         <Text style={textStyles.title}>Tworzenie nowego konta</Text>
         <View style={{flex: 1}} />
-        <Card
-          style={styles.mainCard}
-          lightColor="white"
-          darkColor="#273444"
-        >
+        <Card style={styles.mainCard} >
           <View style={styles.formRow}>
             <Text style={textStyles.label}>Login</Text>
             <Card
               style={styles.inputCard}
-              lightColor="white"
-              darkColor="#1E2835"
+              lightColor={Colors.light.textInput}
+              darkColor={Colors.dark.textInput}
             >
               <TextInput
                 value={username}
                 onChangeText={setUsername}
                 placeholder='Wprowadź nazwę użytkownika...'
-                style={textStyles.input}
+                style={textStyles.textInput}
               />
             </Card>
           </View>
@@ -51,26 +51,44 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
             <Text style={textStyles.label}>Hasło</Text>
             <Card
               style={styles.inputCard}
-              darkColor="#1E2835"
+              lightColor={Colors.light.textInput}
+              darkColor={Colors.dark.textInput}
             >
               <TextInput
                 value={password}
                 onChangeText={setPassword}
                 placeholder='Wprowadź hasło...'
-                style={textStyles.input}
+                style={textStyles.textInput}
                 secureTextEntry={true}
               />
             </Card>
           </View>
-          <TouchableOpacity style={styles.resetPasswordButton} onPress={onCreateAccountPressed} >
-            <Text style={textStyles.resetPassword}>Utwórz konto</Text>
-          </TouchableOpacity>
+          <View style={styles.formRow}>
+            <Text style={textStyles.label}>Powtórz hasło</Text>
+            <Card
+              style={styles.inputCard}
+              lightColor={Colors.light.textInput}
+              darkColor={Colors.dark.textInput}
+            >
+              <TextInput
+                value={passwordRepeated}
+                onChangeText={setPasswordRepeated}
+                placeholder='Powtórz hasło...'
+                style={textStyles.textInput}
+                secureTextEntry={true}
+              />
+            </Card>
+          </View>
+          <OpacityButton
+            style={styles.registerButton}
+            onPress={onCreateAccountPressed}
+          >
+            Utwórz konto
+          </OpacityButton>
         </Card>
         <View style={styles.touchableTextContainer}>
           <Text>Masz już konto?</Text>
-          <TouchableOpacity style={{padding: 5}} onPress={onSignInPressed}>
-            <Text style={textStyles.touchableText}>Zaloguj się</Text>
-          </TouchableOpacity>
+          <TouchableText onPress={onSignInPressed}>Zaloguj się</TouchableText>
         </View>
 
         <View style={{flex: 2}} />
@@ -80,14 +98,8 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
 };
 
 const textStyles = StyleSheet.create({
-  resetPassword: {
-    color: 'white',
-  },
-  touchableText: {
-    color: '#4285F4',
-  },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     textAlign: 'center',
     padding: 20,
   },
@@ -95,7 +107,7 @@ const textStyles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
   },
-  input: {
+  textInput: {
     flex: 1,
     textAlign: 'center',
   },
@@ -104,7 +116,7 @@ const textStyles = StyleSheet.create({
 
 
 const styles = StyleSheet.create({
-  screenView: {
+  container: {
     flex: 1,
   },
   keyboardAvoidingView: {
@@ -112,16 +124,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 25,
-  },
-  logoContainer: {
-    flex: 3,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-  },
-  logo: {
-    flex: 1,
-    maxWidth: '40%',
   },
   mainCard: {
     width: '100%',
@@ -137,7 +139,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 10,
+    marginVertical: 5,
     backgroundColor: 'transparent',
   },
   inputCard: {
@@ -147,8 +149,9 @@ const styles = StyleSheet.create({
     // marginHorizontal: 20,
     width: '85%',
   },
-  resetPasswordButton: {
-    margin: 0,
+  registerButton: {
+    marginTop: 15,
+    marginBottom: 5,
     // height: 40,
     paddingVertical: 10,
     paddingHorizontal: 20,

@@ -3,40 +3,28 @@
  * https://reactnavigation.org/docs/typescript/
  */
 
-import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { DrawerScreenProps } from '@react-navigation/drawer';
 
 declare global {
   namespace ReactNavigation {
-    interface RootParamList extends RootStackParamList {}
+    interface RootParamList extends OldRootStackParamList {}
   }
 }
 
 // ROOT STACK
 
 export type RootStackParamList = {
-  Root: NavigatorScreenParams<RootTabParamList> | undefined;
-  Modal: undefined;
-  NotFound: undefined;
+  Login: NavigatorScreenParams<LoginStackParamList>;
+  Home: NavigatorScreenParams<HomeDrawerParamList>;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<
   RootStackParamList,
   Screen
->;
-
-// ROOT TAB
-
-export type RootTabParamList = {
-  TabOne: undefined;
-  TabTwo: undefined;
-};
-
-export type RootTabScreenProps<Screen extends keyof RootTabParamList> = CompositeScreenProps<
-  BottomTabScreenProps<RootTabParamList, Screen>,
-  NativeStackScreenProps<RootStackParamList>
->;
+  >;
 
 // LOGIN STACK
 
@@ -45,9 +33,84 @@ export type LoginStackParamList = {
   Register: undefined;
   ForgotPassword: undefined;
   ResetPassword: undefined;
+  AppSettings: undefined;
 };
 
 export type LoginStackScreenProps<Screen extends keyof LoginStackParamList> = NativeStackScreenProps<
   LoginStackParamList,
   Screen
   >;
+
+// HOME DRAWER
+
+export type HomeDrawerParamList = {
+  OrganizationTabNavigator: undefined;
+};
+
+export type HomeDrawerScreenProps<Screen extends keyof HomeDrawerParamList> = DrawerScreenProps<
+  HomeDrawerParamList,
+  Screen
+  >;
+
+// HOME TAB
+
+export type HomeTabParamList = {
+  Homescreen: undefined;
+  Inventory: undefined;
+  Lending: undefined;
+  Members: undefined;
+  Events: undefined;
+  ManageOrganization: undefined;
+  AppSettings: undefined;
+  UserSettings: undefined;
+};
+
+export type HomeTabScreenProps<Screen extends keyof HomeTabParamList> = BottomTabScreenProps<
+  HomeTabParamList,
+  Screen
+  >;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// OLD ROOT STACK
+
+export type OldRootStackParamList = {
+  Root: NavigatorScreenParams<OldRootTabParamList> | undefined;
+  Modal: undefined;
+  NotFound: undefined;
+};
+
+export type OldRootStackScreenProps<Screen extends keyof OldRootStackParamList> = NativeStackScreenProps<
+  OldRootStackParamList,
+  Screen
+>;
+
+// ROOT TAB
+
+export type OldRootTabParamList = {
+  TabOne: undefined;
+  TabTwo: undefined;
+};
+
+export type RootTabScreenProps<Screen extends keyof OldRootTabParamList> = CompositeScreenProps<
+  BottomTabScreenProps<OldRootTabParamList, Screen>,
+  NativeStackScreenProps<OldRootStackParamList>
+>;
