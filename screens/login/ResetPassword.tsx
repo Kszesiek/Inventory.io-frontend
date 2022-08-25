@@ -66,7 +66,6 @@ export default function ResetPasswordScreen({ navigation, route }: LoginStackScr
             </Card>
           </View>
           <OpacityButton
-            style={styles.setPasswordButton}
             onPress={onSetPasswordPressed}
           >
             Ustaw nowe hasło
@@ -142,11 +141,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     marginVertical: 10,
     width: '85%',
-  },
-  setPasswordButton: {
-    margin: 0,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
   },
   touchableTextContainer: {
     flexDirection: 'row',

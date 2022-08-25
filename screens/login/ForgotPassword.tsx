@@ -50,12 +50,7 @@ export default function ForgotPasswordScreen({ navigation, route }: LoginStackSc
                 placeholder: 'Wprowadź adres e-mail...',
             }} />
           </View>
-          <OpacityButton
-            onPress={onResetPasswordPressed}
-            style={styles.resetPasswordButton}
-          >
-            Resetuj hasło
-          </OpacityButton>
+          <OpacityButton onPress={onResetPasswordPressed}>Resetuj hasło</OpacityButton>
         </Card>
         <View style={styles.touchableTextContainer}>
           <Text>O, hasło ci się przypomniało?</Text>
@@ -117,13 +112,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 5,
     marginVertical: 10,
-    // marginHorizontal: 20,
     width: '85%',
   },
-  resetPasswordButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-  },
+
   touchableTextContainer: {
     flexDirection: 'row',
     backgroundColor: 'transparent',

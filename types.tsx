@@ -45,6 +45,8 @@ export type LoginStackScreenProps<Screen extends keyof LoginStackParamList> = Na
 
 export type HomeDrawerParamList = {
   OrganizationTabNavigator: undefined;
+  SecondOrganizationTabNavigator: undefined;
+  // Yeah, in the future this needs to be changed for sure
 };
 
 export type HomeDrawerScreenProps<Screen extends keyof HomeDrawerParamList> = DrawerScreenProps<

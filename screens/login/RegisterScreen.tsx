@@ -146,14 +146,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 5,
     marginVertical: 10,
-    // marginHorizontal: 20,
     width: '85%',
   },
   registerButton: {
     marginTop: 15,
     marginBottom: 5,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
   },
   touchableTextContainer: {
     flexDirection: 'row',

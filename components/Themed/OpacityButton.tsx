@@ -16,12 +16,14 @@ export function OpacityButton({children, onPress, style, props = {}, textProps =
 
 const styles = StyleSheet.create({
   defaultStyle: {
-    padding: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 30,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 10,
+    borderRadius: 100,
   },
   defaultTextStyle: {
     textAlign: 'center',
+    fontSize: 18,
   },
 })

@@ -6,9 +6,16 @@ import {FontAwesome, Ionicons} from '@expo/vector-icons';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import {
+  createDrawerNavigator,
+  DrawerContentComponentProps,
+  DrawerContentScrollView,
+  DrawerItem,
+  DrawerItemList,
+  useDrawerProgress
+} from '@react-navigation/drawer';
 import * as React from 'react';
-import {ColorSchemeName, Pressable, TouchableOpacity} from 'react-native';
+import {ColorSchemeName, Pressable, StyleSheet, TouchableOpacity} from 'react-native';
 
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
@@ -35,7 +42,9 @@ import Inventory from "../screens/home/Inventory";
 import Events from "../screens/home/Events";
 import Lending from "../screens/home/Lending";
 import ManageOrganization from "../screens/home/ManageOrganization";
-import {useThemeColor} from "../components/Themed";
+import {Text, useThemeColor, View} from "../components/Themed";
+import Animated, {Adaptable} from "react-native-reanimated";
+import {OpacityButton} from "../components/Themed/OpacityButton";
 // import LinkingConfiguration from './LinkingConfiguration';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
@@ -86,7 +95,7 @@ function LoginNavigator() {
       <LoginStack.Screen name="SignIn" component={SignInScreen} options={({ navigation }) => ({
         headerRight: () => (
           <TouchableOpacity onPress={() => navigation.navigate("AppSettings")}>
-            <Ionicons name='settings' size={35} style={{ color: useThemeColor({light: '#333', dark: '#fff'}, 'text')}} />
+            <Ionicons name='construct' size={35} style={{ color: useThemeColor({light: '#333', dark: '#fff'}, 'text')}}  />
           </TouchableOpacity>
         ),
         headerLeft: () => <></>,
@@ -106,21 +115,87 @@ const HomeDrawer = createDrawerNavigator<HomeDrawerParamList>();
 
 type OrganizationDetails = {name: string};
 
+function CustomHomeDrawerContent(props: DrawerContentComponentProps) {
+  const progress = useDrawerProgress() as Adaptable<number>;
+
+  const translateX = Animated.interpolateNode(progress, {
+    inputRange: [0, 1],
+    outputRange: [-100, 0],
+  });
+
+  function createOrganizationPressed() {
+    console.log("create organization pressed")
+  }
+
+  return (
+    <>
+      <DrawerContentScrollView {...props}>
+        <Animated.View style={{ transform: [{ translateX }] }}>
+          <View style={drawerStyles.titleView}>
+            <Text style={drawerStyles.titleText}>Twoje organizacje</Text>
+          </View>
+          <DrawerItemList {...props} />
+        </Animated.View>
+      </DrawerContentScrollView>
+      <Animated.View style={{ transform: [{ translateX }] }}>
+        <View style={drawerStyles.bottomView}>
+          <OpacityButton
+            style={drawerStyles.bottomButton}
+            textProps={{style: {fontSize: 16}}}
+            onPress={createOrganizationPressed}
+          >
+            Utwórz organizację
+          </OpacityButton>
+        </View>
+      </Animated.View>
+    </>
+  );
+}
+
 function HomeDrawerNavigator(props: OrganizationDetails[]) {
   return (
     <HomeDrawer.Navigator
+      useLegacyImplementation
       screenOptions={{
         headerShown: false,
-      }}
-
+        drawerStyle: {backgroundColor: useThemeColor({}, "header")},
+        drawerActiveBackgroundColor: useThemeColor({}, "tabBackgroundSelected"),
+        drawerActiveTintColor: useThemeColor({}, "tabIconSelected"),
+    }}
+      drawerContent={(props) => <CustomHomeDrawerContent {...props} />}
     >
       <HomeDrawer.Screen
         name="OrganizationTabNavigator"
         component={HomeTabNavigator}
       />
+      <HomeDrawer.Screen
+        name="SecondOrganizationTabNavigator"
+        component={HomeTabNavigator}
+      />
     </HomeDrawer.Navigator>
   );
 }
+
+const drawerStyles = StyleSheet.create({
+  titleView: {
+    marginLeft: 12,
+    marginTop: 40,
+    marginBottom: 30,
+    backgroundColor: 'transparent',
+  },
+  titleText: {
+    fontSize: 18,
+  },
+  bottomView: {
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    marginBottom: 20,
+    marginTop: 10,
+  },
+  bottomButton: {
+    paddingVertical: 8,
+  },
+})
 
 // HOME TAB
 
@@ -132,11 +207,15 @@ function HomeTabNavigator(props: {navigation: any, route: any}) {  // Organizati
       screenOptions={{
         headerTitleAlign: "center",
         headerLeft: () => (
-        <TouchableOpacity onPress={props.navigation.openDrawer}>
-        <Ionicons name="arrow-back" color={useThemeColor({}, "text")} size={30} style={{padding: 10}} />
+        <TouchableOpacity onPress={() => props.navigation.navigate('Homescreen')}>
+          <Ionicons name="arrow-back" color={useThemeColor({}, "text")} size={30} style={{padding: 10}} />
         </TouchableOpacity>
         ),
         headerTintColor: useThemeColor({}, "text"),
+        headerStyle: {backgroundColor: useThemeColor({}, "header")},
+        tabBarActiveBackgroundColor: useThemeColor({}, "tabBackgroundSelected"),
+        tabBarInactiveBackgroundColor: useThemeColor({}, "header"),
+        tabBarActiveTintColor: useThemeColor({}, "tabIconSelected"),
       }}
       >
       <HomeTab.Screen
@@ -185,20 +264,18 @@ function HomeTabNavigator(props: {navigation: any, route: any}) {  // Organizati
             <Ionicons name="calendar" size={size} color={color} />
           ),
         }} />
-      <HomeTab.Screen
-        name="ManageOrganization"
-        component={ManageOrganization}
-        options={{
-          tabBarLabel: "Zarządzanie",
-          tabBarIcon: ({color, size}) => (
-            <Ionicons name="terminal" size={size} color={color} />
-          ),
-        }} />
+      {/*<HomeTab.Screen*/}
+      {/*  name="ManageOrganization"*/}
+      {/*  component={ManageOrganization}*/}
+      {/*  options={{*/}
+      {/*    tabBarLabel: "Zarządzanie",*/}
+      {/*    tabBarIcon: ({color, size}) => (*/}
+      {/*      <Ionicons name="terminal" size={size} color={color} />*/}
+      {/*    ),*/}
+      {/*  }} />*/}
     </HomeTab.Navigator>
   )
 }
-
-
 
 
 

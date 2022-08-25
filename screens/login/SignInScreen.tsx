@@ -71,7 +71,6 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
           </View>
           <OpacityButton
             onPress={onSignInPressed}
-            style={styles.signInButton}
           >
             Zaloguj
           </OpacityButton>
@@ -145,10 +144,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     marginTop: 10,
     width: '85%',
-  },
-  signInButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 20,
   },
   touchableTextContainer: {
     flexDirection: 'row',

@@ -13,7 +13,7 @@ type propsType = {
 export function IoniconCard({onPress, iconName, iconSize=32, style = {}, props = {}}: propsType) {
   const { lightColor, darkColor, ...otherProps } = props;
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'cardBackground');
-  const iconColor = useThemeColor({}, 'buttonText');
+  const iconColor = useThemeColor({}, 'text');
 
   return (
     <TouchableOpacity {...otherProps} onPress={onPress} style={[styles.defaultStyle, { backgroundColor }, style]} >
