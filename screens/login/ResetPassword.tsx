@@ -141,16 +141,12 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 5,
     marginVertical: 10,
-    // marginHorizontal: 20,
     width: '85%',
   },
   setPasswordButton: {
     margin: 0,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 10,
   },
   touchableTextContainer: {
     flexDirection: 'row',

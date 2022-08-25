@@ -149,9 +149,6 @@ const styles = StyleSheet.create({
   signInButton: {
     paddingVertical: 8,
     paddingHorizontal: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 10,
   },
   touchableTextContainer: {
     flexDirection: 'row',

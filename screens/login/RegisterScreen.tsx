@@ -152,13 +152,8 @@ const styles = StyleSheet.create({
   registerButton: {
     marginTop: 15,
     marginBottom: 5,
-    // height: 40,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 10,
-    backgroundColor: '#4285F4',
   },
   touchableTextContainer: {
     flexDirection: 'row',

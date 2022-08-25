@@ -1,5 +1,5 @@
 import {Text, TouchableOpacity, TextProps, TouchableOpacityProps, useThemeColor} from "./index";
-import {GestureResponderEvent, StyleProp, ViewStyle} from "react-native";
+import {GestureResponderEvent, StyleProp, StyleSheet, ViewStyle} from "react-native";
 
 export function OpacityButton({children, onPress, style, props = {}, textProps = {}}: {children: string, onPress?: ((event: GestureResponderEvent) => void) | undefined, style?: StyleProp<ViewStyle>, props?: TouchableOpacityProps, textProps?: TextProps}) {
   const { lightColor, darkColor, ...otherProps } = props;
@@ -8,8 +8,20 @@ export function OpacityButton({children, onPress, style, props = {}, textProps =
   const color = useThemeColor({ light: textLightColor, dark: textDarkColor }, 'buttonText');
 
   return (
-    <TouchableOpacity {...otherProps} onPress={onPress} style={[{ backgroundColor }, style]} >
-      <Text style={[{ color }, textStyle]} {...otherTextProps}>{children}</Text>
+    <TouchableOpacity {...otherProps} onPress={onPress} style={[styles.defaultStyle, { backgroundColor }, style]} >
+      <Text style={[styles.defaultTextStyle, { color }, textStyle]} {...otherTextProps}>{children}</Text>
     </TouchableOpacity>
   )
 }
+
+const styles = StyleSheet.create({
+  defaultStyle: {
+    padding: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+  },
+  defaultTextStyle: {
+    textAlign: 'center',
+  },
+})

@@ -121,12 +121,8 @@ const styles = StyleSheet.create({
     width: '85%',
   },
   resetPasswordButton: {
-    margin: 0,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 10,
   },
   touchableTextContainer: {
     flexDirection: 'row',
