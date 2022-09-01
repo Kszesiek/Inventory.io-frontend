@@ -12,7 +12,7 @@ export default {
     tint: tintColorLight,
     tabIconDefault: '#ccc',
     tabIconSelected: tintColorLight,
-    tabBackgroundSelected: 'transparent',
+    tabBackgroundSelected: '#E8F0FE',
     transparent: 'transparent',
   },
   dark: {

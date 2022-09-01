@@ -45,6 +45,8 @@ import ManageOrganization from "../screens/home/ManageOrganization";
 import {Text, useThemeColor, View} from "../components/Themed";
 import Animated, {Adaptable} from "react-native-reanimated";
 import {OpacityButton} from "../components/Themed/OpacityButton";
+import {Provider} from "react-redux";
+import {store} from "../store/store";
 // import LinkingConfiguration from './LinkingConfiguration';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
@@ -154,25 +156,27 @@ function CustomHomeDrawerContent(props: DrawerContentComponentProps) {
 
 function HomeDrawerNavigator(props: OrganizationDetails[]) {
   return (
-    <HomeDrawer.Navigator
-      useLegacyImplementation
-      screenOptions={{
-        headerShown: false,
-        drawerStyle: {backgroundColor: useThemeColor({}, "header")},
-        drawerActiveBackgroundColor: useThemeColor({}, "tabBackgroundSelected"),
-        drawerActiveTintColor: useThemeColor({}, "tabIconSelected"),
-    }}
-      drawerContent={(props) => <CustomHomeDrawerContent {...props} />}
-    >
-      <HomeDrawer.Screen
-        name="OrganizationTabNavigator"
-        component={HomeTabNavigator}
-      />
-      <HomeDrawer.Screen
-        name="SecondOrganizationTabNavigator"
-        component={HomeTabNavigator}
-      />
-    </HomeDrawer.Navigator>
+    <Provider store={store}>
+      <HomeDrawer.Navigator
+        useLegacyImplementation
+        screenOptions={{
+          headerShown: false,
+          drawerStyle: {backgroundColor: useThemeColor({}, "header")},
+          drawerActiveBackgroundColor: useThemeColor({}, "tabBackgroundSelected"),  // Czy potrzebujemy tego? Może lepiej zostawić złotą poświatę?
+          drawerActiveTintColor: useThemeColor({}, "tabIconSelected"),
+        }}
+        drawerContent={(props) => <CustomHomeDrawerContent {...props} />}
+      >
+        <HomeDrawer.Screen
+          name="OrganizationTabNavigator"
+          component={HomeTabNavigator}
+        />
+        <HomeDrawer.Screen
+          name="SecondOrganizationTabNavigator"
+          component={HomeTabNavigator}
+        />
+      </HomeDrawer.Navigator>
+    </Provider>
   );
 }
 
