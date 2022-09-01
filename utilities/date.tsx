@@ -3,10 +3,12 @@ export function displayDateTimePeriod(start: Date | undefined, end: Date | undef
     return 'cannot parse date'
   }
 
-  let output: string = ""
+  let output: string = ""  // Termin:
 
-  const startDate: string = start.toLocaleDateString().replace(/\//g, '.');
-  let   endDate: string   =   end.toLocaleDateString().replace(/\//g, '.');
+  const ISOstart = start.toISOString();
+  const ISOend = end.toISOString();
+  const startDate: string = ISOstart.slice(8, 10) + '.' + ISOstart.slice(5, 7) + '.' + ISOstart.slice(0, 4);
+  let   endDate: string   =   ISOend.slice(8, 10) + '.' +   ISOend.slice(5, 7) + '.' +   ISOend.slice(0, 4);
   const startHour: string = start.toLocaleTimeString().slice(0, -3);
   let   endHour: string   =   end.toLocaleTimeString().slice(0, -3);
   // console.log(startDate + ' ' + startHour + " - " + endDate + ' ' + endHour)
@@ -30,7 +32,7 @@ export function displayDateTimePeriod(start: Date | undefined, end: Date | undef
     if (startHour === '00:00' && endHour === '00:00') {
       output += startDate + ' - ' + endDate
     } else {
-      output = `Początek:  ${startDate}  ${startHour}\nKoniec:  ${endDate}  ${endHour}`;
+      output = `od: ${startDate}, ${startHour}\ndo: ${endDate}, ${endHour}`;
     }
   }
 
