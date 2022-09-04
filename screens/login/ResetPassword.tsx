@@ -84,16 +84,18 @@ export default function ResetPasswordScreen({ navigation, route }: LoginStackScr
 
 const textStyles = StyleSheet.create({
   title: {
-    fontSize: 24,
+    fontSize: 26,
     textAlign: 'center',
+    fontFamily: 'Source Sans Bold',
   },
   subtitle: {
     fontSize: 14,
     textAlign: 'center',
     paddingTop: 5,
+    fontFamily: 'Source Sans SemiBold',
   },
   label: {
-    fontSize: 18,
+    fontSize: 20,
     textAlign: 'center',
   },
   textInput: {

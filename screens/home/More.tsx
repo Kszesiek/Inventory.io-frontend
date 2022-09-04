@@ -1,10 +1,10 @@
 import {StyleSheet} from "react-native";
 import {Text, View} from "../../components/Themed";
 
-export default function Lending() {
+export default function More() {
   return (
     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-      <Text>Lending</Text>
+      <Text>More</Text>
     </View>
   )
 }

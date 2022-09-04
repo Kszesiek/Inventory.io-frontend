@@ -2,7 +2,7 @@
  * If you are not familiar with React Navigation, refer to the "Fundamentals" guide:
  * https://reactnavigation.org/docs/getting-started
  */
-import {FontAwesome, Ionicons} from '@expo/vector-icons';
+import {Feather, FontAwesome, Ionicons} from '@expo/vector-icons';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -15,7 +15,7 @@ import {
   useDrawerProgress
 } from '@react-navigation/drawer';
 import * as React from 'react';
-import {ColorSchemeName, Pressable, StyleSheet, TouchableOpacity} from 'react-native';
+import {ColorSchemeName, Pressable, StyleSheet, TouchableOpacity, BackHandler} from 'react-native';
 
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
@@ -31,6 +31,7 @@ import {
   RootTabScreenProps,
   HomeDrawerParamList,
   HomeTabParamList,
+  LendingStackParamList,
 } from '../types';
 import SignInScreen from "../screens/login/SignInScreen";
 import RegisterScreen from "../screens/login/RegisterScreen";
@@ -40,13 +41,15 @@ import AppSettings from "../screens/AppSettings";
 import Homescreen from "../screens/home/Homescreen";
 import Inventory from "../screens/home/Inventory";
 import Events from "../screens/home/Events";
-import Lending from "../screens/home/Lending";
-import ManageOrganization from "../screens/home/ManageOrganization";
+import Lendings from "../screens/home/lendings/Lendings";
+import More from "../screens/home/More";
 import {Text, useThemeColor, View} from "../components/Themed";
 import Animated, {Adaptable} from "react-native-reanimated";
 import {OpacityButton} from "../components/Themed/OpacityButton";
 import {Provider} from "react-redux";
 import {store} from "../store/store";
+import LendingDetails from "../screens/home/lendings/LendingDetails";
+import AddEditLending from "../screens/home/lendings/AddEditLending";
 // import LinkingConfiguration from './LinkingConfiguration';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
@@ -81,6 +84,8 @@ function RootNavigator() {
 const LoginStack = createNativeStackNavigator<LoginStackParamList>();
 
 function LoginNavigator() {
+  const textColor = useThemeColor({}, 'text');
+
   return (
     <LoginStack.Navigator
       screenOptions={({ navigation }) => ({
@@ -88,8 +93,8 @@ function LoginNavigator() {
         headerTransparent: true,
         title: "",
         headerLeft: () => (
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name='arrow-back' size={30} style={{ color: useThemeColor({}, 'text')}} />
+          <TouchableOpacity onPress={navigation.goBack}>
+            <Ionicons name='chevron-back' size={30} style={{ color: textColor}} />
           </TouchableOpacity>
         ),
       })}
@@ -97,10 +102,14 @@ function LoginNavigator() {
       <LoginStack.Screen name="SignIn" component={SignInScreen} options={({ navigation }) => ({
         headerRight: () => (
           <TouchableOpacity onPress={() => navigation.navigate("AppSettings")}>
-            <Ionicons name='construct' size={35} style={{ color: useThemeColor({light: '#333', dark: '#fff'}, 'text')}}  />
+            <Ionicons name='construct' size={32} style={{ color: textColor}}  />
           </TouchableOpacity>
         ),
-        headerLeft: () => <></>,
+        headerLeft: () => (
+          <TouchableOpacity onPress={BackHandler.exitApp}>
+            <Ionicons name='close' size={36} style={{ color: textColor}} />
+          </TouchableOpacity>
+        )
       })} />
       <LoginStack.Screen name="Register" component={RegisterScreen} />
       <LoginStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
@@ -155,13 +164,15 @@ function CustomHomeDrawerContent(props: DrawerContentComponentProps) {
 }
 
 function HomeDrawerNavigator(props: OrganizationDetails[]) {
+  const headerColor = useThemeColor({}, 'header');
+
   return (
     <Provider store={store}>
       <HomeDrawer.Navigator
         useLegacyImplementation
         screenOptions={{
           headerShown: false,
-          drawerStyle: {backgroundColor: useThemeColor({}, "header")},
+          drawerStyle: {backgroundColor: headerColor},
           drawerActiveBackgroundColor: useThemeColor({}, "tabBackgroundSelected"),  // Czy potrzebujemy tego? Może lepiej zostawić złotą poświatę?
           drawerActiveTintColor: useThemeColor({}, "tabIconSelected"),
         }}
@@ -205,27 +216,45 @@ const drawerStyles = StyleSheet.create({
 
 const HomeTab = createBottomTabNavigator<HomeTabParamList>();
 
-function HomeTabNavigator(props: {navigation: any, route: any}) {  // OrganizationDetails
+function HomeTabNavigator(props: {navigation: any, route: any}) {
+  const textColor = useThemeColor({}, 'text');
+  const headerColor = useThemeColor({}, 'header');
+
   return (
     <HomeTab.Navigator
+      initialRouteName="Homescreen"
       screenOptions={{
         headerTitleAlign: "center",
         headerLeft: () => (
-        <TouchableOpacity onPress={() => props.navigation.navigate('Homescreen')}>
-          <Ionicons name="arrow-back" color={useThemeColor({}, "text")} size={30} style={{padding: 10}} />
+        <TouchableOpacity onPress={() => props.navigation.navigate("Homescreen")}>
+          <Ionicons name="chevron-back" color={textColor} size={30} style={{padding: 10}} />
         </TouchableOpacity>
         ),
-        headerTintColor: useThemeColor({}, "text"),
-        headerStyle: {backgroundColor: useThemeColor({}, "header")},
+        headerTintColor: textColor,
+        headerStyle: {backgroundColor: headerColor},
         tabBarActiveBackgroundColor: useThemeColor({}, "tabBackgroundSelected"),
-        tabBarInactiveBackgroundColor: useThemeColor({}, "header"),
         tabBarActiveTintColor: useThemeColor({}, "tabIconSelected"),
+        tabBarInactiveBackgroundColor: headerColor,
+        tabBarStyle: {
+          height: 55,
+        },
+        tabBarIconStyle: {
+          scaleX: 1.2,
+          scaleY: 1.2,
+          marginTop: 2,
+        },
+        tabBarLabelStyle: {
+          fontFamily: "Source Sans",
+          fontSize: 12,
+          marginBottom: 4,
+        }
       }}
       >
       <HomeTab.Screen
         name="Homescreen"
         component={Homescreen}
         options={{
+          title: "Strona główna",
           tabBarLabel: "Strona główna",
           tabBarIcon: ({color, size}) => (
             <Ionicons name="home" size={size} color={color} />
@@ -245,15 +274,18 @@ function HomeTabNavigator(props: {navigation: any, route: any}) {  // Organizati
         name="Inventory"
         component={Inventory}
         options={{
+          title: "Inwentarz",
           tabBarLabel: "Inwentarz",
           tabBarIcon: ({color, size}) => (
             <Ionicons name="library" size={size} color={color} />
           ),
         }} />
       <HomeTab.Screen
-        name="Lending"
-        component={Lending}
+        name="LendingsNavigator"
+        component={LendingNavigator}
         options={{
+          headerShown: false,
+          // title: "Wypożyczenia",
           tabBarLabel: "Wypożyczenia",
           tabBarIcon: ({color, size}) => (
             <Ionicons name="push" size={size} color={color} />
@@ -263,23 +295,74 @@ function HomeTabNavigator(props: {navigation: any, route: any}) {  // Organizati
         name="Events"
         component={Events}
         options={{
+          title: "Wydarzenia",
           tabBarLabel: "Wydarzenia",
           tabBarIcon: ({color, size}) => (
             <Ionicons name="calendar" size={size} color={color} />
           ),
         }} />
-      {/*<HomeTab.Screen*/}
-      {/*  name="ManageOrganization"*/}
-      {/*  component={ManageOrganization}*/}
-      {/*  options={{*/}
-      {/*    tabBarLabel: "Zarządzanie",*/}
-      {/*    tabBarIcon: ({color, size}) => (*/}
-      {/*      <Ionicons name="terminal" size={size} color={color} />*/}
-      {/*    ),*/}
-      {/*  }} />*/}
+      <HomeTab.Screen
+        name="More"
+        component={More}
+        options={{
+          title: "Więcej",
+          tabBarLabel: "Więcej",
+          tabBarIcon: ({color, size}) => (
+            <Feather name="more-horizontal" size={size} color={color} />
+          ),
+        }} />
     </HomeTab.Navigator>
   )
 }
+
+// LENDING STACK
+
+const LendingStack = createNativeStackNavigator<LendingStackParamList>();
+
+function LendingNavigator() {
+  const textColor = useThemeColor({}, 'text');
+  const headerColor = useThemeColor({}, 'header');
+
+  return (
+    <LendingStack.Navigator
+      screenOptions={({ navigation }) => ({
+        headerTitleAlign: "center",
+        headerTintColor: textColor,
+        headerStyle: {backgroundColor: headerColor},
+        headerLeft: () => (
+          <TouchableOpacity onPress={navigation.goBack}>
+            <Ionicons name='chevron-back' size={30} style={{ color: textColor}} />
+          </TouchableOpacity>
+        ),
+      })}
+    >
+      <LendingStack.Screen name="Lendings" component={Lendings} options={({ navigation }) => ({
+        title: "Wypożyczenia",
+        headerRight: () => (
+          <TouchableOpacity onPress={() => navigation.navigate("AddEditLending")}>
+            <Ionicons name='add' size={32} style={{ color: textColor}}  />
+          </TouchableOpacity>
+        ),
+        headerLeft: () => (
+          <TouchableOpacity onPress={navigation.goBack}>
+            <Ionicons name='chevron-back' size={36} style={{ color: textColor}} />
+          </TouchableOpacity>
+        )
+      })} />
+      <LendingStack.Screen name="LendingDetails" component={LendingDetails} options={{
+        title: "Szczegóły wypożyczenia",
+      }} />
+      <LendingStack.Screen name="AddEditLending" component={AddEditLending} options={{
+        title: "AddEdit, to się zmieni",
+      }} />
+
+    </LendingStack.Navigator>
+  );
+}
+
+
+
+
 
 
 

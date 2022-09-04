@@ -59,10 +59,10 @@ export type HomeDrawerScreenProps<Screen extends keyof HomeDrawerParamList> = Dr
 export type HomeTabParamList = {
   Homescreen: undefined;
   Inventory: undefined;
-  Lending: undefined;
+  LendingsNavigator: undefined;
   Members: undefined;
   Events: undefined;
-  ManageOrganization: undefined;
+  More: undefined;
   AppSettings: undefined;
   UserSettings: undefined;
 };
@@ -72,6 +72,18 @@ export type HomeTabScreenProps<Screen extends keyof HomeTabParamList> = BottomTa
   Screen
   >;
 
+// LENDING STACK
+
+export type LendingStackParamList = {
+  Lendings: undefined;
+  AddEditLending: { lendingId: string } | undefined;
+  LendingDetails: { lendingId: string };
+};
+
+export type LendingStackScreenProps<Screen extends keyof LendingStackParamList> = NativeStackScreenProps<
+  LendingStackParamList,
+  Screen
+>;
 
 
 

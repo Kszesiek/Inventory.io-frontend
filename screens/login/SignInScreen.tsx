@@ -47,6 +47,9 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
                 value: username,
                 onChangeText: setUsername,
                 placeholder: 'Wprowadź nazwę użytkownika...',
+                style: {
+                  fontFamily: 'Source Sans',
+                },
             }} />
           </View>
           <View style={styles.formRow}>
@@ -90,13 +93,14 @@ const textStyles = StyleSheet.create({
   label: {
     fontSize: 22,
     textAlign: 'center',
+    fontFamily: 'Source Sans SemiBold',
   },
   textInput: {
     flex: 1,
     textAlign: 'center',
   },
   resetPassword: {
-    fontSize: 12,
+    fontSize: 13,
   }
 })
 
@@ -121,7 +125,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     flex: 1,
-    maxWidth: '40%',
+    maxWidth: '33%',
   },
   mainCard: {
     width: '100%',

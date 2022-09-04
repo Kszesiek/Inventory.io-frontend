@@ -13,6 +13,7 @@ export default {
     tabIconDefault: '#ccc',
     tabIconSelected: tintColorLight,
     tabBackgroundSelected: '#E8F0FE',
+    delete: '#EF5350',
     transparent: 'transparent',
   },
   dark: {
@@ -26,6 +27,7 @@ export default {
     tabIconDefault: '#7c7c7c',
     tabIconSelected: '#c8a951',
     tabBackgroundSelected: '#121f2b',
+    delete: '#D32F2F',
     transparent: 'transparent',
   },
 };

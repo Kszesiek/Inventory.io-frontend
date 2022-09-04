@@ -8,6 +8,7 @@ import {
   View as DefaultView,
   TextInput as DefaultTextInput,
   TouchableOpacity as DefaultTouchableOpacity,
+  TextStyle,
 } from 'react-native';
 
 import Colors, {CSSColorToHex} from '../../constants/Colors';
@@ -40,13 +41,21 @@ export type TouchableOpacityProps = ThemeProps & DefaultTouchableOpacity['props'
 export function Text(props: TextProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const defaultTextStyle: TextStyle = {
+    fontFamily: 'Source Sans',
+    color,
+  }
 
-  return <DefaultText style={[{ color }, style]} {...otherProps} />;
+  return <DefaultText style={[defaultTextStyle, style]} {...otherProps} />;
 }
 
 export function TextInput(props: TextInputProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const defaultStyle: TextStyle = {
+    fontFamily: 'Source Sans',
+    color: color,
+  }
 
   let placeholderColor: string = CSSColorToHex(color);
   if (placeholderColor[0] !== "#") {
@@ -61,7 +70,7 @@ export function TextInput(props: TextInputProps) {
       break;
   }
 
-  return <DefaultTextInput style={[{ color }, style]} placeholderTextColor={placeholderColor} {...otherProps} />;
+  return <DefaultTextInput style={[defaultStyle, style]} placeholderTextColor={placeholderColor} {...otherProps} />;
 }
 
 export function View(props: ViewProps) {

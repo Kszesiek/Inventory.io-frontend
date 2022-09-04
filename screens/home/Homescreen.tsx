@@ -1,33 +1,34 @@
-import {FlatList, ListRenderItemInfo, StyleProp, StyleSheet, TextStyle} from "react-native";
-import {Text, useThemeColor, View} from "../../components/Themed";
+import {FlatList, ListRenderItemInfo, ScrollView, StyleProp, StyleSheet, TextStyle} from "react-native";
+import {Text, TextInput, useThemeColor, View} from "../../components/Themed";
 import Card from "../../components/Themed/Card";
-import {IoniconCard} from "../../components/Themed/IoniconCard";
+import {TouchableCard} from "../../components/Themed/TouchableCard";
 import {OpacityButton} from "../../components/Themed/OpacityButton";
 import {useSelector} from "react-redux";
 import {store} from "../../store/store";
 import {Event} from "../../store/events";
-import {Item} from "../../store/items";
-import {User} from "../../store/users";
 import {LendingForEvent, LendingPrivate} from "../../store/lendings";
 import {displayDateTimePeriod} from "../../utilities/date";
+import {FontAwesome, MaterialCommunityIcons} from "@expo/vector-icons";
+import enlistItems from "../../utilities/enlist";
+import {HomeTabScreenProps} from "../../types";
 
-export default function Homescreen() {
+export default function Homescreen({ navigation, route }: HomeTabScreenProps<'Homescreen'>) {
   const events: Map<string, Event> = useSelector((state: typeof store.dispatch.prototype) => state.events.events)
-  const items: Map<string, Item> = useSelector((state: typeof store.dispatch.prototype) => state.items.items)
-  const users: Map<string, User> = useSelector((state: typeof store.dispatch.prototype) => state.users.users)
   const lendings: Map<string, LendingForEvent | LendingPrivate> = useSelector((state: typeof store.dispatch.prototype) => state.lendings.lendings)
 
   const boldedText: StyleProp<TextStyle> = {
-    fontWeight: 'bold',
+    fontFamily: 'Source Sans Bold',
     color: useThemeColor({}, "tint"),
   }
 
   function showMoreEventsPressed() {
     console.log("show more events pressed");
+    navigation.navigate("Events");
   }
 
   function showMoreLendingsPressed() {
     console.log("show more lendings pressed");
+    navigation.navigate("LendingsNavigator");
   }
 
   function searchShortcutPressed() {
@@ -38,111 +39,148 @@ export default function Homescreen() {
     console.log("barcode shortcut pressed");
   }
 
-  function settingsShortcutPressed() {
-    console.log("settings shortcut pressed");
-  }
-
   return (
-      <View style={styles.mainContainer}>
-        <View style={{...styles.verticalContainer, flex: 4}}>
-          <Card style={styles.menuCard}>
-            <Text style={{fontSize: 18, fontWeight: 'bold', marginTop: 10}}>Nadchodzące wydarzenia</Text>
-            <FlatList
-              style={styles.flatList}
-              data={Array.from(events.values())}
-              renderItem={(event) => {
-                return (
-                  <View style={{backgroundColor: 'transparent', marginTop: 8}}>
-                    <Text style={[boldedText, {textAlign: 'center'}]}>{event.item.name}</Text>
-                    <Text style={{textAlign: 'center'}}>{displayDateTimePeriod(event.item.startDate, event.item.endDate)}</Text>
-                  </View>
-                )}}
-            />
-            <OpacityButton onPress={showMoreEventsPressed} textProps={{style: {fontSize: 16}}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>
-          </Card>
-          <Card style={styles.menuCard}>
-            <Text style={{fontSize: 18, fontWeight: 'bold', marginTop: 10}}>Ostatnie wypożyczenia</Text>
-            <FlatList
-              style={styles.flatList}
-              data={Array.from(lendings.values())}  // .slice(0, 3)
-              renderItem={(lending: ListRenderItemInfo<LendingForEvent | LendingPrivate>) => {
-                let username: string | undefined
-                let eventName: string | undefined
-
-                if (lending.item instanceof LendingForEvent) {
-                  const event = events.get(lending.item.eventId) ?? { name: undefined, startDate: undefined, endDate: undefined};
-                  eventName = event.name;
-                  lending.item.startDate = event.startDate;
-                  lending.item.endDate = event.endDate;
-                }
-
-                if (lending.item instanceof LendingPrivate) {
-                  username = users.get(lending.item.userId)?.username ?? 'undefined';
-                }
-
-                const itemName: string = items.get(lending.item.itemId)?.name ?? 'undefined';
-
-                console.log(displayDateTimePeriod(lending.item.startDate!, lending.item.endDate!));
-
-                return (
-                  <View style={{backgroundColor: 'transparent', marginTop: 8}}>
-                    {username ?
-                      <Text style={{textAlign: 'center'}}>Użytkownik <Text style={boldedText}>{username}</Text> wypożyczył <Text style={boldedText}>{itemName}</Text></Text>
-                      :
-                      <Text style={{textAlign: 'center'}}>Wypożyczono <Text style={boldedText}>{itemName}</Text> na wydarzenie <Text style={boldedText}>{eventName}</Text></Text>
-                    }
-                    <Text style={{textAlign: 'center'}}>{displayDateTimePeriod(lending.item.startDate, lending.item.endDate)}</Text>
-                  </View>
-                )}} />
-            <OpacityButton onPress={showMoreLendingsPressed} textProps={{style: {fontSize: 16}}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>
-          </Card>
-        </View>
-        <View style={{...styles.verticalContainer, flex: 1}}>
-          <IoniconCard
-            iconName="barcode"
-            iconSize={50}
-            style={{
-              marginVertical: 5,
-              paddingLeft: 4,
-            }}
-            onPress={barcodeShortcutPressed}
-          />
-          <IoniconCard
-            iconName="search"
-            iconSize={40}
-            style={{
-              marginVertical: 5,
-            }}
-            onPress={searchShortcutPressed}
-          />
-          <IoniconCard
-            iconName="construct"
-            iconSize={40}
-            style={{
-              marginVertical: 5,
-            }}
-            onPress={settingsShortcutPressed}
-          />
-        </View>
+    <ScrollView style={{...styles.mainContainer, backgroundColor: useThemeColor({}, 'background')}}>
+      <View style={{...styles.searchBar, backgroundColor: useThemeColor({}, 'cardBackground')}}>
+        <TouchableCard
+          style={[styles.searchBarButton, {
+            borderTopRightRadius: 0,
+            borderBottomRightRadius: 0,
+            paddingLeft: 2,
+            backgroundColor: useThemeColor({}, 'tint'),
+          }]
+        }
+          onPress={barcodeShortcutPressed}
+        >
+          <MaterialCommunityIcons name="barcode-scan" size={35} color={useThemeColor({}, 'background')} />
+        </TouchableCard>
+        <TextInput
+          style={styles.searchBarInput}
+          placeholder="Wyszukaj w inwentarzu..."
+        />
+        <TouchableCard
+          style={[styles.searchBarButton, {
+            borderTopLeftRadius: 0,
+            borderBottomLeftRadius: 0,
+            paddingRight: 2,
+            backgroundColor: useThemeColor({}, 'tint'),
+          }]
+          }
+          onPress={searchShortcutPressed}
+        >
+          <FontAwesome name="search" size={30} color={useThemeColor({}, 'background')} />
+        </TouchableCard>
       </View>
+      <Card style={styles.menuCard}>
+        <Text style={{fontSize: 18, fontWeight: 'bold', marginTop: 10}}>Nadchodzące wydarzenia</Text>
+        <FlatList
+          style={styles.flatList}
+          data={Array.from(events.values()).slice(0, 3)}
+          renderItem={(event) => {
+            return (
+              <View style={{backgroundColor: 'transparent', marginTop: 8}}>
+                <Text style={[boldedText, {textAlign: 'center'}]}>{event.item.name}</Text>
+                <Text style={{textAlign: 'center'}}>{displayDateTimePeriod(event.item.startDate, event.item.endDate)}</Text>
+              </View>
+            )}}
+        />
+
+        <View style={styles.showMoreContainer}>
+          {events.size > 3 && <OpacityButton onPress={showMoreEventsPressed} textProps={{style: {fontSize: 15}}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>}
+        </View>
+      </Card>
+      <Card style={styles.menuCard}>
+        <Text style={{fontSize: 18, fontWeight: 'bold', marginTop: 10}}>Ostatnie wypożyczenia</Text>
+        <FlatList
+          style={styles.flatList}
+          data={Array.from(lendings.values()).slice(0, 3)}
+          renderItem={(lending: ListRenderItemInfo<LendingForEvent | LendingPrivate>) => {
+            const itemsListed = enlistItems(lending.item.itemNames);
+
+            return (
+              <View style={{backgroundColor: 'transparent', marginTop: 8}}>
+                {lending.item instanceof LendingForEvent ?
+                  <Text style={{textAlign: 'center'}}>Wypożyczono <Text style={boldedText}>{itemsListed}</Text> na wydarzenie <Text style={boldedText}>{lending.item.eventName}</Text></Text>
+                  :
+                  <Text style={{textAlign: 'center'}}>Użytkownik <Text style={boldedText}>{lending.item.username}</Text> wypożyczył <Text style={boldedText}>{itemsListed}</Text></Text>
+                }
+                <Text style={{textAlign: 'center'}}>{displayDateTimePeriod(lending.item.startDate, lending.item.endDate)}</Text>
+              </View>
+            )}} />
+        <View style={styles.showMoreContainer}>
+          {lendings.size > 3 && <OpacityButton onPress={showMoreLendingsPressed} textProps={{style: {fontSize: 15}}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>}
+        </View>
+      </Card>
+      {/*<View style={{flex: 1}}/>*/}
+      {/*<View style={styles.barcodeScannerContainer}>*/}
+        {/*<OpacityButton textProps={{style: {fontSize: 18}}} onPress={() => {}}>*/}
+        {/*  Skanuj kod kreskowy*/}
+        {/*</OpacityButton>*/}
+      {/*</View>*/}
+    </ScrollView>
+    // <IconCard
+    //   style={{
+    //     height: 70,
+    //     width: 80,
+    //     backgroundColor: useThemeColor({}, 'tint'),
+    //     position: 'absolute',
+    //     bottom: 20,
+    //     right: 15,
+    //   }}
+    //   onPress={barcodeShortcutPressed}
+    // >
+    //   <MaterialCommunityIcons name="barcode-scan" size={50} color={useThemeColor({}, 'background')} />
+    // </IconCard>
+    // <View style={styles.mainContainer}>
+    //   <MaterialCommunityIcons name="barcode-scan" size={24} color="black" />
+    //   {/*<IconCard*/}
+    //   {/*  iconName="search"*/}
+    //   {/*  iconSize={40}*/}
+    //   {/*  style={{*/}
+    //   {/*    marginVertical: 5,*/}
+    //   {/*  }}*/}
+    //   {/*  onPress={searchShortcutPressed}*/}
+    //   {/*/>*/}
+    //   {/*<IconCard*/}
+    //   {/*  iconName="construct"*/}
+    //   {/*  iconSize={40}*/}
+    //   {/*  style={{*/}
+    //   {/*    marginVertical: 5,*/}
+    //   {/*  }}*/}
+    //   {/*  onPress={settingsShortcutPressed}*/}
+    //   {/*/>*/}
+    // </View>
   )
 }
 
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    flexDirection: 'row',
-    padding: 5,
+    paddingBottom: 10,
   },
-  verticalContainer: {
+  searchBar: {
+    flexDirection: 'row',
+    borderRadius: 12,
+    marginHorizontal: 10,
+    margin: 15,
+    elevation: 5,
+  },
+  searchBarButton: {
+    height: 40,
+    width: 55,
+    borderRadius: 12,
+  },
+  searchBarInput: {
     flex: 1,
-    paddingHorizontal: 5,
+    paddingHorizontal: 15,
+    fontSize: 16,
   },
   menuCard: {
     alignItems: 'center',
-    padding: 5,
-    marginVertical: 5,
-
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    marginBottom: 15,
+    marginHorizontal: 10,
   },
   shortcutContainer: {
     flexDirection: 'row',
@@ -160,8 +198,16 @@ const styles = StyleSheet.create({
     padding: 5
   },
   showMoreButton: {
-    marginVertical: 10,
     paddingHorizontal: 20,
     paddingVertical: 5,
+  },
+  showMoreContainer: {
+    marginVertical: 10,
+    backgroundColor: 'transparent',
+  },
+  barcodeScannerContainer: {
+    marginVertical: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 })

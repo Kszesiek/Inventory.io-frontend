@@ -14,7 +14,7 @@ export class User {
   }
 }
 
-export const eventsSlice = createSlice({
+export const usersSlice = createSlice({
   name: 'users',
   initialState: {
     users: new Map<string, User>([
@@ -56,6 +56,6 @@ export const eventsSlice = createSlice({
   },
 });
 
-export const addUser = eventsSlice.actions.addUser;
-export const removeUser = eventsSlice.actions.removeUser;
-export default eventsSlice.reducer;
+export const addUser = usersSlice.actions.addUser;
+export const removeUser = usersSlice.actions.removeUser;
+export default usersSlice.reducer;

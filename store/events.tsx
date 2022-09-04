@@ -35,7 +35,13 @@ export const eventsSlice = createSlice({
         "Open Doors at Amplitron",
         new Date(2022, 8 - 1, 3),
         new Date(2022, 8 - 1, 3),
-        )],
+      )],
+      ["ca70b980-157e-47d2-8f0c-9e884e5291c7", new Event(
+        "ca70b980-157e-47d2-8f0c-9e884e5291c7",
+        "AmpliGranie 2k22 - otwarcie roku akademickiego",
+        new Date(2022, 10 - 1, 23, 18),
+        new Date(2022, 10 - 1, 23, 22),
+      )],
     ])
   },
   reducers: {

@@ -99,12 +99,13 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
 
 const textStyles = StyleSheet.create({
   title: {
-    fontSize: 24,
+    fontSize: 26,
     textAlign: 'center',
     padding: 20,
+    fontFamily: 'Source Sans Bold',
   },
   label: {
-    fontSize: 18,
+    fontSize: 20,
     textAlign: 'center',
   },
   textInput: {
