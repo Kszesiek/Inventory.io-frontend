@@ -1,18 +1,23 @@
-import {LendingForEvent, LendingPrivate} from "../../../store/lendings";
+import {
+  isLendingForEvent,
+  isLendingPrivate,
+  lendingActions,
+  LendingForEvent,
+  LendingPrivate
+} from "../../../store/lendings";
 import {Text, useThemeColor, View} from "../../../components/Themed";
 import {displayDateTimePeriod} from "../../../utilities/date";
 import {OpacityButton} from "../../../components/Themed/OpacityButton";
-import {FlatList, ListRenderItemInfo, ScrollView, StyleProp, StyleSheet, TextStyle} from "react-native";
+import {ScrollView, StyleProp, StyleSheet, TextStyle} from "react-native";
 import {LendingStackScreenProps} from "../../../types";
-import {useSelector} from "react-redux";
-import {store} from "../../../store/store";
 import Detail from "../../../components/Detail";
+import {useDispatch, useSelector} from "react-redux";
+import {store} from "../../../store/store";
 
 export default function LendingDetails({ navigation, route }: LendingStackScreenProps<'LendingDetails'>) {
-  const lendingId: string = route.params.lendingId;
-  const lendings: Map<string, LendingForEvent | LendingPrivate> = useSelector((state: typeof store.dispatch.prototype) => state.lendings.lendings)
-
-  const lending: LendingForEvent | LendingPrivate = lendings.get(lendingId)! //useSelector((state: typeof store.dispatch.prototype) => state.lendings.lendings[lendingId])
+  const dispatch = useDispatch();
+  const lending: LendingForEvent | LendingPrivate = useSelector((state: typeof store.dispatch.prototype) =>
+    state.lendings.lendings.find((item: LendingForEvent | LendingPrivate) => item.lendingId === route.params.lendingId))
 
   const property: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans',
@@ -21,46 +26,44 @@ export default function LendingDetails({ navigation, route }: LendingStackScreen
 
   const backgroundColor = useThemeColor({}, "background");
 
-  function deletePressed() {
+  async function deletePressed() {
     console.log("delete button pressed");
+    await dispatch(lendingActions.removeLending({lendingId: lending.lendingId}));
+    navigation.goBack();
   }
 
   function editPressed() {
-    navigation.navigate("AddEditLending", {lendingId: lendingId});
+    navigation.navigate("AddEditLending", {lending: lending});
   }
 
   return (
     <ScrollView contentContainerStyle={{backgroundColor, ...styles.container}}>
-      {lending instanceof LendingForEvent ?
+      {isLendingForEvent(lending) ?
         <Detail name="Wydarzenie">
           <Text style={[styles.text, property]}>{lending.eventName}</Text>
         </Detail>
-        :
+      : isLendingPrivate(lending) ?
         <Detail name="Użytkownik">
           <Text style={[styles.text, property]}>{lending.username}</Text>
         </Detail>
+      : <Text>ERROR</Text>
       }
       <Detail name="Termin">
-        <Text style={[styles.text, property]}>{displayDateTimePeriod(lending.startDate, lending.endDate)}</Text>
+        <Text style={[styles.text, property]}>{displayDateTimePeriod(new Date(lending.startDate), new Date(lending.endDate))}</Text>
       </Detail>
       <Detail name="Przedmioty">
-        <FlatList
-          data={lending.itemNames}
-          renderItem={(itemName: ListRenderItemInfo<string>) => {
-            return (
-              <Text style={styles.text}><Text style={styles.ordinalNumber}>{itemName.index + 1}.</Text> {itemName.item}</Text>
-            )}}
-        />
+        { Array.from(lending.itemNames).map((itemName: string, index) => (
+          <Text key={index} style={styles.text}><Text style={styles.ordinalNumber}>{index + 1}.</Text> {itemName}</Text>
+        ))}
+      </Detail>
+      <Detail name="Notatki">
+        <Text style={[styles.text, property]}>{lending.notes}</Text>
       </Detail>
 
       <View style={{flexGrow: 1}}/>
       <View style={styles.editButtonContainer}>
-        <OpacityButton style={{...styles.editButton, backgroundColor: useThemeColor({}, "delete")}} onPress={deletePressed}>
-          Usuń
-        </OpacityButton>
-        <OpacityButton style={styles.editButton} onPress={editPressed}>
-          Edytuj
-        </OpacityButton>
+        <OpacityButton style={[styles.editButton, {backgroundColor: useThemeColor({}, "delete")}]} onPress={deletePressed}>Usuń</OpacityButton>
+        <OpacityButton style={styles.editButton} onPress={editPressed}>Edytuj</OpacityButton>
       </View>
     </ScrollView>
   );

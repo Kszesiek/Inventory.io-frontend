@@ -6,15 +6,15 @@ import {OpacityButton} from "../../components/Themed/OpacityButton";
 import {useSelector} from "react-redux";
 import {store} from "../../store/store";
 import {Event} from "../../store/events";
-import {LendingForEvent, LendingPrivate} from "../../store/lendings";
+import {isLendingForEvent, isLendingPrivate, LendingForEvent, LendingPrivate} from "../../store/lendings";
 import {displayDateTimePeriod} from "../../utilities/date";
 import {FontAwesome, MaterialCommunityIcons} from "@expo/vector-icons";
 import enlistItems from "../../utilities/enlist";
 import {HomeTabScreenProps} from "../../types";
 
 export default function Homescreen({ navigation, route }: HomeTabScreenProps<'Homescreen'>) {
-  const events: Map<string, Event> = useSelector((state: typeof store.dispatch.prototype) => state.events.events)
-  const lendings: Map<string, LendingForEvent | LendingPrivate> = useSelector((state: typeof store.dispatch.prototype) => state.lendings.lendings)
+  const events: Array<Event> = useSelector((state: typeof store.dispatch.prototype) => state.events.events)
+  const lendings: Array<LendingForEvent | LendingPrivate> = useSelector((state: typeof store.dispatch.prototype) => state.lendings.lendings)
 
   const boldedText: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans Bold',
@@ -74,37 +74,38 @@ export default function Homescreen({ navigation, route }: HomeTabScreenProps<'Ho
       <Card key="events" style={styles.menuCard}>
         <Text style={{fontSize: 18, fontWeight: 'bold', marginTop: 10}}>Nadchodzące wydarzenia</Text>
         <View style={styles.list}>
-        { Array.from(events.values()).slice(0, 3).map((event: Event) => (
+        { events.slice(0, 3).map((event: Event) => (
             <View key={event.eventId} style={{backgroundColor: 'transparent', marginTop: 8}}>
               <Text style={[boldedText, {textAlign: 'center'}]}>{event.name}</Text>
-              <Text style={{textAlign: 'center'}}>{displayDateTimePeriod(event.startDate, event.endDate)}</Text>
+              <Text style={{textAlign: 'center'}}>{displayDateTimePeriod(new Date(event.startDate), new Date(event.endDate))}</Text>
             </View>
           ))}
         </View>
-        {events.size > 3 && <OpacityButton onPress={showMoreEventsPressed} textProps={{style: {fontSize: 15}}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>}
+        {events.length > 3 && <OpacityButton onPress={showMoreEventsPressed} textProps={{style: {fontSize: 15}}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>}
       </Card>
       <Card key="lendings" style={styles.menuCard}>
         <Text style={{fontSize: 18, fontWeight: 'bold', marginTop: 10}}>Ostatnie wypożyczenia</Text>
         <View style={styles.list}>
-          {Array.from(lendings.values()).slice(0, 3).map((lending: LendingForEvent | LendingPrivate) => {
-            const itemsListed = enlistItems(lending.itemNames);
+          {lendings.slice(0, 3).map((lending: LendingForEvent | LendingPrivate) => {
+            const itemsListed: string = enlistItems(lending.itemNames);
 
             return (<View key={lending.lendingId} style={{backgroundColor: 'transparent', marginTop: 8}}>
-              {lending instanceof LendingForEvent ?
+              {isLendingForEvent(lending) ?
                 <Text style={{textAlign: 'center'}}>Wypożyczono <Text style={boldedText}>{itemsListed}</Text> na
-                  wydarzenie <Text style={boldedText}>{lending.eventName}</Text></Text>
-                :
+                wydarzenie <Text style={boldedText}>{lending.eventName}</Text></Text>
+              : isLendingPrivate(lending) ?
                 <Text style={{textAlign: 'center'}}>Użytkownik <Text
                   style={boldedText}>{lending.username}</Text> wypożyczył <Text
                   style={boldedText}>{itemsListed}</Text></Text>
+              : <Text>ERROR</Text>
               }
               <Text
-                style={{textAlign: 'center'}}>{displayDateTimePeriod(lending.startDate, lending.endDate)}</Text>
+                style={{textAlign: 'center'}}>{displayDateTimePeriod(new Date(lending.startDate), new Date(lending.endDate))}</Text>
             </View>
             )
           })}
         </View>
-        {lendings.size > 3 && <OpacityButton onPress={showMoreLendingsPressed} textProps={{style: {fontSize: 15}}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>}
+        {lendings.length > 3 && <OpacityButton onPress={showMoreLendingsPressed} textProps={{style: {fontSize: 15}}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>}
       </Card>
     </ScrollView>
   )

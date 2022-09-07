@@ -349,9 +349,14 @@ function LendingNavigator() {
           </TouchableOpacity>
         )
       })} />
-      <LendingStack.Screen name="LendingDetails" component={LendingDetails} options={{
+      <LendingStack.Screen name="LendingDetails" component={LendingDetails} options={({ navigation, route }) => ({
         title: "Szczegóły wypożyczenia",
-      }} />
+        headerRight: () => (
+          <TouchableOpacity onPress={() => navigation.navigate("AddEditLending", {lendingId: route.params.lendingId})}>
+            <Feather name='edit' size={24} style={{ color: textColor,}} />
+          </TouchableOpacity>
+        ),
+      })} />
       <LendingStack.Screen name="AddEditLending" component={AddEditLending} options={{
         title: "AddEdit, to się zmieni",
       }} />

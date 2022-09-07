@@ -1,103 +1,119 @@
 import {createSlice} from "@reduxjs/toolkit";
 
-class Lending {
+interface Lending {
   lendingId: string;
   itemNames: string[];
-  startDate: Date;
-  endDate: Date;
-
-  constructor(lendingId: string, itemNames: string[], startDate: Date, endDate: Date) {
-    this.lendingId = lendingId;
-    this.itemNames = itemNames;
-    this.startDate = startDate;
-    this.endDate = endDate;
-  }
+  startDate: string;
+  endDate: string;
+  notes: string;
 }
 
-export class LendingForEvent extends Lending {
-  eventName: string;
-
-  constructor(lendingId: string, itemNames: string[], startDate: Date, endDate: Date, eventName: string) {
-    super(lendingId, itemNames, startDate, endDate);
-    this.eventName = eventName;
-  }
+export function isLending(object: any): object is Lending {
+  return (
+    object &&
+    typeof object === 'object' &&
+    typeof object['lendingId'] === 'string' &&
+    typeof object['startDate'] === 'string' &&
+    typeof object['endDate'] === 'string' &&
+    typeof object['notes'] === 'string'
+  );
 }
 
-export class LendingPrivate extends Lending {
+export interface LendingPrivate extends Lending {
   username: string;
+}
 
-  constructor(lendingId: string, itemNames: string[], username: string, startDate: Date, endDate: Date);
-  constructor(lendingId: string, itemNames: string[], username: string, startDate: string, endDate: string);
-  constructor(lendingId: string, itemNames: string[], username: string, startDate: string | Date, endDate: string | Date) {
-    if (typeof startDate === 'string' && typeof endDate === 'string') {
-      startDate = new Date(startDate);
-      endDate = new Date(endDate);
-    } else if (!(startDate instanceof Date) || !(endDate instanceof Date)) {
-      startDate = new Date();
-      endDate = new Date();
-    }
+export function isLendingPrivate(object: any): object is LendingPrivate {
+  return (
+    object &&
+    typeof object === 'object' &&
+    typeof object['username'] === 'string' &&
+    isLending(object)
+  );
+}
 
-    super(lendingId, itemNames, startDate, endDate);
-    this.username = username;
-  }
+export interface LendingForEvent extends Lending {
+  eventName: string;
+}
+
+export function isLendingForEvent(object: any): object is LendingForEvent {
+  return (
+    object &&
+    typeof object === 'object' &&
+    typeof object['eventName'] === 'string' &&
+    isLending(object)
+  );
 }
 
 export const lendingsSlice = createSlice({
   name: 'lendings',
   initialState: {
-    lendings: new Map<string, LendingPrivate | LendingForEvent>([
-      ["c1544eea-b3a0-4680-ad62-4778fc3c1893", new LendingForEvent(
-        "c1544eea-b3a0-4680-ad62-4778fc3c1893",
-        ["mic stand"],
-        new Date(2022, 8 - 1, 3),
-        new Date(2022, 8 - 1, 3),
-        "Open Doors at Amplitron",
-      )],
-      ["65c50cf0-390a-484f-9c3a-efb073a50dfc", new LendingPrivate(
-        "65c50cf0-390a-484f-9c3a-efb073a50dfc",
-        ["metal box", "rozdzielnica", "kabel trójfazowy 10m", "drabina"],
-        "YourGuyRoy",
-        new Date(2022, 8 - 1, 30, 0),
-        new Date(2022, 8 - 1, 30, 24),
-      )],
-      ["b4b10fb9-35db-45b7-9729-c07152c57e4a", new LendingPrivate(
-        "b4b10fb9-35db-45b7-9729-c07152c57e4a",
-        ["półka", "zmiotka", "lutownica"],
-        "TheRealGlobetrotterGrover",
-        new Date(2022, 7 - 1, 12),
-        new Date(2022, 7 - 1, 22),
-      )],
-      ["b4b10fb9-35db-45b7-9729-c07152c57e4a", new LendingPrivate(
-        "b4b10fb9-35db-45b7-9729-c07152c57e4a",
-        ["subwoofer", "tweeter x4", "instrukcja montażu zestawu 5.1", "mikrofon strojeniowy Shure", "mikser", "kabel XLR 10m x2", "kabel XLR 5m x4"],
-        "itsmejohndoe",
-        new Date(2022, 7 - 1, 12),
-        new Date(2022, 7 - 1, 22),
-      )],
-      ["4a172d51-06ca-4495-8c8a-b4dce974c630", new LendingPrivate(
-        "4a172d51-06ca-4495-8c8a-b4dce974c630",
-        ["głośnik bluetooth", "słuchawki bluetooth", "kabel minijack 2m"],
-        "JustClarence",
-        new Date(2022, 9 - 1, 1, 9),
-        new Date(2022, 9 - 1, 1, 20, 15),
-      )],
-    ]),
-    total: 4,
+    lendings: new Array<LendingPrivate | LendingForEvent>(
+      {
+        lendingId: "c1544eea-b3a0-4680-ad62-4778fc3c1893",
+        itemNames: ["mic stand"],
+        startDate: new Date(2022, 8 - 1, 3).toISOString(),
+        endDate: new Date(2022, 8 - 1, 3).toISOString(),
+        eventName: "Open Doors at Amplitron",
+        notes: "Drzwi otwarte",
+      },
+      {
+        lendingId: "65c50cf0-390a-484f-9c3a-efb073a50dfc",
+        itemNames: ["metal box", "rozdzielnica", "kabel trójfazowy 10m", "drabina"],
+        username: "YourGuyRoy",
+        startDate: new Date(2022, 8 - 1, 30, 0).toISOString(),
+        endDate: new Date(2022, 8 - 1, 30, 24).toISOString(),
+        notes: "Impreza w ogrodzie",
+      },
+      {
+        lendingId: "b4b10fb9-35db-45b7-9729-c07152c57e4a",
+        itemNames: ["półka", "zmiotka", "lutownica"],
+        username: "TheRealGlobetrotterGrover",
+        startDate: new Date(2022, 7 - 1, 12, 9).toISOString(),
+        endDate: new Date(2022, 7 - 1, 12, 20, 15).toISOString(),
+        notes: "Wcale nie włożyłem widelca do gniazdka 230V",
+      },
+      {
+        lendingId: "5f53cb97-93b3-40c0-84c2-59e2ecbf1169",
+        itemNames: ["subwoofer", "tweeter x4", "instrukcja montażu zestawu 5.1", "mikrofon strojeniowy Shure", "mikser", "kabel XLR 10m x2", "kabel XLR 5m x4"],
+        username: "itsmejohndoe",
+        startDate: new Date(2022, 7 - 1, 12).toISOString(),
+        endDate: new Date(2022, 7 - 1, 22).toISOString(),
+        notes: "Zróbmy więc prywatkę jakiej nie przeżył nikt,\nNiech sąsiedzi walą, walą, walą, walą do drzwi...",
+      },
+      {
+        lendingId: "4a172d51-06ca-4495-8c8a-b4dce974c630",
+        itemNames: ["głośnik bluetooth", "słuchawki bluetooth", "kabel minijack 2m"],
+        username: "JustClarence",
+        startDate: new Date(2022, 9 - 1, 1).toISOString(),
+        endDate:  new Date(2022, 9 - 1, 15).toISOString(),
+        notes: "Tylko ty, ja, łódka mojego szwagra, zapasik dobrze zmrożonego mojito i dwa tygodnie nic tylko - wędkujemy!",
+      },
+    ),
+    total: 5,
   },
   reducers: {
     addLending: (state, action) => {
-      if (!state.lendings.has(action.payload.lending.lendingId)) {
-        state.lendings.set(action.payload.lending.lendingId, action.payload.lending);
+      if (!state.lendings.some(item => item.lendingId === action.payload.lending.lendingId)) {
+        state.lendings.push(action.payload.lending);
         state.total += 1;
       }
     },
     removeLending: (state, action) => {
-      state.lendings.delete(action.payload.lendingId);
-      state.total -= 1;
+      if (state.lendings.find(item => item.lendingId === action.payload.lendingId)) {
+        state.lendings = state.lendings.filter(item => item.lendingId !== action.payload.lendingId);
+        state.total -= 1;
+      }
+    },
+    modifyLending: (state, action) => {
+      const index = state.lendings.findIndex(item => item.lendingId === action.payload.lending.lendingId);
+      if (index >= 0) {
+        state.lendings[index] = action.payload.lending;
+      }
     },
   },
 });
 
-export const addLending = lendingsSlice.actions.addLending;
-export const removeLending = lendingsSlice.actions.removeLending;
+
+export const lendingActions = lendingsSlice.actions;
 export default lendingsSlice.reducer;

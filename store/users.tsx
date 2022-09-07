@@ -17,45 +17,51 @@ export class User {
 export const usersSlice = createSlice({
   name: 'users',
   initialState: {
-    users: new Map<string, User>([
-      ["eed0be02-f83e-46c8-a4aa-2dcae02dc12f", new User(
-        "eed0be02-f83e-46c8-a4aa-2dcae02dc12f",
-        "itsmejohndoe",
-        "John",
-        "Doe",
-      )],
-      ["b517ed77-5ce5-4457-ba1e-b8a1fba4d376", new User(
-        "b517ed77-5ce5-4457-ba1e-b8a1fba4d376",
-        "JustClarence",
-        "Clarence",
-        "Walter",
-      )],
-      ["f141ec5f-3d2b-4e71-a4ba-1a72f872c4ab", new User(
-        "f141ec5f-3d2b-4e71-a4ba-1a72f872c4ab",
-        "YourGuyRoy",
-        "Roy",
-        "Whitings",
-      )],
-      ["7f7feb57-d63d-4fc4-b60c-8281c5c8109c", new User(
-        "7f7feb57-d63d-4fc4-b60c-8281c5c8109c",
-        "TheRealGlobetrotterGrover",
-        "Grover",
-        "Globetrotter",
-      )],
-    ])
+    users: new Array<User>(
+      {
+        userId: "eed0be02-f83e-46c8-a4aa-2dcae02dc12f",
+        username: "itsmejohndoe",
+        name: "John",
+        surname: "Doe",
+      },
+      {
+        userId: "b517ed77-5ce5-4457-ba1e-b8a1fba4d376",
+        username: "JustClarence",
+        name: "Clarence",
+        surname: "Walter",
+      },{
+        userId: "f141ec5f-3d2b-4e71-a4ba-1a72f872c4ab",
+        username: "YourGuyRoy",
+        name: "Roy",
+        surname: "Whitings",
+      },{
+        userId: "7f7feb57-d63d-4fc4-b60c-8281c5c8109c",
+        username: "TheRealGlobetrotterGrover",
+        name: "Grover",
+        surname: "Globetrotter",
+      },
+    )
   },
   reducers: {
     addUser: (state, action) => {
-      if (!state.users.has(action.payload.user.userId)) {
-        state.users.set(action.payload.user.userId, action.payload.user);
+      if (!state.users.some(user => user.userId === action.payload.user.userId)) {
+        state.users.push(action.payload.user);
       }
     },
     removeUser: (state, action) => {
-      state.users.delete(action.payload.userId);
+      if (state.users.find(user => user.userId === action.payload.userId)) {
+        state.users = state.users.filter(user => user.userId !== action.payload.userId);
+      }
+    },
+
+    modifyUser: (state, action) => {
+      const index = state.users.findIndex(user => user.userId === action.payload.user.userId);
+      if (index >= 0) {
+        state.users[index] = action.payload.user;
+      }
     },
   },
 });
 
-export const addUser = usersSlice.actions.addUser;
-export const removeUser = usersSlice.actions.removeUser;
+export const userActions = usersSlice.actions;
 export default usersSlice.reducer;

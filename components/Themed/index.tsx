@@ -49,14 +49,8 @@ export function Text(props: TextProps) {
   return <DefaultText style={[defaultTextStyle, style]} {...otherProps} />;
 }
 
-export function TextInput(props: TextInputProps) {
-  const { style, lightColor, darkColor, ...otherProps } = props;
+export function getPlaceholderColor(lightColor?: string, darkColor?: string): string {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
-  const defaultStyle: TextStyle = {
-    fontFamily: 'Source Sans',
-    color: color,
-  }
-
   let placeholderColor: string = CSSColorToHex(color);
   if (placeholderColor[0] !== "#") {
     console.warn("Unsupported color!")
@@ -69,6 +63,19 @@ export function TextInput(props: TextInputProps) {
       placeholderColor += '80';
       break;
   }
+
+  return placeholderColor;
+}
+
+export function TextInput(props: TextInputProps) {
+  const { style, lightColor, darkColor, ...otherProps } = props;
+  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const defaultStyle: TextStyle = {
+    fontFamily: 'Source Sans',
+    color: color,
+  }
+  const placeholderColor: string = getPlaceholderColor(lightColor, darkColor);
+
 
   return <DefaultTextInput style={[defaultStyle, style]} placeholderTextColor={placeholderColor} {...otherProps} />;
 }

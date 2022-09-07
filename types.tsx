@@ -7,6 +7,7 @@ import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/n
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { DrawerScreenProps } from '@react-navigation/drawer';
+import {LendingForEvent, LendingPrivate} from "./store/lendings";
 
 declare global {
   namespace ReactNavigation {
@@ -76,7 +77,7 @@ export type HomeTabScreenProps<Screen extends keyof HomeTabParamList> = BottomTa
 
 export type LendingStackParamList = {
   Lendings: undefined;
-  AddEditLending: { lendingId: string } | undefined;
+  AddEditLending: { lending: LendingPrivate | LendingForEvent } | undefined;
   LendingDetails: { lendingId: string };
 };
 

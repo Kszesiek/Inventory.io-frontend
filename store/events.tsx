@@ -1,61 +1,62 @@
 import {createSlice} from "@reduxjs/toolkit";
 
-export class Event {
+export interface Event {
   eventId: string
   name: string
-  startDate: Date
-  endDate: Date
-
-  constructor(eventId: string, name: string, startDate: Date, endDate: Date) {
-    this.eventId = eventId;
-    this.name = name;
-    this.startDate = startDate;
-    this.endDate = endDate;
-  }
+  startDate: string
+  endDate: string
 }
 
 export const eventsSlice = createSlice({
   name: 'events',
   initialState: {
-    events: new Map<string, Event>([
-      ["a2b114f3-0b2c-4fb3-98a8-762d87c161ee", new Event(
-         "a2b114f3-0b2c-4fb3-98a8-762d87c161ee",
-         "Annual Garage Band Competition",
-         new Date(2022, 9 - 1, 2, 14),
-         new Date(2022, 9 - 1, 2, 22),
-      )],
-      ["e97982f8-7dd1-49cb-b207-60957aadb7d3", new Event(
-        "e97982f8-7dd1-49cb-b207-60957aadb7d3",
-        "Elka Country Music Festival",
-        new Date(2022, 9 - 1, 8, 10),
-        new Date(2022, 9 - 1, 11, 2),
-      )],
-      ["5e509adc-dd63-4312-9db8-e4c02f5a4bbb", new Event(
-        "5e509adc-dd63-4312-9db8-e4c02f5a4bbb",
-        "Open Doors at Amplitron",
-        new Date(2022, 8 - 1, 3),
-        new Date(2022, 8 - 1, 3),
-      )],
-      ["ca70b980-157e-47d2-8f0c-9e884e5291c7", new Event(
-        "ca70b980-157e-47d2-8f0c-9e884e5291c7",
-        "AmpliGranie 2k22 - otwarcie roku akademickiego",
-        new Date(2022, 10 - 1, 23, 18),
-        new Date(2022, 10 - 1, 23, 22),
-      )],
-    ])
+    events: new Array<Event>(
+      {
+        eventId: "a2b114f3-0b2c-4fb3-98a8-762d87c161ee",
+        name: "Annual Garage Band Competition",
+        startDate: new Date(2022, 9 - 1, 2, 14).toISOString(),
+        endDate: new Date(2022, 9 - 1, 2, 22).toISOString(),
+      },
+      {
+        eventId: "e97982f8-7dd1-49cb-b207-60957aadb7d3",
+        name: "Elka Country Music Festival",
+        startDate: new Date(2022, 9 - 1, 8, 10).toISOString(),
+        endDate: new Date(2022, 9 - 1, 11, 2).toISOString(),
+      },
+      {
+        eventId: "5e509adc-dd63-4312-9db8-e4c02f5a4bbb",
+        name: "Open Doors at Amplitron",
+        startDate: new Date(2022, 8 - 1, 3).toISOString(),
+        endDate: new Date(2022, 8 - 1, 3).toISOString(),
+      },
+      {
+        eventId: "ca70b980-157e-47d2-8f0c-9e884e5291c7",
+        name: "AmpliGranie 2k22 - otwarcie roku akademickiego",
+        startDate: new Date(2022, 10 - 1, 23, 18).toISOString(),
+        endDate: new Date(2022, 10 - 1, 23, 22).toISOString(),
+      },
+    )
   },
   reducers: {
     addEvent: (state, action) => {
-      if (!state.events.has(action.payload.event.eventId)) {
-        state.events.set(action.payload.event.eventId, action.payload.event);
+      if (!state.events.some(event => event.eventId === action.payload.event.eventId)) {
+        state.events.push(action.payload.event);
       }
     },
     removeEvent: (state, action) => {
-      state.events.delete(action.payload.eventId);
+      if (state.events.find(event => event.eventId === action.payload.eventId)) {
+        state.events = state.events.filter(event => event.eventId !== action.payload.eventId);
+      }
+    },
+
+    modifyEvent: (state, action) => {
+      const index = state.events.findIndex(event => event.eventId === action.payload.event.eventId);
+      if (index >= 0) {
+        state.events[index] = action.payload.event;
+      }
     },
   },
 });
 
-export const addEvent = eventsSlice.actions.addEvent;
-export const removeEvent = eventsSlice.actions.removeEvent;
+export const eventActions = eventsSlice.actions;
 export default eventsSlice.reducer;
