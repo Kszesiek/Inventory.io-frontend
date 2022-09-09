@@ -1,4 +1,4 @@
-export default function enlistItems(items: string[]): string {
+export function enlistItems(items: string[]): string {
   let itemsListed: string = ""
   items.slice(0, items.length > 3 ? 2 : 3).forEach(itemName => {  //
     itemsListed += itemName + ', '
@@ -9,4 +9,22 @@ export default function enlistItems(items: string[]): string {
   }
 
   return itemsListed
+}
+
+export function writeOutArray(stringsArray: string[]): string {
+  let output: string = ""
+  let ending: string = ""
+  if (stringsArray.length > 0) {
+    output += stringsArray.shift()
+  }
+  if (stringsArray.length > 0) {
+    ending = " and " + stringsArray.pop()
+  }
+  if (stringsArray.length > 0) {
+    stringsArray.forEach(item => {
+      output += ", " + item
+    })
+  }
+
+  return output + ending
 }

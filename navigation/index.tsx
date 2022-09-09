@@ -31,7 +31,7 @@ import {
   RootTabScreenProps,
   HomeDrawerParamList,
   HomeTabParamList,
-  LendingStackParamList,
+  LendingStackParamList, EventStackParamList,
 } from '../types';
 import SignInScreen from "../screens/login/SignInScreen";
 import RegisterScreen from "../screens/login/RegisterScreen";
@@ -40,7 +40,7 @@ import ResetPasswordScreen from "../screens/login/ResetPassword";
 import AppSettings from "../screens/AppSettings";
 import Homescreen from "../screens/home/Homescreen";
 import Inventory from "../screens/home/Inventory";
-import Events from "../screens/home/Events";
+import Events from "../screens/home/events/Events";
 import Lendings from "../screens/home/lendings/Lendings";
 import More from "../screens/home/More";
 import {Text, useThemeColor, View} from "../components/Themed";
@@ -50,6 +50,8 @@ import {Provider} from "react-redux";
 import {store} from "../store/store";
 import LendingDetails from "../screens/home/lendings/LendingDetails";
 import AddEditLending from "../screens/home/lendings/AddEditLending";
+import EventDetails from "../screens/home/events/EventDetails";
+import AddEditEvent from "../screens/home/events/AddEditEvent";
 // import LinkingConfiguration from './LinkingConfiguration';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
@@ -281,21 +283,20 @@ function HomeTabNavigator(props: {navigation: any, route: any}) {
           ),
         }} />
       <HomeTab.Screen
-        name="LendingsNavigator"
+        name="LendingNavigator"
         component={LendingNavigator}
         options={{
           headerShown: false,
-          // title: "Wypożyczenia",
           tabBarLabel: "Wypożyczenia",
           tabBarIcon: ({color, size}) => (
             <Ionicons name="push" size={size} color={color} />
           ),
         }} />
       <HomeTab.Screen
-        name="Events"
-        component={Events}
+        name="EventNavigator"
+        component={EventNavigator}
         options={{
-          title: "Wydarzenia",
+          headerShown: false,
           tabBarLabel: "Wydarzenia",
           tabBarIcon: ({color, size}) => (
             <Ionicons name="calendar" size={size} color={color} />
@@ -357,15 +358,63 @@ function LendingNavigator() {
           </TouchableOpacity>
         ),
       })} />
-      <LendingStack.Screen name="AddEditLending" component={AddEditLending} options={{
-        title: "AddEdit, to się zmieni",
-      }} />
+      <LendingStack.Screen name="AddEditLending" component={AddEditLending} options={({ navigation, route }) => ({
+        title: route.params && route.params.lending ? "Edytuj wydarzenie" : "Nowe wydarzenie",
+      })} />
 
     </LendingStack.Navigator>
   );
 }
 
+// EVENT STACK
 
+const EventStack = createNativeStackNavigator<EventStackParamList>();
+
+function EventNavigator() {
+  const textColor = useThemeColor({}, 'text');
+  const headerColor = useThemeColor({}, 'header');
+
+  return (
+    <EventStack.Navigator
+      screenOptions={({ navigation }) => ({
+        headerTitleAlign: "center",
+        headerTintColor: textColor,
+        headerStyle: {backgroundColor: headerColor},
+        headerLeft: () => (
+          <TouchableOpacity onPress={navigation.goBack}>
+            <Ionicons name='chevron-back' size={30} style={{ color: textColor}} />
+          </TouchableOpacity>
+        ),
+      })}
+    >
+      <EventStack.Screen name="Events" component={Events} options={({ navigation }) => ({
+        title: "Wydarzenia",
+        headerRight: () => (
+          <TouchableOpacity onPress={() => navigation.navigate("AddEditEvent")}>
+            <Ionicons name='add' size={32} style={{ color: textColor}}  />
+          </TouchableOpacity>
+        ),
+        headerLeft: () => (
+          <TouchableOpacity onPress={navigation.goBack}>
+            <Ionicons name='chevron-back' size={36} style={{ color: textColor}} />
+          </TouchableOpacity>
+        )
+      })} />
+      <EventStack.Screen name="EventDetails" component={EventDetails} options={({ navigation, route }) => ({
+        title: "Szczegóły wydarzenia",
+        headerRight: () => (
+          <TouchableOpacity onPress={() => navigation.navigate("AddEditEvent", {eventId: route.params.eventId})}>
+            <Feather name='edit' size={24} style={{ color: textColor,}} />
+          </TouchableOpacity>
+        ),
+      })} />
+      <EventStack.Screen name="AddEditEvent" component={AddEditEvent} options={({ navigation, route }) => ({
+        title: route.params && route.params.event ? "Edytuj wydarzenie" : "Nowe wydarzenie",
+      })} />
+
+    </EventStack.Navigator>
+  );
+}
 
 
 

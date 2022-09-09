@@ -14,6 +14,7 @@ import Input from "../../../components/Input";
 import {OpacityButton} from "../../../components/Themed/OpacityButton";
 import HighlightChooser from "../../../components/HighlightChooser";
 import ExpandableItemList from "../../../components/ExpandableItemList";
+import {writeOutArray} from "../../../utilities/enlist";
 
 export type ValidValuePair = {
   value: string
@@ -34,24 +35,6 @@ const lendingTypes = [
   { 'key': "event", label: 'na wydarzenie' },
 ];
 
-function writeOutArray(stringsArray: string[]): string {
-  let output: string = ""
-  let ending: string = ""
-  if (stringsArray.length > 0) {
-    output += stringsArray.shift()
-  }
-  if (stringsArray.length > 0) {
-    ending = " and " + stringsArray.pop()
-  }
-  if (stringsArray.length > 0) {
-    stringsArray.forEach(item => {
-      output += ", " + item
-    })
-  }
-
-  return output + ending
-}
-
 export default function AddEditLending({ navigation, route }: LendingStackScreenProps<'AddEditLending'>) {
   const dispatch = useDispatch();
 
@@ -64,32 +47,32 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
   const cancelColor = useThemeColor({}, "delete");
 
   const [inputs, setInputs]: [inputValuesType, Function] = useState(
-    {
-      itemNames: !!lending ?
-        lending.itemNames.map((item) => {return ({value: item, isInvalid: false} as ValidValuePair)})
-        :
-        [] as ValidValuePair[],
-      eventName: {
-        value: !!lending && isLendingForEvent(lending) ? lending.eventName : "",
-        isInvalid: false,
-      },
-      username: {
-        value: !!lending && isLendingPrivate(lending) ? lending.username : "",
-        isInvalid: false,
-      },
-      startDate: {
-        value: !!lending && isLending(lending) ? lending.startDate.slice(0, 10) : "",
-        isInvalid: false,
-      },
-      endDate: {
-        value: !!lending && isLending(lending) ? lending.endDate.slice(0, 10) : "",
-        isInvalid: false,
-      },
-      notes: {
-        value: !!lending ? lending.notes : "",
-        isInvalid: false,
-      },
-    });
+  {
+    itemNames: !!lending ?
+      lending.itemNames.map((item) => {return ({value: item, isInvalid: false} as ValidValuePair)})
+      :
+      [] as ValidValuePair[],
+    eventName: {
+      value: !!lending && isLendingForEvent(lending) ? lending.eventName : "",
+      isInvalid: false,
+    },
+    username: {
+      value: !!lending && isLendingPrivate(lending) ? lending.username : "",
+      isInvalid: false,
+    },
+    startDate: {
+      value: !!lending && isLending(lending) ? lending.startDate.slice(0, 10) : "",
+      isInvalid: false,
+    },
+    endDate: {
+      value: !!lending && isLending(lending) ? lending.endDate.slice(0, 10) : "",
+      isInvalid: false,
+    },
+    notes: {
+      value: !!lending ? lending.notes : "",
+      isInvalid: false,
+    },
+  });
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -146,7 +129,7 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
       }
     });
 
-    if (!notesIsValid || !startDateIsValid || !endDateIsValid || !usernameIsValid || !eventNameIsValid) { // itemsAreValid.some(item => !item)
+    if (!notesIsValid || !startDateIsValid || !endDateIsValid || !usernameIsValid || !eventNameIsValid || !itemsAreValid.some(item => !item)) {
       const wrongDataArray: string[] = []
       if (!startDateIsValid)
         wrongDataArray.push("start date")
@@ -231,6 +214,8 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
       }
     })
   }
+
+  // ACTUAL FORM FIELDS
 
   const lendingTypeComponent = !isEditing ? <>
         <Text style={{fontSize: 16, marginBottom: 4}}>Typ wypożyczenia</Text>
@@ -355,10 +340,6 @@ const styles = StyleSheet.create({
   dateAmountRow: {
     flexDirection: 'row',
   },
-  amountStyle: {
-    flex: 1,
-    marginRight: 10,
-  },
   buttons: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -366,10 +347,6 @@ const styles = StyleSheet.create({
   },
   button: {
     margin: 15,
-  },
-  errorText: {
-    color: 'red',
-    margin: 8,
   },
   input: {
     flex: 1,

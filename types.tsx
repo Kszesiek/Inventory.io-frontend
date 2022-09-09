@@ -8,6 +8,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import {LendingForEvent, LendingPrivate} from "./store/lendings";
+import {Event} from "./store/events";
 
 declare global {
   namespace ReactNavigation {
@@ -60,9 +61,9 @@ export type HomeDrawerScreenProps<Screen extends keyof HomeDrawerParamList> = Dr
 export type HomeTabParamList = {
   Homescreen: undefined;
   Inventory: undefined;
-  LendingsNavigator: undefined;
+  LendingNavigator: undefined;
   Members: undefined;
-  Events: undefined;
+  EventNavigator: undefined;
   More: undefined;
   AppSettings: undefined;
   UserSettings: undefined;
@@ -86,7 +87,18 @@ export type LendingStackScreenProps<Screen extends keyof LendingStackParamList> 
   Screen
 >;
 
+// EVENT STACK
 
+export type EventStackParamList = {
+  Events: undefined;
+  AddEditEvent: { event: Event } | undefined;
+  EventDetails: { eventId: string };
+};
+
+export type EventStackScreenProps<Screen extends keyof EventStackParamList> = NativeStackScreenProps<
+  EventStackParamList,
+  Screen
+>;
 
 
 

@@ -9,7 +9,7 @@ import {Event} from "../../store/events";
 import {isLendingForEvent, isLendingPrivate, LendingForEvent, LendingPrivate} from "../../store/lendings";
 import {displayDateTimePeriod} from "../../utilities/date";
 import {FontAwesome, MaterialCommunityIcons} from "@expo/vector-icons";
-import enlistItems from "../../utilities/enlist";
+import {enlistItems} from "../../utilities/enlist";
 import {HomeTabScreenProps} from "../../types";
 
 export default function Homescreen({ navigation, route }: HomeTabScreenProps<'Homescreen'>) {
@@ -23,12 +23,12 @@ export default function Homescreen({ navigation, route }: HomeTabScreenProps<'Ho
 
   function showMoreEventsPressed() {
     console.log("show more events pressed");
-    navigation.navigate("Events");
+    navigation.navigate("EventNavigator");
   }
 
   function showMoreLendingsPressed() {
     console.log("show more lendings pressed");
-    navigation.navigate("LendingsNavigator");
+    navigation.navigate("LendingNavigator");
   }
 
   function searchShortcutPressed() {

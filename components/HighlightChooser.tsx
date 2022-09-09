@@ -31,6 +31,7 @@ export default function HighlightChooser({data, onPress}: propsType) {
   return <Card style={{...styles.container, backgroundColor}}>
     {data.map((item) => {
       return <TouchableCard
+        key={item.key}
         style={[styles.card, item.key === chosenKey && chosenCardStyle]}
         onPress={() => onCardPressed(item.key)}
       >

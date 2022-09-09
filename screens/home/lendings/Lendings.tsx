@@ -5,7 +5,7 @@ import {displayDateTimePeriod} from "../../../utilities/date";
 import {useSelector} from "react-redux";
 import {store} from "../../../store/store";
 import {TouchableCard} from "../../../components/Themed/TouchableCard";
-import enlistItems from "../../../utilities/enlist";
+import {enlistItems} from "../../../utilities/enlist";
 import {LendingStackScreenProps} from "../../../types";
 
 export default function Lendings({ navigation, route }: LendingStackScreenProps<'Lendings'>) {

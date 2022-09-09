@@ -7,6 +7,17 @@ export interface Event {
   endDate: string
 }
 
+export function isEvent(object: any): object is Event {
+  return (
+    object &&
+    typeof object === 'object' &&
+    typeof object['eventId'] === 'string' &&
+    typeof object['name'] === 'string' &&
+    typeof object['startDate'] === 'string' &&
+    typeof object['endDate'] === 'string'
+  );
+}
+
 export const eventsSlice = createSlice({
   name: 'events',
   initialState: {
