@@ -17,6 +17,7 @@ type propsType = {
 export default function HighlightChooser({data, onPress}: propsType) {
   const [chosenKey, setChosenKey] = useState(data[0].key);
   const backgroundColor = useThemeColor({}, 'cardBackground');
+  const buttonTextColor = useThemeColor({}, 'buttonText');
 
   function onCardPressed(cardKey: string) {
     setChosenKey(cardKey);
@@ -35,7 +36,7 @@ export default function HighlightChooser({data, onPress}: propsType) {
         style={[styles.card, item.key === chosenKey && chosenCardStyle]}
         onPress={() => onCardPressed(item.key)}
       >
-        <Text style={styles.text}>{item.label}</Text>
+        <Text style={[styles.text, item.key === chosenKey && {color: buttonTextColor}]}>{item.label}</Text>
       </TouchableCard>
     })}
   </Card>
