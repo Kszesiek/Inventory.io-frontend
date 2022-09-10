@@ -4,7 +4,7 @@ import Card from "../../components/Themed/Card";
 import {TouchableCard} from "../../components/Themed/TouchableCard";
 import {OpacityButton} from "../../components/Themed/OpacityButton";
 import {useSelector} from "react-redux";
-import {store} from "../../store/store";
+import {IRootState} from "../../store/store";
 import {Event} from "../../store/events";
 import {isLendingForEvent, isLendingPrivate, LendingForEvent, LendingPrivate} from "../../store/lendings";
 import {displayDateTimePeriod} from "../../utilities/date";
@@ -13,8 +13,8 @@ import {enlistItems} from "../../utilities/enlist";
 import {HomeTabScreenProps} from "../../types";
 
 export default function Homescreen({ navigation, route }: HomeTabScreenProps<'Homescreen'>) {
-  const events: Array<Event> = useSelector((state: typeof store.dispatch.prototype) => state.events.events)
-  const lendings: Array<LendingForEvent | LendingPrivate> = useSelector((state: typeof store.dispatch.prototype) => state.lendings.lendings)
+  const events: Array<Event> = useSelector((state: IRootState) => state.events.events)
+  const lendings: Array<LendingForEvent | LendingPrivate> = useSelector((state: IRootState) => state.lendings.lendings)
 
   const boldedText: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans Bold',

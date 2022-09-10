@@ -3,13 +3,13 @@ import {Text, useThemeColor} from "../../../components/Themed";
 import {isLendingForEvent, isLendingPrivate, LendingForEvent, LendingPrivate} from "../../../store/lendings";
 import {displayDateTimePeriod} from "../../../utilities/date";
 import {useSelector} from "react-redux";
-import {store} from "../../../store/store";
+import {IRootState} from "../../../store/store";
 import {TouchableCard} from "../../../components/Themed/TouchableCard";
 import {enlistItems} from "../../../utilities/enlist";
 import {LendingStackScreenProps} from "../../../types";
 
 export default function Lendings({ navigation, route }: LendingStackScreenProps<'Lendings'>) {
-  const lendings: Array<LendingForEvent | LendingPrivate> = useSelector((state: typeof store.dispatch.prototype) => state.lendings.lendings)
+  const lendings: Array<LendingForEvent | LendingPrivate> = useSelector((state: IRootState) => state.lendings.lendings)
 
   const boldedText: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans Bold',

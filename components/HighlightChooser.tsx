@@ -9,17 +9,19 @@ type dataItem = {
   key: string,
 }
 
-type propsType = {
-  data: dataItem[]
-  onPress?: ((chosenKey: string) => void)
+type propsType<TDataItem, TDataKey> = {
+  data: TDataItem[]
+  onPress?: (chosenKey: TDataKey) => void
+  style?: ViewStyle
+  defaultOption?: TDataKey
 }
 
-export default function HighlightChooser({data, onPress}: propsType) {
-  const [chosenKey, setChosenKey] = useState(data[0].key);
+export default function HighlightChooser<TDataItem extends dataItem, TDataKey extends TDataItem['key']>({data, onPress, style, defaultOption}: propsType<TDataItem, TDataKey>) {
+  const [chosenKey, setChosenKey] = useState(defaultOption || data[0].key);
   const backgroundColor = useThemeColor({}, 'cardBackground');
   const buttonTextColor = useThemeColor({}, 'buttonText');
 
-  function onCardPressed(cardKey: string) {
+  function onCardPressed(cardKey: TDataKey) {
     setChosenKey(cardKey);
     onPress && onPress(cardKey);
   }
@@ -29,12 +31,12 @@ export default function HighlightChooser({data, onPress}: propsType) {
     elevation: 10,
   }
 
-  return <Card style={{...styles.container, backgroundColor}}>
-    {data.map((item) => {
+  return <Card style={{...styles.container, backgroundColor, ...style}}>
+    {data.map((item: TDataItem) => {
       return <TouchableCard
         key={item.key}
         style={[styles.card, item.key === chosenKey && chosenCardStyle]}
-        onPress={() => onCardPressed(item.key)}
+        onPress={() => onCardPressed(item.key as TDataKey)}
       >
         <Text style={[styles.text, item.key === chosenKey && {color: buttonTextColor}]}>{item.label}</Text>
       </TouchableCard>

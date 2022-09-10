@@ -12,12 +12,12 @@ import {ScrollView, StyleProp, StyleSheet, TextStyle} from "react-native";
 import {LendingStackScreenProps} from "../../../types";
 import Detail from "../../../components/Detail";
 import {useDispatch, useSelector} from "react-redux";
-import {store} from "../../../store/store";
+import {IRootState} from "../../../store/store";
 
 export default function LendingDetails({ navigation, route }: LendingStackScreenProps<'LendingDetails'>) {
   const dispatch = useDispatch();
-  const lending: LendingForEvent | LendingPrivate = useSelector((state: typeof store.dispatch.prototype) =>
-    state.lendings.lendings.find((item: LendingForEvent | LendingPrivate) => item.lendingId === route.params.lendingId))
+  const lending: LendingForEvent | LendingPrivate = useSelector((state: IRootState) =>
+    state.lendings.lendings.find((item: LendingForEvent | LendingPrivate) => item.lendingId === route.params.lendingId)!)
 
   const property: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans',
@@ -28,8 +28,8 @@ export default function LendingDetails({ navigation, route }: LendingStackScreen
 
   async function deletePressed() {
     console.log("delete button pressed");
+    navigation.replace("Lendings");
     await dispatch(lendingActions.removeLending({lendingId: lending.lendingId}));
-    navigation.goBack();
   }
 
   function editPressed() {

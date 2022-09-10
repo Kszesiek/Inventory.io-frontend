@@ -1,7 +1,7 @@
 import {FlatList, ListRenderItemInfo, StyleProp, StyleSheet, TextStyle} from "react-native";
 import {Text, useThemeColor} from "../../../components/Themed";
 import {useSelector} from "react-redux";
-import {store} from "../../../store/store";
+import {IRootState} from "../../../store/store";
 import {Event} from "../../../store/events";
 
 import {TouchableCard} from "../../../components/Themed/TouchableCard";
@@ -9,7 +9,7 @@ import {displayDateTimePeriod} from "../../../utilities/date";
 import {EventStackScreenProps} from "../../../types";
 
 export default function Events({ navigation, route }: EventStackScreenProps<'Events'>) {
-  const events: Array<Event> = useSelector((state: typeof store.dispatch.prototype) => state.events.events)
+  const events: Array<Event> = useSelector((state: IRootState) => state.events.events)
 
   const boldedText: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans Bold',

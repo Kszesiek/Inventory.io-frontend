@@ -1,89 +1,43 @@
-import {FlatList, Platform, StatusBar, StyleSheet, Switch, TouchableOpacity} from "react-native";
-import {Text, View} from "../components/Themed";
+import {ScrollView, StyleSheet, TouchableOpacity} from "react-native";
+import {Text, useThemeColor, View} from "../components/Themed";
 import Card from "../components/Themed/Card";
 import {useState} from "react";
-
-type settingsType = {name: string, value: string | number | boolean}
-
-const settingsRows: settingsType[] = [
-  {name: 'Motyw', value: 'auto'},
-  {name: 'Demo mode', value: true},
-]
+import HighlightChooser from "../components/HighlightChooser";
+import Switch from "../components/Themed/Switch";
+import {appWideActions} from "../store/appWide";
+import {useDispatch} from "react-redux";
 
 export default function AppSettings() {
-  const [isEnabled, setIsEnabled] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState();
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+  const dispatch = useDispatch();
+  const [demoModeEnabled, setDemoModeEnabled] = useState(false);
+  const backgroundColor = useThemeColor({}, 'background');
 
-
-  function renderMenuItem({name, value}: settingsType) {
-    if (typeof value === 'string' || typeof value === 'number') {
-      return (
-          <TouchableOpacity>
-            <View style={[styles.cardView, styles.stringCardView]}>
-              <Text style={textStyles.optionName}>{name}</Text>
-              <Text style={textStyles.optionValue}>{value}</Text>
-            </View>
-          </TouchableOpacity>
-          // {/*<Picker*/}
-          // {/*  mode="dropdown"*/}
-          // {/*  dropdownIconColor={textColor}*/}
-          // {/*  selectedValue={selectedLanguage}*/}
-          // {/*  style={styles.picker}*/}
-          // {/*  itemStyle={styles.pickerItem}*/}
-          // {/*  onValueChange={(itemValue, itemIndex) =>*/}
-          // {/*    setSelectedLanguage(itemValue)*/}
-          // {/*  }>*/}
-          // {/*  <Picker.Item color={textColor} label="Java" value="java" />*/}
-          // {/*  <Picker.Item  color={textColor} label="JavaScript" value="js" />*/}
-          // {/*</Picker>*/}
-
-        // <TouchableOpacity style={styles.cardView}>
-        //   <Text style={textStyles.optionName}>{name}</Text>
-        //   <Text style={textStyles.optionValue}>{value}</Text>
-        // </TouchableOpacity>
-
-        // style={{...styles.pickerItem, backgroundColor: bgColor}}
-        // style={styles.pickerItem}
-      )
-    }
-    else if (typeof value === 'boolean') {
-      return (
-        <View style={styles.cardView}>
-          <Text style={textStyles.optionName}>{name}</Text>
-          <Switch
-            style={styles.switch}
-            trackColor={{ false: "#767577", true: "#81b0ff" }}
-            thumbColor={isEnabled ? "#4285F4" : "#f4f3f4"}
-            ios_backgroundColor="#3e3e3e"
-            onValueChange={toggleSwitch}
-            value={isEnabled}
-          />
-        </View>
-      )
+  function themeChanged(chosenKey: 'auto' | 'light' | 'dark') {
+    if (chosenKey === 'auto' || chosenKey === 'light' || chosenKey === 'dark') {
+      dispatch(appWideActions.setTheme(chosenKey));
     }
   }
 
   return (
-    <View style={styles.container} lightColor="#F9FBFC" darkColor="#1E2E3D" >
-      <FlatList
-        data={settingsRows}
-        contentContainerStyle={{...styles.flatList, paddingTop: StatusBar.currentHeight}}
-        ListHeaderComponent={
-        <View style={{alignItems: 'center', backgroundColor: 'transparent'}}>
-          <Text style={textStyles.title}>Ustawienia</Text>
+    <ScrollView style={[styles.container, styles.flatList, {backgroundColor}]}>
+      <View style={[styles.listItem, {backgroundColor: 'transparent'}]}>
+        <Text style={[textStyles.optionName, styles.label]}>Motyw</Text>
+        <HighlightChooser
+          data={[{key: 'light', label: 'jasny'}, {key: 'dark', label: 'ciemny'}, {key: 'auto', label: 'auto'}]}
+          defaultOption='auto'
+          onPress={themeChanged}
+          style={{flex: 1}}
+        />
+      </View>
+      <TouchableOpacity>
+        <View style={[styles.cardView, styles.stringCardView]}>
         </View>
-        }
-        renderItem={({item}) =>
-        <Card
-          style={styles.listItem}
-          lightColor="white"
-          darkColor="#273444"
-        >
-          {renderMenuItem(item)}
-        </Card>
-      } />
-    </View>
+      </TouchableOpacity>
+      <View style={styles.cardView}>
+        <Text style={textStyles.optionName}>Demo mode</Text>
+        <Switch enabled={demoModeEnabled} setEnabled={setDemoModeEnabled} />
+      </View>
+    </ScrollView>
   )
 }
 
@@ -111,9 +65,8 @@ const styles = StyleSheet.create({
   stringCardView: {
     paddingRight: 20,
   },
-  switch: {
-    marginVertical: Platform.OS === 'android' ? -15 : 0,  // on jest po prostu za duuży w pionie
-    // backgroundColor: 'magenta',
+  label: {
+    marginBottom: 6,
   },
   // picker: {
   //   borderRadius: 20,
@@ -128,10 +81,10 @@ const styles = StyleSheet.create({
 
 const textStyles = StyleSheet.create({
   optionName: {
-
+    fontSize: 18,
   },
   optionValue: {
-
+    fontSize: 18,
   },
   title: {
     fontSize: 24,

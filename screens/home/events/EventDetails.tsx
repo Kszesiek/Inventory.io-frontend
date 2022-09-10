@@ -4,15 +4,15 @@ import {eventActions} from "../../../store/events";
 import {useDispatch, useSelector} from "react-redux";
 import {EventStackScreenProps} from "../../../types";
 import {Event} from "../../../store/events";
-import {store} from "../../../store/store";
+import {IRootState} from "../../../store/store";
 import Detail from "../../../components/Detail";
 import {displayDateTimePeriod} from "../../../utilities/date";
 import {OpacityButton} from "../../../components/Themed/OpacityButton";
 
 export default function EventDetails({ navigation, route }: EventStackScreenProps<'EventDetails'>) {
   const dispatch = useDispatch();
-  const event: Event = useSelector((state: typeof store.dispatch.prototype) =>
-    state.events.events.find((item: Event) => item.eventId === route.params.eventId))
+  const event: Event = useSelector((state: IRootState) =>
+    state.events.events.find((item: Event) => item.eventId === route.params.eventId)!)
 
   const property: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans',

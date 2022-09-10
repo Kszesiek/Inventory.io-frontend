@@ -13,12 +13,15 @@ import {
 
 import Colors, {CSSColorToHex} from '../../constants/Colors';
 import useColorScheme from '../../hooks/useColorScheme';
+import {useSelector} from "react-redux";
+import {IRootState} from "../../store/store";
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
   colorName: keyof typeof Colors.light & keyof typeof Colors.dark
 ) {
-  const theme = useColorScheme();
+  const colorScheme = useColorScheme();
+  const theme: "light" | "dark" | null | undefined = useSelector((state: IRootState) => state.appWide.theme === 'auto' ? colorScheme : state.appWide.theme);
   const colorFromProps = props[theme];
 
   if (colorFromProps) {

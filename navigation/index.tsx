@@ -46,19 +46,22 @@ import More from "../screens/home/More";
 import {Text, useThemeColor, View} from "../components/Themed";
 import Animated, {Adaptable} from "react-native-reanimated";
 import {OpacityButton} from "../components/Themed/OpacityButton";
-import {Provider} from "react-redux";
-import {store} from "../store/store";
 import LendingDetails from "../screens/home/lendings/LendingDetails";
 import AddEditLending from "../screens/home/lendings/AddEditLending";
 import EventDetails from "../screens/home/events/EventDetails";
 import AddEditEvent from "../screens/home/events/AddEditEvent";
 // import LinkingConfiguration from './LinkingConfiguration';
 
+import {useSelector} from "react-redux";
+import {IRootState} from "../store/store";
+
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
+  const chosenTheme: "light" | "dark" | null | undefined = useSelector((state: IRootState) => state.appWide.theme === 'auto' ? colorScheme : state.appWide.theme);
+
   return (
     <NavigationContainer
       // linking={LinkingConfiguration}
-      theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      theme={chosenTheme === 'dark' ? DarkTheme : DefaultTheme}>
       <RootNavigator />
     </NavigationContainer>
   );
@@ -87,6 +90,7 @@ const LoginStack = createNativeStackNavigator<LoginStackParamList>();
 
 function LoginNavigator() {
   const textColor = useThemeColor({}, 'text');
+  const headerColor = useThemeColor({}, "header");
 
   return (
     <LoginStack.Navigator
@@ -116,7 +120,13 @@ function LoginNavigator() {
       <LoginStack.Screen name="Register" component={RegisterScreen} />
       <LoginStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       <LoginStack.Screen name="ResetPassword" component={ResetPasswordScreen} />
-      <LoginStack.Screen name="AppSettings" component={AppSettings} />
+      <LoginStack.Screen name="AppSettings" component={AppSettings} options={{
+        title: 'Ustawienia',
+        headerTitleAlign: 'center',
+        headerTransparent: false,
+        headerStyle: {backgroundColor: headerColor},
+        headerTitleStyle: {color: textColor},
+      }} />
 
     </LoginStack.Navigator>
   );
@@ -169,14 +179,14 @@ function HomeDrawerNavigator(props: OrganizationDetails[]) {
   const headerColor = useThemeColor({}, 'header');
 
   return (
-    <Provider store={store}>
+    // <Provider store={store}>
       <HomeDrawer.Navigator
         useLegacyImplementation
         screenOptions={{
           headerShown: false,
           drawerStyle: {backgroundColor: headerColor},
-          drawerActiveBackgroundColor: useThemeColor({}, "tabBackgroundSelected"),  // Czy potrzebujemy tego? Może lepiej zostawić złotą poświatę?
-          drawerActiveTintColor: useThemeColor({}, "tabIconSelected"),
+          drawerActiveBackgroundColor: useThemeColor({}, "tintBackground"),  // Czy potrzebujemy tego? Może lepiej zostawić złotą poświatę?
+          drawerActiveTintColor: useThemeColor({}, "tint"),
         }}
         drawerContent={(props) => <CustomHomeDrawerContent {...props} />}
       >
@@ -189,7 +199,7 @@ function HomeDrawerNavigator(props: OrganizationDetails[]) {
           component={HomeTabNavigator}
         />
       </HomeDrawer.Navigator>
-    </Provider>
+    // </Provider>
   );
 }
 
@@ -234,8 +244,8 @@ function HomeTabNavigator(props: {navigation: any, route: any}) {
         ),
         headerTintColor: textColor,
         headerStyle: {backgroundColor: headerColor},
-        tabBarActiveBackgroundColor: useThemeColor({}, "tabBackgroundSelected"),
-        tabBarActiveTintColor: useThemeColor({}, "tabIconSelected"),
+        tabBarActiveBackgroundColor: useThemeColor({}, "tintBackground"),
+        tabBarActiveTintColor: useThemeColor({}, "tint"),
         tabBarInactiveBackgroundColor: headerColor,
         tabBarStyle: {
           height: 55,
