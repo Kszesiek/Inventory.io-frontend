@@ -90,13 +90,13 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
     const startDateIsValid: boolean = !isLendingForEvent(lending) ? (dateRegex.test(inputs.startDate.value) && new Date(inputs.startDate.value).toString() !== "Invalid Date") : true;
     const endDateIsValid: boolean = !isLendingForEvent(lending) ? (dateRegex.test(inputs.endDate.value) && new Date(inputs.endDate.value).toString() !== "Invalid Date") : true;
     const notesIsValid: boolean = inputs.notes.value.trim().length >= 0;
-    const itemsAreValid: boolean[] = inputs.itemNames.map((item) => {return (item.value.trim().length > 0 && item.value.trim().length < 100)});
+    const itemsAreValid: boolean[] = inputs.itemNames.map((item) => item.value.trim().length > 0 && item.value.trim().length < 100);
     const usernameIsValid: boolean = isLendingPrivate(lending) ? (inputs.username.value.trim().length > 0 && inputs.username.value.trim().length < 100) : true;
     const eventNameIsValid: boolean = isLendingForEvent(lending) ? (inputs.eventName.value.trim().length > 0 && inputs.eventName.value.trim().length < 100) : true;
 
-      setInputs((currentInputs: inputValuesType) => {
+    setInputs((currentInputs: inputValuesType) => {
       return {
-        itemNames: [
+        itemNames:
           currentInputs.itemNames.map((item, index) => {
             return (
               {
@@ -104,8 +104,7 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
                 isInvalid: !itemsAreValid[index]
               } as ValidValuePair
             )
-          })
-        ],
+          }),
         eventName: {
           value: currentInputs.eventName.value,
           isInvalid: !eventNameIsValid,
@@ -129,7 +128,7 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
       }
     });
 
-    if (!notesIsValid || !startDateIsValid || !endDateIsValid || !usernameIsValid || !eventNameIsValid || !itemsAreValid.some(item => !item)) {
+    if (!notesIsValid || !startDateIsValid || !endDateIsValid || !usernameIsValid || !eventNameIsValid || itemsAreValid.length === 0 || itemsAreValid.some(item => !item)) {
       const wrongDataArray: string[] = []
       if (!startDateIsValid)
         wrongDataArray.push("start date")
@@ -139,13 +138,15 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
         wrongDataArray.push("notes")
       if (itemsAreValid.some(item => !item))
         wrongDataArray.push("some list items")
+      if (itemsAreValid.length === 0)
+        wrongDataArray.push("list of items")
       if (!usernameIsValid)
         wrongDataArray.push("username")
       if (!eventNameIsValid)
         wrongDataArray.push("event name")
       const wrongDataString: string = writeOutArray(wrongDataArray)
 
-      Alert.alert("Invalid values", `Some data seems incorrect. Please check the ${wrongDataString} and try again.`);
+      Alert.alert("Invalid values", `Some data seems incorrect. Please check ${wrongDataString} and try again.`);
       return;
     }
 

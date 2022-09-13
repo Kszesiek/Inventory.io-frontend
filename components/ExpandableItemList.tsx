@@ -13,37 +13,27 @@ type propsType = {
 }
 
 export default function ExpandableItemList ({data, onChangeText, onAddItem, onDeleteItem}: propsType) {
-  // const [items, setItems] = useState(data || [] as ValidValuePair[])
-
   const cardBackground = useThemeColor({}, "cardBackground");
   const errorColor = useThemeColor({}, "delete");
-
-  // function addItem() {
-  //   console.log(`Adding new item`)
-  //   const newItems = data;
-  //   newItems.push({value: "", isInvalid: false} as ValidValuePair);
-  //   setItems([...newItems]);
-  // }
 
   return (
     <View style={styles.container}>
       <Text style={[styles.label, data?.some(item => item.isInvalid) && {color: errorColor}]}>Przedmioty</Text>
       {data?.length > 0 ? <FlatList
-        style={[styles.innerContainer, ]} // styles.card, {backgroundColor: cardBackground}
+        style={styles.innerContainer}
         data={data}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({item, index}) =>
-          <View key={index} style={{backgroundColor: item.isInvalid ? errorColor : 'transparent', borderRadius: 10, flexDirection: 'row', alignItems: 'center'}}>
+          <View key={index} style={styles.itemView}>
             <Text style={[styles.text, styles.ordinalNumber]}>{index + 1}.</Text>
             <TextInput
-              style={[styles.card, styles.input, {backgroundColor: cardBackground}]}
+              style={[styles.card, styles.input, {backgroundColor: item.isInvalid ? errorColor :  cardBackground}]}
               multiline={true}
               value={data[index].value}
               onChangeText={(text) => onChangeText(text, index)}
             />
             <TouchableOpacity onPress={() => {
               onDeleteItem(index)
-              // deletePressed(index)
             }}>
               <MaterialIcons name="delete-outline" size={24} color={errorColor} />
             </TouchableOpacity>
@@ -62,11 +52,13 @@ export default function ExpandableItemList ({data, onChangeText, onAddItem, onDe
           // }}
           //   />
         }
-      /> : <></>}
+      /> : <Text style={{fontStyle: 'italic', textAlign: 'center', marginVertical: 6}}>
+        {'Żaden przedmiot nie został dodany do wypożyczenia.\nDodaj przedmioty, aby móc utworzyć wypożyczenie.'}
+      </Text>}
       <OpacityButton
         textProps={{style: {fontSize: 15}}}
-        style={[styles.addItem, data?.length === 0 && {marginTop: 20, marginBottom: 20} /* don't ask me about the margins... */]}
-        onPress={onAddItem} //addItem}
+        style={styles.addItem}
+        onPress={onAddItem}
       >Dodaj przedmiot</OpacityButton>
     </View>
   )
@@ -114,5 +106,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     fontSize: 18,
     flex: 1,
+  },
+  itemView: {
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 })
