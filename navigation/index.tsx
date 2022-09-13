@@ -10,7 +10,6 @@ import {
   createDrawerNavigator,
   DrawerContentComponentProps,
   DrawerContentScrollView,
-  DrawerItem,
   DrawerItemList,
   useDrawerProgress
 } from '@react-navigation/drawer';
@@ -29,7 +28,7 @@ import {
   OldRootStackParamList,
   OldRootTabParamList,
   RootTabScreenProps,
-  HomeDrawerParamList,
+  // HomeDrawerParamList,
   HomeTabParamList,
   LendingStackParamList, EventStackParamList,
 } from '../types';
@@ -52,8 +51,14 @@ import EventDetails from "../screens/home/events/EventDetails";
 import AddEditEvent from "../screens/home/events/AddEditEvent";
 // import LinkingConfiguration from './LinkingConfiguration';
 
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {IRootState} from "../store/store";
+import {useEffect} from "react";
+import {eventActions} from "../store/events";
+import {demoData} from "../constants/demoData";
+import {itemActions} from "../store/items";
+import {lendingActions} from "../store/lendings";
+import {userActions} from "../store/users";
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   const chosenTheme: "light" | "dark" | null | undefined = useSelector((state: IRootState) => state.appWide.theme === 'auto' ? colorScheme : state.appWide.theme);
@@ -72,6 +77,8 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
+  const organizations = useSelector((state: IRootState) => state.organizations.organizations)
+
   return (
     <RootStack.Navigator
       screenOptions={{
@@ -79,7 +86,7 @@ function RootNavigator() {
       }}
     >
       <RootStack.Screen name="Login" component={LoginNavigator} />
-      <RootStack.Screen name="Home" component={HomeDrawerNavigator} options={{ headerShown: false, }} />
+      <RootStack.Screen name="Home" options={{ headerShown: false, }}>{() => HomeDrawerNavigator(organizations)}</RootStack.Screen>
     </RootStack.Navigator>
   );
 }
@@ -134,9 +141,7 @@ function LoginNavigator() {
 
 // HOME DRAWER
 
-const HomeDrawer = createDrawerNavigator<HomeDrawerParamList>();
-
-type OrganizationDetails = {name: string};
+const HomeDrawer = createDrawerNavigator();
 
 function CustomHomeDrawerContent(props: DrawerContentComponentProps) {
   const progress = useDrawerProgress() as Adaptable<number>;
@@ -175,30 +180,58 @@ function CustomHomeDrawerContent(props: DrawerContentComponentProps) {
   );
 }
 
+type OrganizationDetails = {
+  organizationId: string,
+  name: string
+};
+
+
 function HomeDrawerNavigator(props: OrganizationDetails[]) {
   const headerColor = useThemeColor({}, 'header');
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    async function loadData () {
+      await Promise.all([
+        dispatch(eventActions.loadEvents(demoData[props[0].organizationId].events)),
+        dispatch(itemActions.loadItems(demoData[props[0].organizationId].items)),
+        dispatch(lendingActions.loadLendings(demoData[props[0].organizationId].lendings)),
+        dispatch(userActions.loadUsers(demoData[props[0].organizationId].users)),
+      ])
+    }
+    loadData()
+    console.log('HomeDrawer useEffect')
+  }, [])
 
   return (
     // <Provider store={store}>
-      <HomeDrawer.Navigator
-        useLegacyImplementation
-        screenOptions={{
-          headerShown: false,
-          drawerStyle: {backgroundColor: headerColor},
-          drawerActiveBackgroundColor: useThemeColor({}, "tintBackground"),  // Czy potrzebujemy tego? Może lepiej zostawić złotą poświatę?
-          drawerActiveTintColor: useThemeColor({}, "tint"),
-        }}
-        drawerContent={(props) => <CustomHomeDrawerContent {...props} />}
-      >
+    <HomeDrawer.Navigator
+      useLegacyImplementation
+      screenOptions={{
+        headerShown: false,
+        drawerStyle: {backgroundColor: headerColor},
+        drawerActiveBackgroundColor: useThemeColor({}, "tintBackground"),  // Czy potrzebujemy tego? Może lepiej zostawić złotą poświatę?
+        drawerActiveTintColor: useThemeColor({}, "tint"),
+      }}
+      drawerContent={(props) => <CustomHomeDrawerContent {...props} />}
+    >
+      {props.map((organization: OrganizationDetails) => (
         <HomeDrawer.Screen
-          name="OrganizationTabNavigator"
+          key={organization.organizationId}
+          name={organization.name}
           component={HomeTabNavigator}
+          listeners={{
+            drawerItemPress: () => {
+                dispatch(eventActions.loadEvents(demoData[organization.organizationId].events))
+                dispatch(itemActions.loadItems(demoData[organization.organizationId].items))
+                dispatch(lendingActions.loadLendings(demoData[organization.organizationId].lendings))
+                dispatch(userActions.loadUsers(demoData[organization.organizationId].users))
+            }
+          }}
         />
-        <HomeDrawer.Screen
-          name="SecondOrganizationTabNavigator"
-          component={HomeTabNavigator}
-        />
-      </HomeDrawer.Navigator>
+        )
+      )}
+    </HomeDrawer.Navigator>
     // </Provider>
   );
 }

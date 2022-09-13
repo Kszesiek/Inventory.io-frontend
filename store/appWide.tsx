@@ -5,25 +5,26 @@ export const appWideSlice = createSlice({
   initialState: {
     theme: 'auto' as 'auto' | 'light' | 'dark',
     demoMode: false,
+    username: undefined as string | undefined,
+    userId: undefined as string | undefined,
   },
   reducers: {
     setTheme: (state, action: {payload: 'auto' | 'light' | 'dark'}) => {
       state.theme = action.payload;
-    },
-    setAutoTheme: (state) => {
-      state.theme = 'auto';
-    },
-    setLightTheme: (state) => {
-      state.theme = 'light';
-    },
-    setDarkTheme: (state) => {
-      state.theme = 'dark';
     },
     enableDemoMode: (state) => {
       state.demoMode = true;
     },
     disableDemoMode: (state) => {
       state.demoMode = false;
+    },
+    signOut: (state) => {
+      state.username = undefined;
+      state.userId = undefined;
+    },
+    signIn: (state, action) => {
+      state.username = action.payload.username;
+      state.userId = action.payload.userId;
     },
   },
 });

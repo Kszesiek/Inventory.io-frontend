@@ -6,7 +6,7 @@
 import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+// import { DrawerScreenProps } from '@react-navigation/drawer';
 import {LendingForEvent, LendingPrivate} from "./store/lendings";
 import {Event} from "./store/events";
 
@@ -20,7 +20,7 @@ declare global {
 
 export type RootStackParamList = {
   Login: NavigatorScreenParams<LoginStackParamList>;
-  Home: NavigatorScreenParams<HomeDrawerParamList>;
+  Home: NavigatorScreenParams<any>; // <HomeDrawerParamList>;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<
@@ -45,16 +45,16 @@ export type LoginStackScreenProps<Screen extends keyof LoginStackParamList> = Na
 
 // HOME DRAWER
 
-export type HomeDrawerParamList = {
-  OrganizationTabNavigator: undefined;
-  SecondOrganizationTabNavigator: undefined;
-  // Yeah, in the future this needs to be changed for sure
-};
-
-export type HomeDrawerScreenProps<Screen extends keyof HomeDrawerParamList> = DrawerScreenProps<
-  HomeDrawerParamList,
-  Screen
-  >;
+// export type HomeDrawerParamList = {
+//   OrganizationTabNavigator: undefined;
+//   SecondOrganizationTabNavigator: undefined;
+//   // Yeah, in the future this needs to be changed for sure
+// };
+//
+// export type HomeDrawerScreenProps<Screen extends keyof HomeDrawerParamList> = DrawerScreenProps<
+//   HomeDrawerParamList,
+//   Screen
+//   >;
 
 // HOME TAB
 

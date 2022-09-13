@@ -4,6 +4,7 @@ import eventsReducer from './events';
 import itemsReducer from './items';
 import usersReducer from './users';
 import lendingsReducer from './lendings';
+import organizationsReducer from './organizations';
 import appWideReducer from './appWide';
 
 const rootReducer = combineReducers({
@@ -11,6 +12,7 @@ const rootReducer = combineReducers({
   items: itemsReducer,
   users: usersReducer,
   lendings: lendingsReducer,
+  organizations: organizationsReducer,
   appWide: appWideReducer,
 })
 

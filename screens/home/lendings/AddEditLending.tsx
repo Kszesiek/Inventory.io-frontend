@@ -2,7 +2,7 @@ import {Alert, FlatList, StyleSheet} from "react-native";
 import {Text, useThemeColor, View} from "../../../components/Themed";
 import {LendingStackScreenProps} from "../../../types";
 import {useLayoutEffect, useState} from "react";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {
   LendingForEvent,
   LendingPrivate,
@@ -15,6 +15,7 @@ import {OpacityButton} from "../../../components/Themed/OpacityButton";
 import HighlightChooser from "../../../components/HighlightChooser";
 import ExpandableItemList from "../../../components/ExpandableItemList";
 import {writeOutArray} from "../../../utilities/enlist";
+import {IRootState} from "../../../store/store";
 
 export type ValidValuePair = {
   value: string
@@ -37,6 +38,7 @@ const lendingTypes = [
 
 export default function AddEditLending({ navigation, route }: LendingStackScreenProps<'AddEditLending'>) {
   const dispatch = useDispatch();
+  const userId = useSelector((state: IRootState) => state.appWide.userId);
 
   const lending = route.params?.lending;
   const isEditing = !!lending;
@@ -47,11 +49,13 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
   const cancelColor = useThemeColor({}, "delete");
 
   const [inputs, setInputs]: [inputValuesType, Function] = useState(
-  {
-    itemNames: !!lending ?
-      lending.itemNames.map((item) => {return ({value: item, isInvalid: false} as ValidValuePair)})
-      :
-      [] as ValidValuePair[],
+    {
+      itemNames: !!lending ?
+        lending.items.map((item) => {
+          return ({value: item.name, isInvalid: false} as ValidValuePair)
+        })
+        :
+        [] as ValidValuePair[],
     eventName: {
       value: !!lending && isLendingForEvent(lending) ? lending.eventName : "",
       isInvalid: false,
@@ -69,7 +73,7 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
       isInvalid: false,
     },
     notes: {
-      value: !!lending ? lending.notes : "",
+      value: !!lending ? lending.notes || "" : "",
       isInvalid: false,
     },
   });
@@ -153,7 +157,8 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
     const lendingData: LendingPrivate | LendingForEvent = isLendingPrivate(lending) ?
       {
         lendingId: lending.lendingId,
-        itemNames: inputs.itemNames.map(item => item.value), // inputs.itemNames.map(item => {return item.value}),
+        items: inputs.itemNames.map(item => {return {itemId: Math.random().toString(), name: item.value}}),
+        userId: userId!,
         username: inputs.username.value,
         startDate: inputs.startDate.value,
         endDate: inputs.endDate.value,
@@ -162,16 +167,18 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
       : isLendingForEvent(lending) ?
         {
           lendingId: lending.lendingId,
-          itemNames: inputs.itemNames.map(item => item.value), // inputs.itemNames.map(item => {return item.value}),
+          items: inputs.itemNames.map(item => {return {itemId: Math.random().toString(), name: item.value}}),
           startDate: inputs.startDate.value,
           endDate: inputs.endDate.value,
+          eventId: Math.random().toString(), // trzeba będzie zmienić
           eventName: inputs.eventName.value,
           notes: inputs.notes.value,
         }
       :
         {
           lendingId: Math.random().toString(),
-          itemNames: inputs.itemNames.map(item => item.value),
+          items: inputs.itemNames.map(item => {return {itemId: Math.random().toString(), name: item.value}}),
+          userId: userId!,
           username: "GenericUsername",
           startDate: inputs.startDate.value,
           endDate: inputs.endDate.value,
@@ -195,10 +202,6 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
   function inputChangedHandler<InputParam extends keyof typeof inputs>(inputIdentifier: InputParam, enteredValue: string, index?: number) {
     console.log(`${inputIdentifier} value changed`);
     setInputs((currentInputValues: typeof inputs) => {
-      // return {
-      //   ...currentInputValues,
-      //   [inputIdentifier]: {value: enteredValue, isInvalid: false},
-      // }
 
       if (Array.isArray(inputs[inputIdentifier]) && index !== undefined) {
         const newValues = currentInputValues.itemNames
@@ -226,7 +229,7 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
         />
     </> : <></>
 
-  const usernameComponent = lendingType === 'private' ? <Input // isLendingPrivate(lending)
+  const usernameComponent = lendingType === 'private' ? <Input
       label="Nazwa użytkownika"
       isInvalid={inputs.username.isInvalid}
       textInputProps={{
@@ -237,7 +240,7 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
       }}
   /> : <></>
 
-  const eventNameComponent = lendingType === 'event' ? <Input // isLendingForEvent(lending)
+  const eventNameComponent = lendingType === 'event' ? <Input
       label="Nazwa wydarzenia"
       isInvalid={inputs.eventName.isInvalid}
       textInputProps={{

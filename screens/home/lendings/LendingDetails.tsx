@@ -52,8 +52,8 @@ export default function LendingDetails({ navigation, route }: LendingStackScreen
         <Text style={[styles.text, property]}>{displayDateTimePeriod(new Date(lending.startDate), new Date(lending.endDate))}</Text>
       </Detail>
       <Detail name="Przedmioty">
-        { Array.from(lending.itemNames).map((itemName: string, index) => (
-          <Text key={index} style={styles.text}><Text style={styles.ordinalNumber}>{index + 1}.</Text> {itemName}</Text>
+        { Array.from(lending.items).map((item: {itemId: string, name: string}, index) => (
+          <Text key={index} style={styles.text}><Text style={styles.ordinalNumber}>{index + 1}.</Text> {item.name}</Text>
         ))}
       </Detail>
       <Detail name="Notatki">

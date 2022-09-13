@@ -1,4 +1,4 @@
-import {ScrollView, StyleProp, StyleSheet, TextStyle} from "react-native";
+import {Alert, BackHandler, ScrollView, StyleProp, StyleSheet, TextStyle} from "react-native";
 import {Text, TextInput, useThemeColor, View} from "../../components/Themed";
 import Card from "../../components/Themed/Card";
 import {TouchableCard} from "../../components/Themed/TouchableCard";
@@ -11,10 +11,38 @@ import {displayDateTimePeriod} from "../../utilities/date";
 import {FontAwesome, MaterialCommunityIcons} from "@expo/vector-icons";
 import {enlistItems} from "../../utilities/enlist";
 import {HomeTabScreenProps} from "../../types";
+import {useCallback} from "react";
+import {useFocusEffect} from "@react-navigation/native";
 
 export default function Homescreen({ navigation, route }: HomeTabScreenProps<'Homescreen'>) {
   const events: Array<Event> = useSelector((state: IRootState) => state.events.events)
   const lendings: Array<LendingForEvent | LendingPrivate> = useSelector((state: IRootState) => state.lendings.lendings)
+
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        Alert.alert(
+          "Wyjście z aplikacji",
+          "Czy chcesz opuścić aplikację?",
+          [
+            {
+              text: "Nie",
+              style: "cancel",
+            },
+            {
+              text: "Tak",
+              onPress: BackHandler.exitApp,
+            }
+          ]
+        );
+        return true;
+      };
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () =>
+        BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [])
+  );
 
   const boldedText: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans Bold',
@@ -74,20 +102,21 @@ export default function Homescreen({ navigation, route }: HomeTabScreenProps<'Ho
       <Card key="events" style={styles.menuCard}>
         <Text style={{fontSize: 18, fontWeight: 'bold', marginTop: 10}}>Nadchodzące wydarzenia</Text>
         <View style={styles.list}>
-        { events.slice(0, 3).map((event: Event) => (
+        {events.length > 0 ? events.slice(0, 3).map((event: Event) => (
             <View key={event.eventId} style={{backgroundColor: 'transparent', marginTop: 8}}>
               <Text style={[boldedText, {textAlign: 'center'}]}>{event.name}</Text>
               <Text style={{textAlign: 'center'}}>{displayDateTimePeriod(new Date(event.startDate), new Date(event.endDate))}</Text>
             </View>
-          ))}
+          )) :
+          <Text style={styles.noContentText}>Brak wydarzeń do wyświetlenia</Text>}
         </View>
         {events.length > 3 && <OpacityButton onPress={showMoreEventsPressed} textProps={{style: {fontSize: 15}}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>}
       </Card>
       <Card key="lendings" style={styles.menuCard}>
         <Text style={{fontSize: 18, fontWeight: 'bold', marginTop: 10}}>Ostatnie wypożyczenia</Text>
         <View style={styles.list}>
-          {lendings.slice(0, 3).map((lending: LendingForEvent | LendingPrivate) => {
-            const itemsListed: string = enlistItems(lending.itemNames);
+          {lendings.length > 0 ? lendings.slice(0, 3).map((lending: LendingForEvent | LendingPrivate) => {
+            const itemsListed: string = enlistItems(lending.items.map(item => item.name));
 
             return (<View key={lending.lendingId} style={{backgroundColor: 'transparent', marginTop: 8}}>
               {isLendingForEvent(lending) ?
@@ -101,9 +130,11 @@ export default function Homescreen({ navigation, route }: HomeTabScreenProps<'Ho
               }
               <Text
                 style={{textAlign: 'center'}}>{displayDateTimePeriod(new Date(lending.startDate), new Date(lending.endDate))}</Text>
-            </View>
-            )
-          })}
+              </View>
+              )
+          }) :
+            <Text style={styles.noContentText}>Brak wypożyczeń do wyświetlenia</Text>
+          }
         </View>
         {lendings.length > 3 && <OpacityButton onPress={showMoreLendingsPressed} textProps={{style: {fontSize: 15}}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>}
       </Card>
@@ -165,4 +196,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  noContentText: {
+    padding: 10,
+    fontStyle: 'italic',
+  }
 })

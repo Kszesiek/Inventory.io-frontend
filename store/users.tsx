@@ -17,30 +17,7 @@ export class User {
 export const usersSlice = createSlice({
   name: 'users',
   initialState: {
-    users: new Array<User>(
-      {
-        userId: "eed0be02-f83e-46c8-a4aa-2dcae02dc12f",
-        username: "itsmejohndoe",
-        name: "John",
-        surname: "Doe",
-      },
-      {
-        userId: "b517ed77-5ce5-4457-ba1e-b8a1fba4d376",
-        username: "JustClarence",
-        name: "Clarence",
-        surname: "Walter",
-      },{
-        userId: "f141ec5f-3d2b-4e71-a4ba-1a72f872c4ab",
-        username: "YourGuyRoy",
-        name: "Roy",
-        surname: "Whitings",
-      },{
-        userId: "7f7feb57-d63d-4fc4-b60c-8281c5c8109c",
-        username: "TheRealGlobetrotterGrover",
-        name: "Grover",
-        surname: "Globetrotter",
-      },
-    )
+    users: new Array<User>(),
   },
   reducers: {
     addUser: (state, action) => {
@@ -60,6 +37,12 @@ export const usersSlice = createSlice({
         state.users[index] = action.payload.user;
       }
     },
+    loadUsers: (state, action) => {
+      state.users = action.payload;
+    },
+    wipeUsers: (state) => {
+      state.users = [];
+    }
   },
 });
 

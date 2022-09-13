@@ -21,7 +21,7 @@ export default function Lendings({ navigation, route }: LendingStackScreenProps<
       style={{...styles.flatList, backgroundColor: useThemeColor({}, 'background')}}
       data={lendings.slice(0, 20)}
       renderItem={(lending: ListRenderItemInfo<LendingForEvent | LendingPrivate>) => {
-        const itemsListed: string = enlistItems(lending.item.itemNames);
+        const itemsListed: string = enlistItems(lending.item.items.map(item => item.name));
 
         return (
           <TouchableCard style={styles.card} onPress={() => navigation.navigate("LendingDetails", { lendingId: lending.item.lendingId })}>

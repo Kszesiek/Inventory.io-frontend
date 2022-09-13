@@ -18,7 +18,7 @@ export default function ExpandableItemList ({data, onChangeText, onAddItem, onDe
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.label, data?.some(item => item.isInvalid) && {color: errorColor}]}>Przedmioty</Text>
+      <Text style={[styles.label, data.some(item => item.isInvalid) && {color: errorColor}]}>Przedmioty</Text>
       {data?.length > 0 ? <FlatList
         style={styles.innerContainer}
         data={data}
@@ -39,18 +39,6 @@ export default function ExpandableItemList ({data, onChangeText, onAddItem, onDe
             </TouchableOpacity>
 
           </View>
-          //   <Input
-          //   label={undefined}
-          //   isInvalid={inputs.startDate.isInvalid}
-          //   style={styles.input}
-          //   // onErrorText="Please enter a date between 2000-01-01 and 2029-12-31 following template YYYY-MM-DD"
-          //   textInputProps={{
-          //   placeholder: "YYYY-MM-DD",
-          //   maxLength: 10,
-          //   onChangeText: inputChangedHandler.bind(null, "startDate"),
-          //   value: inputs.startDate.value,
-          // }}
-          //   />
         }
       /> : <Text style={{fontStyle: 'italic', textAlign: 'center', marginVertical: 6}}>
         {'Żaden przedmiot nie został dodany do wypożyczenia.\nDodaj przedmioty, aby móc utworzyć wypożyczenie.'}

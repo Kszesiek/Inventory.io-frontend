@@ -13,28 +13,7 @@ export class Item{
 export const itemsSlice = createSlice({
   name: 'items',
   initialState: {
-    items: new Array<Item>(
-      {
-        itemId: "90f9f31a-ae21-49be-9ea9-74366f722c1f",
-        name: "shelf",
-      },
-      {
-        itemId: "b60f7689-8251-4a06-aae9-984c1cf78e01",
-        name: "subwoofer",
-      },
-      {
-        itemId: "6158bfc4-a8b2-4eae-9320-c2a77474fb2c",
-        name: "metal box",
-      },
-      {
-        itemId: "c1544eea-b3a0-4680-ad62-4778fc3c1893",
-        name: "mic stand",
-      },
-      {
-        itemId: "1b6746ea-adf6-4cd4-9247-f60cd6de2223",
-        name: "bluetooth speaker",
-      },
-    )
+    items: new Array<Item>(),
   },
   reducers: {
     addItem: (state, action) => {
@@ -52,6 +31,12 @@ export const itemsSlice = createSlice({
       if (index >= 0) {
         state.items[index] = action.payload.item;
       }
+    },
+    loadItems: (state, action) => {
+      state.items = action.payload;
+    },
+    wipeItems: (state) => {
+      state.items = [];
     },
   },
 });

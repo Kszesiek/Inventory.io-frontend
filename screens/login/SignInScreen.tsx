@@ -3,19 +3,38 @@ import {StyleSheet, Image, Platform, KeyboardAvoidingView} from 'react-native';
 import {Text, View} from '../../components/Themed';
 import {LoginStackScreenProps} from '../../types';
 import Card from "../../components/Themed/Card";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 import Logo from '../../assets/images/inventory.png';
 import {OpacityButton} from "../../components/Themed/OpacityButton";
 import {TouchableText} from "../../components/Themed/TouchableText";
 import {InputCard} from "../../components/Themed/InputCard";
+import {useDispatch} from "react-redux";
+import {appWideActions} from "../../store/appWide";
+import {organizationsActions} from "../../store/organizations";
+import {demoOrganizations} from "../../constants/demoData";
+import {lendingActions} from "../../store/lendings";
+import {itemActions} from "../../store/items";
+import {eventActions} from "../../store/events";
+import {userActions} from "../../store/users";
 
 export default function SignInScreen({ navigation, route }: LoginStackScreenProps<'SignIn'>) {
+  const dispatch = useDispatch();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const onSignInPressed = () => {
+  useEffect(() => {
+    dispatch(lendingActions.wipeLendings());
+    dispatch(itemActions.wipeItems());
+    dispatch(eventActions.wipeEvents());
+    dispatch(organizationsActions.wipeOrganizations());
+    dispatch(userActions.wipeUsers());
+  }, [])
+
+  const onSignInPressed = async () => {
     console.log("Sign in pressed");
+    await dispatch(appWideActions.signIn({username: username, userId: Math.random().toString()}));
+    await dispatch(organizationsActions.setOrganizations(demoOrganizations));
     navigation.getParent()!.navigate("Home");
   }
 
