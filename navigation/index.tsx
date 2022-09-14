@@ -3,7 +3,13 @@
  * https://reactnavigation.org/docs/getting-started
  */
 import {Feather, FontAwesome, Ionicons} from '@expo/vector-icons';
-import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  DefaultTheme,
+  DarkTheme,
+  useNavigation,
+  CommonActions,
+} from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
@@ -189,6 +195,7 @@ type OrganizationDetails = {
 function HomeDrawerNavigator(props: OrganizationDetails[]) {
   const headerColor = useThemeColor({}, 'header');
   const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   useEffect(() => {
     async function loadData () {
@@ -221,11 +228,30 @@ function HomeDrawerNavigator(props: OrganizationDetails[]) {
           name={organization.name}
           component={HomeTabNavigator}
           listeners={{
-            drawerItemPress: () => {
-                dispatch(eventActions.loadEvents(demoData[organization.organizationId].events))
-                dispatch(itemActions.loadItems(demoData[organization.organizationId].items))
-                dispatch(lendingActions.loadLendings(demoData[organization.organizationId].lendings))
-                dispatch(userActions.loadUsers(demoData[organization.organizationId].users))
+            drawerItemPress: (e) => {
+              e.preventDefault()
+
+              navigation.dispatch({
+                ...CommonActions.reset({
+                  index: 0,
+                  routes: [{
+                    name: "Home",
+                  }]
+                })
+              });
+
+              navigation.dispatch({
+                ...CommonActions.reset({
+                  index: 0,
+                  routes: [{
+                    name: organization.name,
+                  }]
+                })
+              })
+              dispatch(eventActions.loadEvents(demoData[organization.organizationId].events))
+              dispatch(itemActions.loadItems(demoData[organization.organizationId].items))
+              dispatch(lendingActions.loadLendings(demoData[organization.organizationId].lendings))
+              dispatch(userActions.loadUsers(demoData[organization.organizationId].users))
             }
           }}
         />
