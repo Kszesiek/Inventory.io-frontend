@@ -1,5 +1,5 @@
 import {FlatList, ListRenderItemInfo, StyleProp, StyleSheet, TextStyle} from "react-native";
-import {Text, useThemeColor} from "../../../components/Themed";
+import {Text, useThemeColor, View} from "../../../components/Themed";
 import {isLendingForEvent, isLendingPrivate, LendingForEvent, LendingPrivate} from "../../../store/lendings";
 import {displayDateTimePeriod} from "../../../utilities/date";
 import {useSelector} from "react-redux";
@@ -17,9 +17,15 @@ export default function Lendings({ navigation, route }: LendingStackScreenProps<
   }
 
   return (
-    <FlatList
+   <FlatList
       style={{...styles.flatList, backgroundColor: useThemeColor({}, 'background')}}
+      contentContainerStyle={{flexGrow: 1}}
       data={lendings.slice(0, 20)}
+      ListEmptyComponent={
+        <View style={styles.noContentContainer}>
+          <Text style={[styles.noContentText, {fontSize: 16}]}>Brak wypożyczeń do wyświetlenia.</Text>
+          <Text style={styles.noContentText}>Aby dodać wypożyczenie, użyj przycisku u góry ekranu.</Text>
+        </View>}
       renderItem={(lending: ListRenderItemInfo<LendingForEvent | LendingPrivate>) => {
         const itemsListed: string = enlistItems(lending.item.items.map(item => item.name));
 
@@ -35,11 +41,21 @@ export default function Lendings({ navigation, route }: LendingStackScreenProps<
           </TouchableCard>
         )
       }}
-    />
-  )
+    />)
 }
 
 const styles = StyleSheet.create({
+  noContentContainer: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noContentText: {
+    textAlign: 'center',
+    fontStyle: 'italic',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
   menuCard: {
     alignItems: 'center',
     paddingVertical: 5,
@@ -48,7 +64,7 @@ const styles = StyleSheet.create({
   },
   flatList: {
     width: '100%',
-    padding: 5
+    padding: 5,
   },
   card: {
     padding: 10,

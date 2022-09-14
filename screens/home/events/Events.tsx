@@ -1,5 +1,5 @@
 import {FlatList, ListRenderItemInfo, StyleProp, StyleSheet, TextStyle} from "react-native";
-import {Text, useThemeColor} from "../../../components/Themed";
+import {Text, useThemeColor, View} from "../../../components/Themed";
 import {useSelector} from "react-redux";
 import {IRootState} from "../../../store/store";
 import {Event} from "../../../store/events";
@@ -19,7 +19,13 @@ export default function Events({ navigation, route }: EventStackScreenProps<'Eve
   return (
     <FlatList
       style={{...styles.flatList, backgroundColor: useThemeColor({}, 'background')}}
+      contentContainerStyle={{flexGrow: 1}}
       data={events.slice(0, 20)}
+      ListEmptyComponent={
+        <View style={styles.noContentContainer}>
+          <Text style={[styles.noContentText, {fontSize: 16}]}>Brak wydarzeń do wyświetlenia.</Text>
+          <Text style={styles.noContentText}>Aby dodać wydarzenie, użyj przycisku u góry ekranu.</Text>
+        </View>}
       renderItem={(event: ListRenderItemInfo<Event>) => {
         return (
           <TouchableCard style={styles.card} onPress={() => navigation.navigate("EventDetails", { eventId: event.item.eventId })}>
@@ -33,6 +39,17 @@ export default function Events({ navigation, route }: EventStackScreenProps<'Eve
 }
 
 const styles = StyleSheet.create({
+  noContentContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noContentText: {
+    textAlign: 'center',
+    fontStyle: 'italic',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
   menuCard: {
     alignItems: 'center',
     paddingVertical: 5,
