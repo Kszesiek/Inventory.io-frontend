@@ -110,7 +110,7 @@ export default function Homescreen({ navigation, route }: HomeTabScreenProps<'Ho
           )) :
           <Text style={styles.noContentText}>Brak wydarzeń do wyświetlenia</Text>}
         </View>
-        {events.length > 3 && <OpacityButton onPress={showMoreEventsPressed} textProps={{style: {fontSize: 15}}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>}
+        {events.length > 3 && <OpacityButton onPress={showMoreEventsPressed} textStyle={{fontSize: 15}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>}
       </Card>
       <Card key="lendings" style={styles.menuCard}>
         <Text style={{fontSize: 18, fontWeight: 'bold', marginTop: 10}}>Ostatnie wypożyczenia</Text>
@@ -136,7 +136,7 @@ export default function Homescreen({ navigation, route }: HomeTabScreenProps<'Ho
             <Text style={styles.noContentText}>Brak wypożyczeń do wyświetlenia</Text>
           }
         </View>
-        {lendings.length > 3 && <OpacityButton onPress={showMoreLendingsPressed} textProps={{style: {fontSize: 15}}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>}
+        {lendings.length > 3 && <OpacityButton onPress={showMoreLendingsPressed} textStyle={{fontSize: 15}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>}
       </Card>
     </ScrollView>
   )

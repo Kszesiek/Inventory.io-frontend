@@ -20,7 +20,9 @@ declare global {
 
 export type RootStackParamList = {
   Login: NavigatorScreenParams<LoginStackParamList>;
-  Home: NavigatorScreenParams<any>; // <HomeDrawerParamList>;
+  Home: undefined; // NavigatorScreenParams<any>; // <HomeDrawerParamList>;
+  Welcome: undefined;
+  CreateOrganization: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<

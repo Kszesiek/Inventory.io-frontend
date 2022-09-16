@@ -2,7 +2,7 @@
  * If you are not familiar with React Navigation, refer to the "Fundamentals" guide:
  * https://reactnavigation.org/docs/getting-started
  */
-import {Feather, FontAwesome, Ionicons} from '@expo/vector-icons';
+import {FontAwesome, Ionicons} from '@expo/vector-icons';
 import {
   NavigationContainer,
   DefaultTheme,
@@ -20,7 +20,7 @@ import {
   useDrawerProgress
 } from '@react-navigation/drawer';
 import * as React from 'react';
-import {ColorSchemeName, Pressable, StyleSheet, TouchableOpacity, BackHandler} from 'react-native';
+import {ColorSchemeName, Pressable, StyleSheet, TouchableOpacity} from 'react-native';
 
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
@@ -30,31 +30,13 @@ import TabOneScreen from '../screens/old screens/TabOneScreen';
 import TabTwoScreen from '../screens/old screens/TabTwoScreen';
 import {
   RootStackParamList,
-  LoginStackParamList,
   OldRootStackParamList,
   OldRootTabParamList,
   RootTabScreenProps,
-  // HomeDrawerParamList,
-  HomeTabParamList,
-  LendingStackParamList, EventStackParamList,
 } from '../types';
-import SignInScreen from "../screens/login/SignInScreen";
-import RegisterScreen from "../screens/login/RegisterScreen";
-import ForgotPasswordScreen from "../screens/login/ForgotPassword";
-import ResetPasswordScreen from "../screens/login/ResetPassword";
-import AppSettings from "../screens/AppSettings";
-import Homescreen from "../screens/home/Homescreen";
-import Inventory from "../screens/home/Inventory";
-import Events from "../screens/home/events/Events";
-import Lendings from "../screens/home/lendings/Lendings";
-import More from "../screens/home/More";
 import {Text, useThemeColor, View} from "../components/Themed";
 import Animated, {Adaptable} from "react-native-reanimated";
 import {OpacityButton} from "../components/Themed/OpacityButton";
-import LendingDetails from "../screens/home/lendings/LendingDetails";
-import AddEditLending from "../screens/home/lendings/AddEditLending";
-import EventDetails from "../screens/home/events/EventDetails";
-import AddEditEvent from "../screens/home/events/AddEditEvent";
 // import LinkingConfiguration from './LinkingConfiguration';
 
 import {useDispatch, useSelector} from "react-redux";
@@ -65,6 +47,10 @@ import {demoData} from "../constants/demoData";
 import {itemActions} from "../store/items";
 import {lendingActions} from "../store/lendings";
 import {userActions} from "../store/users";
+import LoginNavigator from "./LoginStackNavigator";
+import HomeTabNavigator from "./HomeTabNavigator";
+import Welcome from "../screens/firstLogIn/welcome";
+import CreateOrganization from "../screens/home/CreateOrganization";
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   const chosenTheme: "light" | "dark" | null | undefined = useSelector((state: IRootState) => state.appWide.theme === 'auto' ? colorScheme : state.appWide.theme);
@@ -84,64 +70,31 @@ const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
   const organizations = useSelector((state: IRootState) => state.organizations.organizations)
+  const headerColor = useThemeColor({}, 'header');
+  const textColor = useThemeColor({}, 'text');
+  const navigation = useNavigation();
 
   return (
     <RootStack.Navigator
       screenOptions={{
         headerShown: false,
+        headerLeft: () => (
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="chevron-back" color={textColor} size={30} style={{padding: 10}} />
+          </TouchableOpacity>
+        ),
       }}
     >
       <RootStack.Screen name="Login" component={LoginNavigator} />
-      <RootStack.Screen name="Home" options={{ headerShown: false, }}>{() => HomeDrawerNavigator(organizations)}</RootStack.Screen>
-    </RootStack.Navigator>
-  );
-}
-
-// LOGIN
-
-const LoginStack = createNativeStackNavigator<LoginStackParamList>();
-
-function LoginNavigator() {
-  const textColor = useThemeColor({}, 'text');
-  const headerColor = useThemeColor({}, "header");
-
-  return (
-    <LoginStack.Navigator
-      screenOptions={({ navigation }) => ({
+      <RootStack.Screen name="Home">{() => HomeDrawerNavigator(organizations)}</RootStack.Screen>
+      <RootStack.Screen name="Welcome" component={Welcome} />
+      <RootStack.Screen name="CreateOrganization" component={CreateOrganization} options={{
         headerShown: true,
-        headerTransparent: true,
-        title: "",
-        headerLeft: () => (
-          <TouchableOpacity onPress={navigation.goBack}>
-            <Ionicons name='chevron-back' size={30} style={{ color: textColor}} />
-          </TouchableOpacity>
-        ),
-      })}
-    >
-      <LoginStack.Screen name="SignIn" component={SignInScreen} options={({ navigation }) => ({
-        headerRight: () => (
-          <TouchableOpacity onPress={() => navigation.navigate("AppSettings")}>
-            <Ionicons name='construct' size={32} style={{ color: textColor}}  />
-          </TouchableOpacity>
-        ),
-        headerLeft: () => (
-          <TouchableOpacity onPress={BackHandler.exitApp}>
-            <Ionicons name='close' size={36} style={{ color: textColor}} />
-          </TouchableOpacity>
-        )
-      })} />
-      <LoginStack.Screen name="Register" component={RegisterScreen} />
-      <LoginStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-      <LoginStack.Screen name="ResetPassword" component={ResetPasswordScreen} />
-      <LoginStack.Screen name="AppSettings" component={AppSettings} options={{
-        title: 'Ustawienia',
         headerTitleAlign: 'center',
-        headerTransparent: false,
+        headerTitle: 'Załóż organizację',
         headerStyle: {backgroundColor: headerColor},
-        headerTitleStyle: {color: textColor},
       }} />
-
-    </LoginStack.Navigator>
+    </RootStack.Navigator>
   );
 }
 
@@ -158,7 +111,8 @@ function CustomHomeDrawerContent(props: DrawerContentComponentProps) {
   });
 
   function createOrganizationPressed() {
-    console.log("create organization pressed")
+    console.log("create organization pressed");
+    props.navigation.navigate("CreateOrganization");
   }
 
   return (
@@ -175,7 +129,7 @@ function CustomHomeDrawerContent(props: DrawerContentComponentProps) {
         <View style={drawerStyles.bottomView}>
           <OpacityButton
             style={drawerStyles.bottomButton}
-            textProps={{style: {fontSize: 16}}}
+            textStyle={{fontSize: 16}}
             onPress={createOrganizationPressed}
           >
             Utwórz organizację
@@ -207,22 +161,20 @@ function HomeDrawerNavigator(props: OrganizationDetails[]) {
       ])
     }
     loadData()
-    console.log('HomeDrawer useEffect')
   }, [])
 
   return (
-    // <Provider store={store}>
     <HomeDrawer.Navigator
       useLegacyImplementation
       screenOptions={{
         headerShown: false,
         drawerStyle: {backgroundColor: headerColor},
-        drawerActiveBackgroundColor: useThemeColor({}, "tintBackground"),  // Czy potrzebujemy tego? Może lepiej zostawić złotą poświatę?
+        drawerActiveBackgroundColor: useThemeColor({}, "tintBackground"),
         drawerActiveTintColor: useThemeColor({}, "tint"),
       }}
       drawerContent={(props) => <CustomHomeDrawerContent {...props} />}
     >
-      {props.map((organization: OrganizationDetails) => (
+      {props.map((organization: OrganizationDetails) => ( // props.length > 0 ?
         <HomeDrawer.Screen
           key={organization.organizationId}
           name={organization.name}
@@ -256,9 +208,39 @@ function HomeDrawerNavigator(props: OrganizationDetails[]) {
           }}
         />
         )
-      )}
+      )
+        // :
+        // <HomeDrawer.Screen
+        //   key={"\n"}
+        //   name={"Brak organizacji do wyświetlenia"}
+        //   component={Welcome} // {CreateOrganizationScreen}
+        //   options={{
+        //     // headerRight: ({tintColor}) => (
+        //     //   <TouchableOpacity onPress={() => navigation.goBack()}>
+        //     //     <Ionicons name="log-out" color={tintColor} size={30} style={{padding: 10}} />
+        //     //   </TouchableOpacity>
+        //     // ),
+        //     drawerStyle: {
+        //       flexGrow: 1,
+        //       // backgroundColor: 'red',
+        //       // justifyContent: 'center',
+        //     },
+        //     drawerItemStyle: {
+        //       // display: 'none'
+        //       marginTop: 50,
+        //       backgroundColor: 'transparent', // 'yellow',
+        //       flex: 1,
+        //     },
+        //     drawerLabelStyle: {
+        //       fontStyle: 'italic',
+        //       color: textColor,
+        //       opacity: 0.6,
+        //       flexGrow: 1,
+        //     },
+        //   }}
+        // />
+        }
     </HomeDrawer.Navigator>
-    // </Provider>
   );
 }
 
@@ -283,207 +265,6 @@ const drawerStyles = StyleSheet.create({
   },
 })
 
-// HOME TAB
-
-const HomeTab = createBottomTabNavigator<HomeTabParamList>();
-
-function HomeTabNavigator(props: {navigation: any, route: any}) {
-  const textColor = useThemeColor({}, 'text');
-  const headerColor = useThemeColor({}, 'header');
-
-  return (
-    <HomeTab.Navigator
-      initialRouteName="Homescreen"
-      screenOptions={{
-        headerTitleAlign: "center",
-        headerLeft: () => (
-        <TouchableOpacity onPress={() => props.navigation.navigate("Homescreen")}>
-          <Ionicons name="chevron-back" color={textColor} size={30} style={{padding: 10}} />
-        </TouchableOpacity>
-        ),
-        headerTintColor: textColor,
-        headerStyle: {backgroundColor: headerColor},
-        tabBarActiveBackgroundColor: useThemeColor({}, "tintBackground"),
-        tabBarActiveTintColor: useThemeColor({}, "tint"),
-        tabBarInactiveBackgroundColor: headerColor,
-        tabBarStyle: {
-          height: 55,
-        },
-        tabBarIconStyle: {
-          scaleX: 1.2,
-          scaleY: 1.2,
-          marginTop: 2,
-        },
-        tabBarLabelStyle: {
-          fontFamily: "Source Sans",
-          fontSize: 12,
-          marginBottom: 4,
-        }
-      }}
-      >
-      <HomeTab.Screen
-        name="Homescreen"
-        component={Homescreen}
-        options={{
-          title: "Strona główna",
-          tabBarLabel: "Strona główna",
-          tabBarIcon: ({color, size}) => (
-            <Ionicons name="home" size={size} color={color} />
-          ),
-          headerLeft: ({tintColor}) => (
-            <TouchableOpacity onPress={props.navigation.openDrawer}>
-              <Ionicons name="menu" color={tintColor} size={30} style={{padding: 10}} />
-            </TouchableOpacity>
-          ),
-          headerRight: ({tintColor}) => (
-            <TouchableOpacity onPress={() => props.navigation.replace("Login")}>
-              <Ionicons name="log-out" color={tintColor} size={30} style={{padding: 10}} />
-            </TouchableOpacity>
-          ),
-      }} />
-      <HomeTab.Screen
-        name="Inventory"
-        component={Inventory}
-        options={{
-          title: "Inwentarz",
-          tabBarLabel: "Inwentarz",
-          tabBarIcon: ({color, size}) => (
-            <Ionicons name="library" size={size} color={color} />
-          ),
-        }} />
-      <HomeTab.Screen
-        name="LendingNavigator"
-        component={LendingNavigator}
-        options={{
-          headerShown: false,
-          tabBarLabel: "Wypożyczenia",
-          tabBarIcon: ({color, size}) => (
-            <Ionicons name="push" size={size} color={color} />
-          ),
-        }} />
-      <HomeTab.Screen
-        name="EventNavigator"
-        component={EventNavigator}
-        options={{
-          headerShown: false,
-          tabBarLabel: "Wydarzenia",
-          tabBarIcon: ({color, size}) => (
-            <Ionicons name="calendar" size={size} color={color} />
-          ),
-        }} />
-      <HomeTab.Screen
-        name="More"
-        component={More}
-        options={{
-          title: "Więcej",
-          tabBarLabel: "Więcej",
-          tabBarIcon: ({color, size}) => (
-            <Feather name="more-horizontal" size={size} color={color} />
-          ),
-        }} />
-    </HomeTab.Navigator>
-  )
-}
-
-// LENDING STACK
-
-const LendingStack = createNativeStackNavigator<LendingStackParamList>();
-
-function LendingNavigator() {
-  const textColor = useThemeColor({}, 'text');
-  const headerColor = useThemeColor({}, 'header');
-
-  return (
-    <LendingStack.Navigator
-      screenOptions={({ navigation }) => ({
-        headerTitleAlign: "center",
-        headerTintColor: textColor,
-        headerStyle: {backgroundColor: headerColor},
-        headerLeft: () => (
-          <TouchableOpacity onPress={navigation.goBack}>
-            <Ionicons name='chevron-back' size={30} style={{ color: textColor}} />
-          </TouchableOpacity>
-        ),
-      })}
-    >
-      <LendingStack.Screen name="Lendings" component={Lendings} options={({ navigation }) => ({
-        title: "Wypożyczenia",
-        headerRight: () => (
-          <TouchableOpacity onPress={() => navigation.navigate("AddEditLending")}>
-            <Ionicons name='add' size={32} style={{ color: textColor}}  />
-          </TouchableOpacity>
-        ),
-        headerLeft: () => (
-          <TouchableOpacity onPress={navigation.goBack}>
-            <Ionicons name='chevron-back' size={36} style={{ color: textColor}} />
-          </TouchableOpacity>
-        )
-      })} />
-      <LendingStack.Screen name="LendingDetails" component={LendingDetails} options={({ navigation, route }) => ({
-        title: "Szczegóły wypożyczenia",
-        headerRight: () => (
-          <TouchableOpacity onPress={() => navigation.navigate("AddEditLending", {lendingId: route.params.lendingId})}>
-            <Feather name='edit' size={24} style={{ color: textColor,}} />
-          </TouchableOpacity>
-        ),
-      })} />
-      <LendingStack.Screen name="AddEditLending" component={AddEditLending} options={({ navigation, route }) => ({
-        title: route.params && route.params.lending ? "Edytuj wydarzenie" : "Nowe wydarzenie",
-      })} />
-
-    </LendingStack.Navigator>
-  );
-}
-
-// EVENT STACK
-
-const EventStack = createNativeStackNavigator<EventStackParamList>();
-
-function EventNavigator() {
-  const textColor = useThemeColor({}, 'text');
-  const headerColor = useThemeColor({}, 'header');
-
-  return (
-    <EventStack.Navigator
-      screenOptions={({ navigation }) => ({
-        headerTitleAlign: "center",
-        headerTintColor: textColor,
-        headerStyle: {backgroundColor: headerColor},
-        headerLeft: () => (
-          <TouchableOpacity onPress={navigation.goBack}>
-            <Ionicons name='chevron-back' size={30} style={{ color: textColor}} />
-          </TouchableOpacity>
-        ),
-      })}
-    >
-      <EventStack.Screen name="Events" component={Events} options={({ navigation }) => ({
-        title: "Wydarzenia",
-        headerRight: () => (
-          <TouchableOpacity onPress={() => navigation.navigate("AddEditEvent")}>
-            <Ionicons name='add' size={32} style={{ color: textColor}}  />
-          </TouchableOpacity>
-        ),
-        headerLeft: () => (
-          <TouchableOpacity onPress={navigation.goBack}>
-            <Ionicons name='chevron-back' size={36} style={{ color: textColor}} />
-          </TouchableOpacity>
-        )
-      })} />
-      <EventStack.Screen name="EventDetails" component={EventDetails} options={({ navigation, route }) => ({
-        title: "Szczegóły wydarzenia",
-        headerRight: () => (
-          <TouchableOpacity onPress={() => navigation.navigate("AddEditEvent", {eventId: route.params.eventId})}>
-            <Feather name='edit' size={24} style={{ color: textColor,}} />
-          </TouchableOpacity>
-        ),
-      })} />
-      <EventStack.Screen name="AddEditEvent" component={AddEditEvent} options={({ navigation, route }) => ({
-        title: route.params && route.params.event ? "Edytuj wydarzenie" : "Nowe wydarzenie",
-      })} />
-
-    </EventStack.Navigator>
-  );
-}
 
 
 

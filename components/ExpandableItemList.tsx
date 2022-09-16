@@ -44,7 +44,7 @@ export default function ExpandableItemList ({data, onChangeText, onAddItem, onDe
         {'Żaden przedmiot nie został dodany do wypożyczenia.\nDodaj przedmioty, aby móc utworzyć wypożyczenie.'}
       </Text>}
       <OpacityButton
-        textProps={{style: {fontSize: 15}}}
+        textStyle={{fontSize: 15}}
         style={styles.addItem}
         onPress={onAddItem}
       >Dodaj przedmiot</OpacityButton>

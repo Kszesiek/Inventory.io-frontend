@@ -31,11 +31,14 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
     dispatch(userActions.wipeUsers());
   }, [])
 
-  const onSignInPressed = async () => {
+  const onSignInPressed = () => { // async
     console.log("Sign in pressed");
-    await dispatch(appWideActions.signIn({username: username, userId: Math.random().toString()}));
-    await dispatch(organizationsActions.setOrganizations(demoOrganizations));
-    navigation.getParent()!.navigate("Home");
+    dispatch(appWideActions.signIn({username: username, userId: Math.random().toString()})); // await
+    dispatch(organizationsActions.setOrganizations(demoOrganizations)); // await
+    if (demoOrganizations.length > 3) //   // TO TRZEBA ZMIENIĆ PÓŹNIEJ
+      navigation.getParent()!.navigate("Home");
+    else
+      navigation.getParent()!.navigate("Welcome");
   }
 
   const onRegisterPressed = () => {
@@ -66,9 +69,6 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
                 value: username,
                 onChangeText: setUsername,
                 placeholder: 'Wprowadź nazwę użytkownika...',
-                style: {
-                  fontFamily: 'Source Sans',
-                },
             }} />
           </View>
           <View style={styles.formRow}>
