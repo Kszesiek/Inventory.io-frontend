@@ -1,13 +1,13 @@
-import {useThemeColor, View} from "../../components/Themed";
+import {useThemeColor, View} from "../components/Themed";
 import * as React from "react";
 import {Alert, FlatList, StyleSheet} from "react-native";
-import Input from "../../components/Input";
+import Input from "../components/Input";
 import {useDispatch} from "react-redux";
 import {useState} from "react";
-import {RootStackScreenProps} from "../../types";
-import {writeOutArray} from "../../utilities/enlist";
-import {Organization, organizationsActions} from "../../store/organizations";
-import {OpacityButton} from "../../components/Themed/OpacityButton";
+import {RootStackScreenProps} from "../types";
+import {writeOutArray} from "../utilities/enlist";
+import {Organization, organizationsActions} from "../store/organizations";
+import {OpacityButton} from "../components/Themed/OpacityButton";
 
 export type ValidValuePair = {
   value: string
@@ -64,7 +64,7 @@ export default function CreateOrganization({ navigation, route }: RootStackScree
       name: inputs.name.value,
     }
 
-    await dispatch(organizationsActions.addOrganization({organization: organizationData}));
+    await dispatch(organizationsActions.addOrganization(organizationData));
 
     navigation.navigate("Home");
   }

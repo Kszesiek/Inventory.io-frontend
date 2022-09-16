@@ -50,7 +50,7 @@ import {userActions} from "../store/users";
 import LoginNavigator from "./LoginStackNavigator";
 import HomeTabNavigator from "./HomeTabNavigator";
 import Welcome from "../screens/firstLogIn/welcome";
-import CreateOrganization from "../screens/home/CreateOrganization";
+import CreateOrganization from "../screens/CreateOrganization";
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   const chosenTheme: "light" | "dark" | null | undefined = useSelector((state: IRootState) => state.appWide.theme === 'auto' ? colorScheme : state.appWide.theme);
@@ -200,10 +200,12 @@ function HomeDrawerNavigator(props: OrganizationDetails[]) {
                   }]
                 })
               })
-              dispatch(eventActions.loadEvents(demoData[organization.organizationId].events))
-              dispatch(itemActions.loadItems(demoData[organization.organizationId].items))
-              dispatch(lendingActions.loadLendings(demoData[organization.organizationId].lendings))
-              dispatch(userActions.loadUsers(demoData[organization.organizationId].users))
+
+              const isDemo: boolean = demoData.hasOwnProperty(organization.organizationId)
+                dispatch(eventActions.loadEvents(isDemo ? demoData[organization.organizationId].events : []))
+                dispatch(itemActions.loadItems(isDemo ? demoData[organization.organizationId].items : []))
+                dispatch(lendingActions.loadLendings(isDemo ? demoData[organization.organizationId].lendings : []))
+                dispatch(userActions.loadUsers(isDemo ? demoData[organization.organizationId].users : []))
             }
           }}
         />
