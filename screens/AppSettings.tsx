@@ -1,21 +1,24 @@
 import {ScrollView, StyleSheet, TouchableOpacity} from "react-native";
 import {Text, useThemeColor, View} from "../components/Themed";
-import Card from "../components/Themed/Card";
-import {useState} from "react";
 import HighlightChooser from "../components/HighlightChooser";
 import Switch from "../components/Themed/Switch";
 import {appWideActions} from "../store/appWide";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
+import {IRootState} from "../store/store";
 
 export default function AppSettings() {
   const dispatch = useDispatch();
-  const [demoModeEnabled, setDemoModeEnabled] = useState(false);
   const backgroundColor = useThemeColor({}, 'background');
 
+  const demoModeEnabled = useSelector((state: IRootState) => state.appWide.demoMode);
+  const theme = useSelector((state: IRootState) => state.appWide.theme);
+
   function themeChanged(chosenKey: 'auto' | 'light' | 'dark') {
-    if (chosenKey === 'auto' || chosenKey === 'light' || chosenKey === 'dark') {
-      dispatch(appWideActions.setTheme(chosenKey));
-    }
+    dispatch(appWideActions.setTheme(chosenKey));
+  }
+
+  function setDemoModeEnabled(isEnabled: boolean) {
+    dispatch(appWideActions.setDemoMode(isEnabled))
   }
 
   return (
@@ -24,7 +27,7 @@ export default function AppSettings() {
         <Text style={[textStyles.optionName, styles.label]}>Motyw</Text>
         <HighlightChooser
           data={[{key: 'light', label: 'jasny'}, {key: 'dark', label: 'ciemny'}, {key: 'auto', label: 'auto'}]}
-          defaultOption='auto'
+          defaultOption={theme}
           onPress={themeChanged}
           style={{flex: 1}}
         />
@@ -35,7 +38,7 @@ export default function AppSettings() {
       </TouchableOpacity>
       <View style={styles.cardView}>
         <Text style={textStyles.optionName}>Demo mode</Text>
-        <Switch enabled={demoModeEnabled} setEnabled={setDemoModeEnabled} />
+        <Switch isEnabled={demoModeEnabled} setIsEnabled={setDemoModeEnabled} />
       </View>
     </ScrollView>
   )

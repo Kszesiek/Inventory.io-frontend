@@ -4,7 +4,7 @@ export const appWideSlice = createSlice({
   name: 'appWide',
   initialState: {
     theme: 'auto' as 'auto' | 'light' | 'dark',
-    demoMode: false,
+    demoMode: true,
     username: undefined as string | undefined,
     userId: undefined as string | undefined,
   },
@@ -12,11 +12,8 @@ export const appWideSlice = createSlice({
     setTheme: (state, action: {payload: 'auto' | 'light' | 'dark'}) => {
       state.theme = action.payload;
     },
-    enableDemoMode: (state) => {
-      state.demoMode = true;
-    },
-    disableDemoMode: (state) => {
-      state.demoMode = false;
+    setDemoMode: (state, action: {payload: boolean}) => {
+      state.demoMode = action.payload;
     },
     signOut: (state) => {
       state.username = undefined;

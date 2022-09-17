@@ -3,12 +3,12 @@ import React from "react";
 import {useThemeColor} from "./index";
 
 type propsType = {
-  enabled: boolean,
-  setEnabled: React.Dispatch<React.SetStateAction<boolean>>
+  isEnabled: boolean,
+  setIsEnabled: (value: boolean) => void
 }
 
-export default function Switch({enabled, setEnabled}: propsType) {
-  const toggleSwitch = () => setEnabled(previousState => !previousState);
+export default function Switch({isEnabled, setIsEnabled}: propsType) {
+  const toggleSwitch = () => setIsEnabled(!isEnabled);
 
   const tintColor = useThemeColor({}, "tint");
   const tintSecondaryColor = useThemeColor({}, "tintLight");
@@ -17,10 +17,10 @@ export default function Switch({enabled, setEnabled}: propsType) {
     <DefaultSwitch
       style={styles.switch}
       trackColor={{ true: tintSecondaryColor, false: "#767577" }}
-      thumbColor={enabled ? tintColor : "#f4f3f4"}
+      thumbColor={isEnabled ? tintColor : "#f4f3f4"}
       ios_backgroundColor="#3e3e3e"
       onValueChange={toggleSwitch}
-      value={enabled}
+      value={isEnabled}
     />
   )
 }

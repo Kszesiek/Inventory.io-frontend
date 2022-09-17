@@ -9,7 +9,7 @@ import Logo from '../../assets/images/inventory.png';
 import {OpacityButton} from "../../components/Themed/OpacityButton";
 import {TouchableText} from "../../components/Themed/TouchableText";
 import {InputCard} from "../../components/Themed/InputCard";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {appWideActions} from "../../store/appWide";
 import {organizationsActions} from "../../store/organizations";
 import {demoOrganizations} from "../../constants/demoData";
@@ -17,11 +17,15 @@ import {lendingActions} from "../../store/lendings";
 import {itemActions} from "../../store/items";
 import {eventActions} from "../../store/events";
 import {userActions} from "../../store/users";
+import {IRootState} from "../../store/store";
 
 export default function SignInScreen({ navigation, route }: LoginStackScreenProps<'SignIn'>) {
   const dispatch = useDispatch();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+  const organizations = useSelector((state: IRootState) => state.organizations.organizations);
+  const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
 
   useEffect(() => {
     dispatch(lendingActions.wipeLendings());
@@ -31,14 +35,19 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
     dispatch(userActions.wipeUsers());
   }, [])
 
-  const onSignInPressed = () => { // async
+  const onSignInPressed = async () => {
     console.log("Sign in pressed");
-    dispatch(appWideActions.signIn({username: username, userId: Math.random().toString()})); // await
-    dispatch(organizationsActions.setOrganizations(demoOrganizations)); // await
-    if (demoOrganizations.length > 3) //   // TO TRZEBA ZMIENIĆ PÓŹNIEJ
+    dispatch(appWideActions.signIn({username: username, userId: Math.random().toString()}));
+    if (demoMode) {
+      await dispatch(organizationsActions.setOrganizations(demoOrganizations));
       navigation.getParent()!.navigate("Home");
-    else
-      navigation.getParent()!.navigate("Welcome");
+    } else {
+      await dispatch(organizationsActions.setOrganizations([]));
+      if (organizations.length > 0)
+        navigation.getParent()!.navigate("Home");
+      else
+        navigation.getParent()!.navigate("Welcome");
+    }
   }
 
   const onRegisterPressed = () => {
