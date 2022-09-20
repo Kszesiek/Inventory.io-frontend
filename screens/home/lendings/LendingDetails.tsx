@@ -8,16 +8,30 @@ import {
 import {Text, useThemeColor, View} from "../../../components/Themed";
 import {displayDateTimePeriod} from "../../../utilities/date";
 import {OpacityButton} from "../../../components/Themed/OpacityButton";
-import {ScrollView, StyleProp, StyleSheet, TextStyle} from "react-native";
+import {ScrollView, StyleProp, StyleSheet, TextStyle, TouchableOpacity} from "react-native";
 import {LendingStackScreenProps} from "../../../types";
 import Detail from "../../../components/Detail";
 import {useDispatch, useSelector} from "react-redux";
 import {IRootState} from "../../../store/store";
+import {useEffect} from "react";
+import {Feather} from "@expo/vector-icons";
+import * as React from "react";
 
 export default function LendingDetails({ navigation, route }: LendingStackScreenProps<'LendingDetails'>) {
   const dispatch = useDispatch();
+  const textColor = useThemeColor({}, 'text');
   const lending: LendingForEvent | LendingPrivate = useSelector((state: IRootState) =>
     state.lendings.lendings.find((item: LendingForEvent | LendingPrivate) => item.lendingId === route.params.lendingId)!)
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: !!lending ? () => (
+        <TouchableOpacity onPress={() => navigation.navigate("AddEditLending", {lending: lending})}>
+          <Feather name='edit' size={24} style={{color: textColor}}/>
+        </TouchableOpacity>
+      ) : undefined,
+    })
+  }, [lending])
 
   const property: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans',

@@ -2,7 +2,7 @@ import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {LendingStackParamList} from "../types";
 import {useThemeColor} from "../components/Themed";
 import {TouchableOpacity} from "react-native";
-import {Feather, Ionicons} from "@expo/vector-icons";
+import {Ionicons} from "@expo/vector-icons";
 import Lendings from "../screens/home/lendings/Lendings";
 import LendingDetails from "../screens/home/lendings/LendingDetails";
 import AddEditLending from "../screens/home/lendings/AddEditLending";
@@ -42,11 +42,11 @@ export default function LendingNavigator() {
       })} />
       <LendingStack.Screen name="LendingDetails" component={LendingDetails} options={({ navigation, route }) => ({
         title: "Szczegóły wypożyczenia",
-        headerRight: () => (
-          <TouchableOpacity onPress={() => navigation.navigate("AddEditLending", {lendingId: route.params.lendingId})}>
-            <Feather name='edit' size={24} style={{ color: textColor,}} />
-          </TouchableOpacity>
-        ),
+        // headerRight: () => (
+        //   <TouchableOpacity onPress={() => navigation.navigate("AddEditLending", {lendingId: route.params.lendingId})}>
+        //     <Feather name='edit' size={24} style={{ color: textColor,}} />
+        //   </TouchableOpacity>
+        // ),
       })} />
       <LendingStack.Screen name="AddEditLending" component={AddEditLending} options={({ navigation, route }) => ({
         title: route.params && route.params.lending ? "Edytuj wydarzenie" : "Nowe wydarzenie",

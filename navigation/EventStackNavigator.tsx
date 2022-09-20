@@ -2,7 +2,7 @@ import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {EventStackParamList} from "../types";
 import {useThemeColor} from "../components/Themed";
 import {TouchableOpacity} from "react-native";
-import {Feather, Ionicons} from "@expo/vector-icons";
+import {Ionicons} from "@expo/vector-icons";
 import Events from "../screens/home/events/Events";
 import EventDetails from "../screens/home/events/EventDetails";
 import AddEditEvent from "../screens/home/events/AddEditEvent";
@@ -42,11 +42,11 @@ export default function EventNavigator() {
       })} />
       <EventStack.Screen name="EventDetails" component={EventDetails} options={({ navigation, route }) => ({
         title: "Szczegóły wydarzenia",
-        headerRight: () => (
-          <TouchableOpacity onPress={() => navigation.navigate("AddEditEvent", {eventId: route.params.eventId})}>
-            <Feather name='edit' size={24} style={{ color: textColor,}} />
-          </TouchableOpacity>
-        ),
+        // headerRight: () => (
+        //   <TouchableOpacity onPress={() => navigation.navigate("AddEditEvent", {eventId: route.params.eventId})}>
+        //     <Feather name='edit' size={24} style={{ color: textColor,}} />
+        //   </TouchableOpacity>
+        // ),
       })} />
       <EventStack.Screen name="AddEditEvent" component={AddEditEvent} options={({ navigation, route }) => ({
         title: route.params && route.params.event ? "Edytuj wydarzenie" : "Nowe wydarzenie",
