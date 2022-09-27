@@ -3,12 +3,12 @@ import {HomeTabParamList} from "../types";
 import {useThemeColor} from "../components/Themed";
 import {TouchableOpacity} from "react-native";
 import {Feather, Ionicons} from "@expo/vector-icons";
-import Homescreen from "../screens/home/Homescreen";
 import Inventory from "../screens/home/Inventory";
 import More from "../screens/home/More";
 import * as React from "react";
 import LendingNavigator from "./LendingStackNavigator";
 import EventNavigator from "./EventStackNavigator";
+import HomescreenNavigator from "./HomescreenStackNavigator";
 
 const HomeTab = createBottomTabNavigator<HomeTabParamList>();
 
@@ -18,11 +18,11 @@ export default function HomeTabNavigator(props: {navigation: any, route: any}) {
 
   return (
     <HomeTab.Navigator
-      initialRouteName="Homescreen"
+      initialRouteName="HomescreenNavigator"
       screenOptions={{
         headerTitleAlign: "center",
         headerLeft: () => (
-          <TouchableOpacity onPress={() => props.navigation.navigate("Homescreen")}>
+          <TouchableOpacity onPress={() => props.navigation.navigate("HomescreenNavigator")}>
             <Ionicons name="chevron-back" color={textColor} size={30} style={{padding: 10}} />
           </TouchableOpacity>
         ),
@@ -47,24 +47,24 @@ export default function HomeTabNavigator(props: {navigation: any, route: any}) {
       }}
     >
       <HomeTab.Screen
-        name="Homescreen"
-        component={Homescreen}
+        name="HomescreenNavigator"
+        component={HomescreenNavigator}
         options={{
-          title: "Strona główna",
+          headerShown: false,
           tabBarLabel: "Strona główna",
           tabBarIcon: ({color, size}) => (
             <Ionicons name="home" size={size} color={color} />
           ),
-          headerLeft: ({tintColor}) => (
-            <TouchableOpacity onPress={props.navigation.openDrawer}>
-              <Ionicons name="menu" color={tintColor} size={30} style={{padding: 10}} />
-            </TouchableOpacity>
-          ),
-          headerRight: ({tintColor}) => (
-            <TouchableOpacity onPress={() => props.navigation.replace("Login")}>
-              <Ionicons name="log-out" color={tintColor} size={30} style={{padding: 10}} />
-            </TouchableOpacity>
-          ),
+          // headerLeft: ({tintColor}) => (
+          //   <TouchableOpacity onPress={props.navigation.openDrawer}>
+          //     <Ionicons name="menu" color={tintColor} size={30} style={{padding: 10}} />
+          //   </TouchableOpacity>
+          // ),
+          // headerRight: ({tintColor}) => (
+          //   <TouchableOpacity onPress={() => props.navigation.replace("Login")}>
+          //     <Ionicons name="log-out" color={tintColor} size={30} style={{padding: 10}} />
+          //   </TouchableOpacity>
+          // ),
         }} />
       <HomeTab.Screen
         name="Inventory"

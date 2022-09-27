@@ -10,11 +10,11 @@ import {isLendingForEvent, isLendingPrivate, LendingForEvent, LendingPrivate} fr
 import {displayDateTimePeriod} from "../../utilities/date";
 import {FontAwesome, MaterialCommunityIcons} from "@expo/vector-icons";
 import {enlistItems} from "../../utilities/enlist";
-import {HomeTabScreenProps} from "../../types";
+import {HomescreenStackScreenProps} from "../../types";
 import {useCallback} from "react";
 import {useFocusEffect} from "@react-navigation/native";
 
-export default function Homescreen({ navigation, route }: HomeTabScreenProps<'Homescreen'>) {
+export default function Homescreen({ navigation, route }: HomescreenStackScreenProps<'Homescreen'>) {
   const events: Array<Event> = useSelector((state: IRootState) => state.events.events)
   const lendings: Array<LendingForEvent | LendingPrivate> = useSelector((state: IRootState) => state.lendings.lendings)
 
@@ -51,12 +51,12 @@ export default function Homescreen({ navigation, route }: HomeTabScreenProps<'Ho
 
   function showMoreEventsPressed() {
     console.log("show more events pressed");
-    navigation.navigate("EventNavigator");
+    navigation.getParent()!.navigate("EventNavigator");
   }
 
   function showMoreLendingsPressed() {
     console.log("show more lendings pressed");
-    navigation.navigate("LendingNavigator");
+    navigation.getParent()!.navigate("LendingNavigator");
   }
 
   function searchShortcutPressed() {
@@ -65,6 +65,7 @@ export default function Homescreen({ navigation, route }: HomeTabScreenProps<'Ho
 
   function barcodeShortcutPressed() {
     console.log("barcode shortcut pressed");
+    navigation.navigate("BarcodeScanner");
   }
 
   return (

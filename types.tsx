@@ -61,7 +61,7 @@ export type LoginStackScreenProps<Screen extends keyof LoginStackParamList> = Na
 // HOME TAB
 
 export type HomeTabParamList = {
-  Homescreen: undefined;
+  HomescreenNavigator: undefined;
   Inventory: undefined;
   LendingNavigator: undefined;
   Members: undefined;
@@ -73,6 +73,18 @@ export type HomeTabParamList = {
 
 export type HomeTabScreenProps<Screen extends keyof HomeTabParamList> = BottomTabScreenProps<
   HomeTabParamList,
+  Screen
+  >;
+
+// HOMESCREEN STACK
+
+export type HomescreenStackParamList = {
+  Homescreen: undefined;
+  BarcodeScanner: undefined;
+};
+
+export type HomescreenStackScreenProps<Screen extends keyof HomescreenStackParamList> = NativeStackScreenProps<
+  HomescreenStackParamList,
   Screen
   >;
 
