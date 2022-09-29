@@ -7,6 +7,7 @@ export const appWideSlice = createSlice({
     demoMode: true,
     username: undefined as string | undefined,
     userId: undefined as string | undefined,
+    token: undefined as string | undefined,
   },
   reducers: {
     setTheme: (state, action: {payload: 'auto' | 'light' | 'dark'}) => {
@@ -18,10 +19,12 @@ export const appWideSlice = createSlice({
     signOut: (state) => {
       state.username = undefined;
       state.userId = undefined;
+      state.token = undefined;
     },
     signIn: (state, action) => {
       state.username = action.payload.username;
       state.userId = action.payload.userId;
+      state.token = action.payload.token;
     },
   },
 });

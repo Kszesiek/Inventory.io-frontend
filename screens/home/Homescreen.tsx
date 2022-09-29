@@ -15,9 +15,8 @@ import {useCallback} from "react";
 import {useFocusEffect} from "@react-navigation/native";
 
 export default function Homescreen({ navigation, route }: HomescreenStackScreenProps<'Homescreen'>) {
-  const events: Array<Event> = useSelector((state: IRootState) => state.events.events)
-  const lendings: Array<LendingForEvent | LendingPrivate> = useSelector((state: IRootState) => state.lendings.lendings)
-
+  const events: Array<Event> = useSelector((state: IRootState) => state.events.events);
+  const lendings: Array<LendingForEvent | LendingPrivate> = useSelector((state: IRootState) => state.lendings.lendings);
 
   useFocusEffect(
     useCallback(() => {

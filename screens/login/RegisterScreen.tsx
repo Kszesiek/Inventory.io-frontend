@@ -1,26 +1,48 @@
 import {LoginStackScreenProps} from "../../types";
 import {useState} from "react";
 import {Text, TextInput, View} from "../../components/Themed";
-import {KeyboardAvoidingView, Platform, StyleSheet} from "react-native";
+import {Alert, KeyboardAvoidingView, Platform, StyleSheet} from "react-native";
 import Card from "../../components/Themed/Card";
 import Colors from "../../constants/Colors";
 import {OpacityButton} from "../../components/Themed/OpacityButton";
 import {TouchableText} from "../../components/Themed/TouchableText";
+import {createUser} from "../../utilities/auth";
+import {useSelector} from "react-redux";
+import {IRootState} from "../../store/store";
 
 export default function SignInScreen({ navigation, route }: LoginStackScreenProps<'Register'>) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [passwordRepeated, setPasswordRepeated] = useState('');
+  const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [passwordRepeated, setPasswordRepeated] = useState<string>('');
+  const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
+  const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
 
   const onSignInPressed = () => {
     console.log("Sign in pressed");
     navigation.navigate("SignIn");
   };
 
-  const onCreateAccountPressed = () => {
+  async function onCreateAccountPressed() {
     console.log("Create account pressed");
-    navigation.navigate("SignIn");
-  };
+    setIsAuthenticating(true);
+
+    if (username.search('@') >= 0 && password.length >= 6 && password === passwordRepeated) {
+      if (demoMode) {
+        navigation.navigate("SignIn");
+      } else {
+        try {
+          await createUser(username, password);
+          navigation.navigate("SignIn");
+        } catch (error) {
+          Alert.alert('Rejestracja zakończona niepowodzeniem', 'Nie można założyć konta na te dane.');
+        }
+      }
+    } else {
+      Alert.alert('Dane zawierają błędy', 'Niektóre z wprowadzonych danych są niewłaściwe. Sprawdź wprowadzone dane i spróbuj ponownie.');
+    }
+
+    setIsAuthenticating(false);
+  }
 
   return (
     <View style={styles.container}>

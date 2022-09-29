@@ -1,4 +1,4 @@
-import {StyleSheet, Image, Platform, KeyboardAvoidingView} from 'react-native';
+import {StyleSheet, Image, Platform, KeyboardAvoidingView, Alert} from 'react-native';
 
 import {Text, View} from '../../components/Themed';
 import {LoginStackScreenProps} from '../../types';
@@ -18,11 +18,13 @@ import {itemActions} from "../../store/items";
 import {eventActions} from "../../store/events";
 import {userActions} from "../../store/users";
 import {IRootState} from "../../store/store";
+import {logIn} from "../../utilities/auth";
 
 export default function SignInScreen({ navigation, route }: LoginStackScreenProps<'SignIn'>) {
   const dispatch = useDispatch();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
 
   const organizations = useSelector((state: IRootState) => state.organizations.organizations);
   const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
@@ -37,17 +39,33 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
 
   const onSignInPressed = async () => {
     console.log("Sign in pressed");
-    dispatch(appWideActions.signIn({username: username, userId: Math.random().toString()}));
+    setIsAuthenticating(true);
+
     if (demoMode) {
+      dispatch(appWideActions.signIn({username: username, userId: Math.random().toString(), token: Math.random().toString()}));
       await dispatch(organizationsActions.setOrganizations(demoOrganizations));
       navigation.getParent()!.navigate("Home");
     } else {
-      await dispatch(organizationsActions.setOrganizations([]));
-      if (organizations.length > 0)
-        navigation.getParent()!.navigate("Home");
-      else
-        navigation.getParent()!.navigate("Welcome");
+      try {
+        const response = await logIn(username, password);
+        if (response !== null) {
+          dispatch(appWideActions.signIn({username: response.username, token: response.token, userId: response.userId}));
+        }
+
+        await dispatch(organizationsActions.setOrganizations([]));
+        if (organizations.length > 0)
+          navigation.getParent()!.navigate("Home");
+        else
+          navigation.getParent()!.navigate("Welcome");
+
+      } catch (error) {
+        Alert.alert('Logowanie nie powiodło się', 'Sprawdź dane logowania i spróbuj ponownie.')
+      }
     }
+
+
+
+    setIsAuthenticating(false);
   }
 
   const onRegisterPressed = () => {
