@@ -31,3 +31,8 @@ export async function logIn(email: string, password: string): Promise< null | {
   } else
     return null;
 }
+
+export async function getOrganizations(token: string) {
+  const response = await axios.get("https://react-native-course-2601f-default-rtdb.europe-west1.firebasedatabase.app/organizations.json?auth=" + token);
+  return JSON.parse(response.data);
+}

@@ -16,20 +16,6 @@ declare global {
   }
 }
 
-// ROOT STACK
-
-export type RootStackParamList = {
-  Login: NavigatorScreenParams<LoginStackParamList>;
-  Home: undefined; // NavigatorScreenParams<any>; // <HomeDrawerParamList>;
-  Welcome: undefined;
-  CreateOrganization: undefined;
-};
-
-export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<
-  RootStackParamList,
-  Screen
-  >;
-
 // LOGIN STACK
 
 export type LoginStackParamList = {
@@ -114,6 +100,18 @@ export type EventStackScreenProps<Screen extends keyof EventStackParamList> = Na
   Screen
 >;
 
+// WELCOME STACK
+
+export type WelcomeStackParamList = {
+  Welcome: undefined;
+  CreateOrganization: undefined;
+  JoinOrganization: undefined;
+};
+
+export type WelcomeStackScreenProps<Screen extends keyof WelcomeStackParamList> = NativeStackScreenProps<
+  WelcomeStackParamList,
+  Screen
+  >;
 
 
 

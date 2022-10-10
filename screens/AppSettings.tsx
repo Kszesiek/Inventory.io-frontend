@@ -17,8 +17,8 @@ export default function AppSettings() {
     dispatch(appWideActions.setTheme(chosenKey));
   }
 
-  function setDemoModeEnabled(isEnabled: boolean) {
-    dispatch(appWideActions.setDemoMode(isEnabled))
+  function setDemoMode(isEnabled: boolean) {
+    dispatch(appWideActions.setDemoMode(isEnabled));
   }
 
   return (
@@ -38,7 +38,7 @@ export default function AppSettings() {
       </TouchableOpacity>
       <View style={styles.cardView}>
         <Text style={textStyles.optionName}>Demo mode</Text>
-        <Switch isEnabled={demoModeEnabled} setIsEnabled={setDemoModeEnabled} />
+        <Switch isEnabled={demoModeEnabled} setIsEnabled={setDemoMode} />
       </View>
     </ScrollView>
   )

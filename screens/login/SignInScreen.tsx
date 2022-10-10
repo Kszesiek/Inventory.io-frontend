@@ -18,7 +18,7 @@ import {itemActions} from "../../store/items";
 import {eventActions} from "../../store/events";
 import {userActions} from "../../store/users";
 import {IRootState} from "../../store/store";
-import {logIn} from "../../utilities/auth";
+import {getOrganizations, logIn} from "../../utilities/auth";
 
 export default function SignInScreen({ navigation, route }: LoginStackScreenProps<'SignIn'>) {
   const dispatch = useDispatch();
@@ -26,7 +26,6 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
   const [password, setPassword] = useState<string>('');
   const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
 
-  const organizations = useSelector((state: IRootState) => state.organizations.organizations);
   const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
 
   useEffect(() => {
@@ -44,26 +43,22 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
     if (demoMode) {
       dispatch(appWideActions.signIn({username: username, userId: Math.random().toString(), token: Math.random().toString()}));
       await dispatch(organizationsActions.setOrganizations(demoOrganizations));
-      navigation.getParent()!.navigate("Home");
     } else {
       try {
         const response = await logIn(username, password);
         if (response !== null) {
-          dispatch(appWideActions.signIn({username: response.username, token: response.token, userId: response.userId}));
+          const organizations = await getOrganizations(response.token);
+          await dispatch(organizationsActions.setOrganizations(organizations));
+          await dispatch(appWideActions.signIn({
+              username: response.username,
+              token: response.token,
+              userId: response.userId
+            }));
         }
-
-        await dispatch(organizationsActions.setOrganizations([]));
-        if (organizations.length > 0)
-          navigation.getParent()!.navigate("Home");
-        else
-          navigation.getParent()!.navigate("Welcome");
-
       } catch (error) {
         Alert.alert('Logowanie nie powiodło się', 'Sprawdź dane logowania i spróbuj ponownie.')
       }
     }
-
-
 
     setIsAuthenticating(false);
   }

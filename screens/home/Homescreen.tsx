@@ -11,12 +11,14 @@ import {displayDateTimePeriod} from "../../utilities/date";
 import {FontAwesome, MaterialCommunityIcons} from "@expo/vector-icons";
 import {enlistItems} from "../../utilities/enlist";
 import {HomescreenStackScreenProps} from "../../types";
-import {useCallback} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {useFocusEffect} from "@react-navigation/native";
+import axios from "axios";
 
 export default function Homescreen({ navigation, route }: HomescreenStackScreenProps<'Homescreen'>) {
-  const events: Array<Event> = useSelector((state: IRootState) => state.events.events);
-  const lendings: Array<LendingForEvent | LendingPrivate> = useSelector((state: IRootState) => state.lendings.lendings);
+  const events: Array<Event> = useSelector((state: IRootState) => state.events.events)
+  const lendings: Array<LendingForEvent | LendingPrivate> = useSelector((state: IRootState) => state.lendings.lendings)
+  const token: string = useSelector((state: IRootState) => state.appWide.token)!
 
   useFocusEffect(
     useCallback(() => {
@@ -42,6 +44,16 @@ export default function Homescreen({ navigation, route }: HomescreenStackScreenP
         BackHandler.removeEventListener('hardwareBackPress', onBackPress);
     }, [])
   );
+
+  const [fetchedMessage, setFetchedMessage] = useState<string>("");
+
+  useEffect(() => {
+    console.log(token);
+    axios.get('https://react-native-course-2601f-default-rtdb.europe-west1.firebasedatabase.app/msg.json?auth=' + token).then((response) => {
+      setFetchedMessage(response.data);
+    });
+
+  }, []);
 
   const boldedText: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans Bold',
@@ -69,6 +81,7 @@ export default function Homescreen({ navigation, route }: HomescreenStackScreenP
 
   return (
     <ScrollView style={{...styles.mainContainer, backgroundColor: useThemeColor({}, 'background')}}>
+      <Text>{fetchedMessage}</Text>
       <View key="searchbar" style={{...styles.searchBar, backgroundColor: useThemeColor({}, 'cardBackground')}}>
         <TouchableCard
           style={[styles.searchBarButton, {
