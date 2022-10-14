@@ -54,7 +54,7 @@ export function Text(props: TextProps) {
 
 export function getPlaceholderColor(lightColor?: string, darkColor?: string): string {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
-  let placeholderColor: string = CSSColorToHex(color);
+  let placeholderColor: string = CSSColorToHex(color!); // TODO: make color always represent value, not undefined
   if (placeholderColor[0] !== "#") {
     console.warn("Unsupported color!")
   }

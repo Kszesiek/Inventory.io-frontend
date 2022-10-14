@@ -38,7 +38,7 @@ export default function useCachedResources() {
             userId,
             token,
           }));
-          console.log(`signIn called with values:\nusername: ${username}\nuserId: ${userId}\ntoken: ${token}`) // .slice(0, 10)
+          console.log(`signIn called with values:\nusername: ${username}\nuserId: ${userId}\ntoken: ${token.slice(0, 10)}...`) // .slice(0, 10)
         }
 
         const demoMode = await AsyncStorage.getItem('demoMode');

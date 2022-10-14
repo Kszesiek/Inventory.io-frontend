@@ -4,7 +4,7 @@ import {Alert, FlatList, StyleSheet} from "react-native";
 import Input from "../../components/Input";
 import {useDispatch} from "react-redux";
 import {useState} from "react";
-import {WelcomeStackScreenProps} from "../../types";
+import {HomeStackScreenProps, WelcomeStackScreenProps} from "../../types";
 import {writeOutArray} from "../../utilities/enlist";
 import {Organization, organizationsActions} from "../../store/organizations";
 import {OpacityButton} from "../../components/Themed/OpacityButton";
@@ -18,10 +18,12 @@ type inputValuesType = {
   name: ValidValuePair
 }
 
-export default function CreateOrganization({ navigation, route }: WelcomeStackScreenProps<'CreateOrganization'>) {
+export default function CreateOrganization({ navigation, route }: WelcomeStackScreenProps<'CreateOrganization'> | HomeStackScreenProps<'CreateOrganization'>) {
   const dispatch = useDispatch();
   const backgroundColor = useThemeColor({}, 'background');
   const cancelColor = useThemeColor({}, "delete");
+
+  const doesGoBack = route.params?.doesGoBack;
 
   const [inputs, setInputs]: [inputValuesType, Function] = useState(
   {
@@ -65,6 +67,7 @@ export default function CreateOrganization({ navigation, route }: WelcomeStackSc
     }
 
     await dispatch(organizationsActions.addOrganization(organizationData));
+    doesGoBack && navigation.goBack();
   }
 
   function inputChangedHandler<InputParam extends keyof typeof inputs>(inputIdentifier: InputParam, enteredValue: string) {

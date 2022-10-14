@@ -10,11 +10,11 @@ import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import {LendingForEvent, LendingPrivate} from "./store/lendings";
 import {Event} from "./store/events";
 
-declare global {
-  namespace ReactNavigation {
-    interface RootParamList extends OldRootStackParamList {}
-  }
-}
+// declare global {
+//   namespace ReactNavigation {
+//     interface RootParamList extends OldRootStackParamList {}
+//   }
+// }
 
 // LOGIN STACK
 
@@ -31,6 +31,19 @@ export type LoginStackScreenProps<Screen extends keyof LoginStackParamList> = Na
   Screen
   >;
 
+// HOME STACK
+
+export type HomeStackParamList = {
+  HomeDrawer: undefined;
+  CreateOrganization: { doesGoBack: boolean } | undefined;
+  JoinOrganization: undefined;
+}
+
+export type HomeStackScreenProps<Screen extends keyof HomeStackParamList> = NativeStackScreenProps<
+  HomeStackParamList,
+  Screen
+>;
+
 // HOME DRAWER
 
 // export type HomeDrawerParamList = {
@@ -42,7 +55,7 @@ export type LoginStackScreenProps<Screen extends keyof LoginStackParamList> = Na
 // export type HomeDrawerScreenProps<Screen extends keyof HomeDrawerParamList> = DrawerScreenProps<
 //   HomeDrawerParamList,
 //   Screen
-//   >;
+// >;
 
 // HOME TAB
 
@@ -50,11 +63,11 @@ export type HomeTabParamList = {
   HomescreenNavigator: undefined;
   Inventory: undefined;
   LendingNavigator: undefined;
-  Members: undefined;
   EventNavigator: undefined;
   More: undefined;
-  AppSettings: undefined;
-  UserSettings: undefined;
+  // Members: undefined;
+  // AppSettings: undefined;
+  // UserSettings: undefined;
 };
 
 export type HomeTabScreenProps<Screen extends keyof HomeTabParamList> = BottomTabScreenProps<

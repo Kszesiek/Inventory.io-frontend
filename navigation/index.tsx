@@ -27,6 +27,7 @@ import NotFoundScreen from '../screens/old screens/NotFoundScreen';
 import TabOneScreen from '../screens/old screens/TabOneScreen';
 import TabTwoScreen from '../screens/old screens/TabTwoScreen';
 import {
+  HomeStackParamList,
   OldRootStackParamList,
   OldRootTabParamList,
   RootTabScreenProps,
@@ -47,6 +48,7 @@ import {userActions} from "../store/users";
 import LoginNavigator from "./LoginStackNavigator";
 import HomeTabNavigator from "./HomeTabNavigator";
 import CreateOrganization from "../screens/organizations/CreateOrganization";
+// import JoinOrganization from "../screens/organizations/JoinOrganization";
 import WelcomeStackNavigator from "./WelcomeStackNavigator";
 import useCachedResources from "../hooks/useCachedResources";
 
@@ -69,7 +71,8 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
           <LoginNavigator/>
           :
           organizations.length > 0 ?
-            <HomeDrawerNavigator organizations={organizations}/>
+            <HomeStackNavigator organizations={organizations} />
+            // <HomeDrawerNavigator organizations={organizations}/>
             :
             <WelcomeStackNavigator/>
         }
@@ -80,29 +83,32 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
 
 // ROOT
 
-// const RootStack = createNativeStackNavigator<RootStackParamList>();
-//
-// function RootNavigator() {
-//
-//   return (
-//     <RootStack.Navigator
-//       screenOptions={{
-//         headerShown: false,
-//       }}
-//     >
-//
-//       <RootStack.Screen name="Login" component={LoginNavigator} />
-//       <RootStack.Screen name="Home">{() => HomeDrawerNavigator({organizations})}</RootStack.Screen>
-//       <RootStack.Screen name="Welcome" component={Welcome} />
-//       <RootStack.Screen name="CreateOrganization" component={CreateOrganization} options={{
-//         headerShown: true,
-//         headerTitleAlign: 'center',
-//         headerTitle: 'Załóż organizację',
-//         headerStyle: {backgroundColor: headerColor},
-//       }} />
-//     </RootStack.Navigator>
-//   );
-// }
+const HomeStack = createNativeStackNavigator<HomeStackParamList>();
+
+function HomeStackNavigator(props: {organizations: OrganizationDetails[]}) {
+  const headerColor = useThemeColor({}, 'header');
+
+  return (
+    <HomeStack.Navigator
+      screenOptions={{
+        headerShown: false,
+        headerTitleAlign: 'center',
+        headerStyle: {backgroundColor: headerColor},
+      }}
+    >
+      <HomeStack.Screen name="HomeDrawer">{() => HomeDrawerNavigator({organizations: props.organizations})}</HomeStack.Screen>
+      <HomeStack.Screen name="CreateOrganization" component={CreateOrganization} options={{
+        headerShown: true,
+        headerTitle: 'Załóż organizację',
+      }}  />
+      <HomeStack.Screen name="JoinOrganization" component={CreateOrganization} options={{ // TODO: Change to JoinOrganization once it is created
+        headerShown: true,
+        headerTitle: 'Dołącz do organizacji',
+      }} />
+
+    </HomeStack.Navigator>
+  );
+}
 
 // HOME DRAWER
 
@@ -118,7 +124,7 @@ function CustomHomeDrawerContent(props: DrawerContentComponentProps) {
 
   function createOrganizationPressed() {
     console.log("create organization pressed");
-    props.navigation.navigate("CreateOrganization");
+    props.navigation.navigate("CreateOrganization", { doesGoBack: true });
   }
 
   return (
