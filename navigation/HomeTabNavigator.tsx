@@ -67,7 +67,7 @@ export default function HomeTabNavigator(props: {navigation: any, route: any}) {
           // ),
         }} />
       <HomeTab.Screen
-        name="Inventory"
+        name="InventoryNavigator"
         component={InventoryNavigator}
         options={{
           headerShown: false,

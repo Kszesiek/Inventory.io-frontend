@@ -264,115 +264,168 @@ export const demoData: Record<typeof demoOrganizations[number]["organizationId"]
       {
         name: "nagłośnienie",
         categoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
+        filters: [],
       },
       {
         name: "oświetlenie",
         categoryId: "b64e44ac-7447-4922-859e-1df0a273db43",
+        filters: [],
+
       },
       {
         name: "zasilanie",
         categoryId: "7a776a11-de96-4702-b4df-b4157a07780d",
+        filters: [],
+
       },
       {
         name: "pozostałe",
         categoryId: "8b10c898-7617-4226-91d3-5b9b2edb45ae",
+        filters: [],
+
       },
       // nagłośnienie
       {
         name: "mikrofony",
         categoryId: "480fa84c-b559-48fe-8cf1-d4a22b322ea5",
         parentCategoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
+        filters: [
+          {
+            name: 'Producent',
+          },
+          {
+            name: 'typ',
+          },
+        ],
+
       },
       {
         name: "głośniki",
         categoryId: "6c620a38-9f44-4648-9202-fa7fc9ca1f43",
         parentCategoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
+        filters: [
+          {
+            name: 'Producent',
+          },
+          {
+            name: 'min. częstotliwość [Hz]',
+          },
+          {
+            name: 'max. częstotliwość [Hz]',
+          },
+        ],
+
       },
       {
         name: "subwoofery",
         categoryId: "31eed529-b22a-4b40-aa72-67b6dc14a725",
-        parentCategoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
+        parentCategoryId: "6c620a38-9f44-4648-9202-fa7fc9ca1f43",
+        filters: [],
+      },
+      {
+        name: "górki",
+        categoryId: "a4271407-86db-415d-afa1-2cd024cd51c5",
+        parentCategoryId: "6c620a38-9f44-4648-9202-fa7fc9ca1f43",
+        filters: [],
       },
       {
         name: "statywy mikrofonowe",
         categoryId: "f096f654-2bd6-4fe2-a635-0346083acdca",
         parentCategoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
+        filters: [
+          {
+            name: 'przeznaczenie',
+          }
+        ],
       },
       {
         name: "statywy głośnikowe",
         categoryId: "98b9dc9d-4749-4b60-b0f2-268a3af25f5c",
         parentCategoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
+        filters: [
+          {
+            name: 'udźwig',
+          },
+          {
+            name: 'masa',
+          }
+        ],
       },
       {
         name: "miksery",
         categoryId: "8ce76808-6d36-420b-89bd-3baf3f972153",
         parentCategoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
+        filters: [
+          {
+            name: 'liczba wejść',
+          },
+          {
+            name: "liczba wyjść",
+          },
+        ],
       },
       {
         name: "kable audio",
         categoryId: "7bb4d313-d747-4218-9017-890799192efe",
         parentCategoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
-      },
-      // kable
-      {
-        name: "XLR",
-        categoryId: "5d128a35-c6fa-4ad0-9c94-a55b3215ce88",
-        parentCategoryId: "7bb4d313-d747-4218-9017-890799192efe",
-      },
-      {
-        name: "jack",
-        categoryId: "a13bf061-ebca-4dbf-bc2b-815b80181e36",
-        parentCategoryId: "7bb4d313-d747-4218-9017-890799192efe",
-      },
-      {
-        name: "minijack",
-        categoryId: "a02759a0-bb2d-4d22-aaa8-14d5a3fe0855",
-        parentCategoryId: "7bb4d313-d747-4218-9017-890799192efe",
+        filters: [
+          {
+            name: 'długość',
+          },
+          {
+            name: "wtyczka",
+          },
+        ],
       },
       // oświetlenie
       {
         name: "głowy",
         categoryId: "67abcb4b-04df-4fb8-bc82-761d07c977ac",
         parentCategoryId: "b64e44ac-7447-4922-859e-1df0a273db43",
+        filters: [],
       },
       {
         name: "żarowe",
         categoryId: "c3bcc320-dfa0-4658-bdd6-fc7a31036097",
         parentCategoryId: "b64e44ac-7447-4922-859e-1df0a273db43",
+        filters: [],
       },
       {
         name: "kable do oświetlenia",
         categoryId: "fb3f07b5-81c8-4ec0-b01d-460bf21cfafc",
         parentCategoryId: "b64e44ac-7447-4922-859e-1df0a273db43",
-      },
-      // kable
-      {
-        name: "DMX",
-        categoryId: "0309d1ef-9069-4571-aff1-175434a85b5c",
-        parentCategoryId: "b64e44ac-7447-4922-859e-1df0a273db43",
+        filters: [
+          {
+            name: "wtyczka",
+          },
+        ],
       },
       // zasilanie
       {
         name: "kable elektryczne",
         categoryId: "0887400d-8a7c-4aec-a162-82a510d3a148",
         parentCategoryId: "7a776a11-de96-4702-b4df-b4157a07780d",
+        filters: [],
       },
       // kable
       {
         name: "IEC",
         categoryId: "35625e42-e888-4f7a-a981-c25a0c5158ba",
         parentCategoryId: "7a776a11-de96-4702-b4df-b4157a07780d",
+        filters: [],
       },
       {
         name: "IEC 'podaj dalej'",
         categoryId: "3816255e-03be-44d6-b04a-1611252e03ba",
         parentCategoryId: "7a776a11-de96-4702-b4df-b4157a07780d",
+        filters: [],
       },
       // różne
       {
         name: "sprzęt elektryczny",
         categoryId: "f7b1dc41-6cb8-4bad-836d-d48667e61507",
         parentCategoryId: "8b10c898-7617-4226-91d3-5b9b2edb45ae",
+        filters: [],
       },
     ),
   },
@@ -470,17 +523,31 @@ export const demoData: Record<typeof demoOrganizations[number]["organizationId"]
       {
         name: "książki",
         categoryId: "7654e89e-0065-4670-93c1-72ca4c694eb1",
+        filters: [
+          {
+            name: "autor",
+          },
+          {
+            name: "rok wydania",
+          },
+        ],
       },
       // książki
       {
         name: "dla dzieci",
         categoryId: "f5a5995c-ad6c-4560-b655-0dd346323e92",
         parentCategoryId: "7654e89e-0065-4670-93c1-72ca4c694eb1",
+        filters: [],
       },
       {
         name: "podręczniki",
         categoryId: "5e03f517-ca77-403e-b252-a07a8f016c8c",
         parentCategoryId: "7654e89e-0065-4670-93c1-72ca4c694eb1",
+        filters: [
+          {
+            name: "przedmiot",
+          },
+        ],
       },
     )
   },

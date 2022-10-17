@@ -62,7 +62,7 @@ export type HomeStackScreenProps<Screen extends keyof HomeStackParamList> = Nati
 
 export type HomeTabParamList = {
   HomescreenNavigator: undefined;
-  Inventory: undefined;
+  InventoryNavigator: undefined;
   LendingNavigator: undefined;
   EventNavigator: undefined;
   More: undefined;

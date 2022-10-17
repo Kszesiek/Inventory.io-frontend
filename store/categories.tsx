@@ -1,8 +1,21 @@
 import {createSlice} from "@reduxjs/toolkit";
 
+export interface Filter {
+  name: string;
+}
+
+export function isFilter(object: any): object is Filter {
+  return (
+    object &&
+    typeof object === 'object' &&
+    typeof object['name'] === 'string'
+  )
+}
+
 export interface Category {
   categoryId: string;
   name: string;
+  filters: Filter[];
   parentCategoryId?: string;
 }
 
@@ -12,6 +25,11 @@ export function isCategory(object: any): object is Category {
     typeof object === 'object' &&
     typeof object['name'] === 'string' &&
     typeof object['categoryId'] === 'string' &&
+    Array.isArray(object['filters']) &&
+    object['filters'].every(item =>
+      typeof item === 'object' &&
+      typeof item['name'] === 'string'
+    ) &&
     (
       typeof object['parentCategoryId'] === 'string' ||
       typeof object['parentCategoryId'] === undefined
