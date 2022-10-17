@@ -9,6 +9,7 @@ import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 // import { DrawerScreenProps } from '@react-navigation/drawer';
 import {LendingForEvent, LendingPrivate} from "./store/lendings";
 import {Event} from "./store/events";
+import {Item} from "./store/items";
 
 // declare global {
 //   namespace ReactNavigation {
@@ -84,6 +85,19 @@ export type HomescreenStackParamList = {
 
 export type HomescreenStackScreenProps<Screen extends keyof HomescreenStackParamList> = NativeStackScreenProps<
   HomescreenStackParamList,
+  Screen
+  >;
+
+// INVENTORY STACK
+
+export type InventoryStackParamList = {
+  Inventory: undefined;
+  AddEditItem: { item: Item } | undefined;
+  ItemDetails: { itemId: string };
+};
+
+export type InventoryStackScreenProps<Screen extends keyof InventoryStackParamList> = NativeStackScreenProps<
+  InventoryStackParamList,
   Screen
   >;
 

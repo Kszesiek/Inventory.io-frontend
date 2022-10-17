@@ -1,15 +1,19 @@
 import {createSlice} from "@reduxjs/toolkit";
 
-export class Item{
+export interface Item{
   itemId: string
   name: string
   categoryId: string
+}
 
-  constructor(itemId: string, name: string, categoryId: string) {
-    this.itemId = itemId;
-    this.name = name;
-    this.categoryId = categoryId;
-  }
+export function isItem(object: any): object is Item {
+  return (
+    object &&
+    typeof object === 'object' &&
+    typeof object['itemId'] === 'string' &&
+    typeof object['name'] === 'string' &&
+    typeof object['categoryId'] === 'string'
+  );
 }
 
 export const itemsSlice = createSlice({
@@ -19,7 +23,7 @@ export const itemsSlice = createSlice({
   },
   reducers: {
     addItem: (state, action) => {
-      if (!state.items.some(item => item.itemId === action.payload.event.itemId)) {
+      if (!state.items.some(item => item.itemId === action.payload.item.itemId)) {
         state.items.push(action.payload.item);
       }
     },
@@ -29,7 +33,7 @@ export const itemsSlice = createSlice({
       }
     },
     modifyItem: (state, action) => {
-      const index = state.items.findIndex(item => item.itemId === action.payload.event.itemId);
+      const index = state.items.findIndex(item => item.itemId === action.payload.item.itemId);
       if (index >= 0) {
         state.items[index] = action.payload.item;
       }

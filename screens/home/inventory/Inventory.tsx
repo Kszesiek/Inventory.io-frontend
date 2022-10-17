@@ -5,13 +5,11 @@ import {FlatList, ListRenderItemInfo, StyleProp, StyleSheet, TextStyle} from "re
 import {useSelector} from "react-redux";
 import {IRootState} from "../../../store/store";
 import {Item} from "../../../store/items";
-import {useNavigation} from "@react-navigation/native";
+import {InventoryStackScreenProps} from "../../../types";
 
-export default function Inventory() {
+export default function Inventory({ navigation, route }: InventoryStackScreenProps<'Inventory'>) {
   const backgroundColor = useThemeColor({}, 'background');
   const cardBackgroundColor = useThemeColor({}, 'cardBackground');
-
-  const navigation = useNavigation();
 
   const items = useSelector((state: IRootState) => state.items.items);
   const categories = useSelector((state: IRootState) => state.categories.categories);
@@ -34,6 +32,11 @@ export default function Inventory() {
 
   function filtersPressed() {
     console.log("filters pressed");
+  }
+
+  function cardPressed(itemId: string) {
+    console.log("Item pressed");
+    navigation.navigate("ItemDetails", { itemId: itemId });
   }
 
   return (
@@ -76,10 +79,9 @@ export default function Inventory() {
           <Text style={styles.noContentText}>Aby dodać przedmiot, użyj przycisku u góry ekranu.</Text>
         </View>}
       renderItem={(item: ListRenderItemInfo<Item>) => {return (
-          <TouchableCard style={styles.card} onPress={() => { console.log("Item pressed"); /* navigation.navigate("ItemDetails", { itemId: item.item.itemId }) */}}>
+          <TouchableCard style={styles.card} onPress={() => cardPressed(item.item.itemId)}>
             <Text style={[styles.cardText, itemTitle]}>{item.item.name}</Text>
             <Text style={styles.cardText}>Kategoria: {categories.find(category => category.categoryId === item.item.categoryId)?.name || <Text style={{fontStyle: 'italic', fontSize: 13}}>nieznana kategoria</Text>}</Text>
-
           </TouchableCard>
         )
       }}
