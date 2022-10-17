@@ -3,10 +3,12 @@ import {createSlice} from "@reduxjs/toolkit";
 export class Item{
   itemId: string
   name: string
+  categoryId: string
 
-  constructor(itemId: string, name: string) {
+  constructor(itemId: string, name: string, categoryId: string) {
     this.itemId = itemId;
     this.name = name;
+    this.categoryId = categoryId;
   }
 }
 

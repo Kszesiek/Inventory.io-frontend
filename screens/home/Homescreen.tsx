@@ -20,6 +20,8 @@ export default function Homescreen({ navigation, route }: HomescreenStackScreenP
   const lendings: Array<LendingForEvent | LendingPrivate> = useSelector((state: IRootState) => state.lendings.lendings)
   const token: string = useSelector((state: IRootState) => state.appWide.token)!
 
+  const backgroundColor = useThemeColor({}, 'background');
+
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
@@ -80,8 +82,8 @@ export default function Homescreen({ navigation, route }: HomescreenStackScreenP
   }
 
   return (
-    <ScrollView style={{...styles.mainContainer, backgroundColor: useThemeColor({}, 'background')}}>
-      <Text>{fetchedMessage}</Text>
+    <ScrollView style={{...styles.mainContainer, backgroundColor}}>
+      <Text style={{backgroundColor: 'darkviolet'}}>{fetchedMessage}</Text>
       <View key="searchbar" style={{...styles.searchBar, backgroundColor: useThemeColor({}, 'cardBackground')}}>
         <TouchableCard
           style={[styles.searchBarButton, {
@@ -159,6 +161,7 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     paddingBottom: 10,
+    paddingHorizontal: 5,
   },
   searchBar: {
     flexDirection: 'row',

@@ -51,6 +51,7 @@ import CreateOrganization from "../screens/organizations/CreateOrganization";
 // import JoinOrganization from "../screens/organizations/JoinOrganization";
 import WelcomeStackNavigator from "./WelcomeStackNavigator";
 import useCachedResources from "../hooks/useCachedResources";
+import {categoryActions} from "../store/categories";
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   const chosenTheme: "light" | "dark" | null | undefined = useSelector((state: IRootState) => state.appWide.theme === 'auto' ? colorScheme : state.appWide.theme);
@@ -169,6 +170,7 @@ function HomeDrawerNavigator(props: {organizations: OrganizationDetails[]}) {
         dispatch(itemActions.loadItems(demoData[props.organizations[0].organizationId].items)),
         dispatch(lendingActions.loadLendings(demoData[props.organizations[0].organizationId].lendings)),
         dispatch(userActions.loadUsers(demoData[props.organizations[0].organizationId].users)),
+        dispatch(categoryActions.loadCategories(demoData[props.organizations[0].organizationId].categories)),
       ])
     }
     loadData()

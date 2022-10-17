@@ -19,6 +19,7 @@ import {eventActions} from "../../store/events";
 import {userActions} from "../../store/users";
 import {IRootState} from "../../store/store";
 import {getOrganizations, logIn} from "../../utilities/auth";
+import {categoryActions} from "../../store/categories";
 
 export default function SignInScreen({ navigation, route }: LoginStackScreenProps<'SignIn'>) {
   const dispatch = useDispatch();
@@ -34,6 +35,7 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
     dispatch(eventActions.wipeEvents());
     dispatch(organizationsActions.wipeOrganizations());
     dispatch(userActions.wipeUsers());
+    dispatch(categoryActions.wipeCategories())
   }, [])
 
   const onSignInPressed = async () => {

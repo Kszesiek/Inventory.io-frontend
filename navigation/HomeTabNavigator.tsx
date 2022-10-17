@@ -3,7 +3,7 @@ import {HomeTabParamList} from "../types";
 import {useThemeColor} from "../components/Themed";
 import {TouchableOpacity} from "react-native";
 import {Feather, Ionicons} from "@expo/vector-icons";
-import Inventory from "../screens/home/Inventory";
+import Inventory from "../screens/home/inventory/Inventory";
 import More from "../screens/home/More";
 import * as React from "react";
 import LendingNavigator from "./LendingStackNavigator";

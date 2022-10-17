@@ -3,6 +3,7 @@ import {User} from "../store/users";
 import {Event} from "../store/events";
 import {LendingForEvent, LendingPrivate} from "../store/lendings";
 import {Item} from "../store/items";
+import {Category} from "../store/categories";
 
 export const demoOrganizations: Organization[] = [
   {
@@ -24,6 +25,7 @@ type demoBatch = {
   lendings: Array<LendingPrivate | LendingForEvent>,
   events: Array<Event>,
   items: Array<Item>,
+  categories: Array<Category>,
 }
 
 export const demoData: Record<typeof demoOrganizations[number]["organizationId"], demoBatch> = {
@@ -169,75 +171,208 @@ export const demoData: Record<typeof demoOrganizations[number]["organizationId"]
     items: new Array<Item>(
       {
         itemId: "c7e3af12-7f15-45bb-8c3f-385fc365da62",
-        name: "mic stand",
+        name: "statyw 'Athletic'",
+        categoryId: "f096f654-2bd6-4fe2-a635-0346083acdca",
       },
       {
         itemId: "3db9ddee-7b21-41d9-82ce-f20c663588da",
         name: "kula dyskotekowa",
+        categoryId: "b64e44ac-7447-4922-859e-1df0a273db43",
       },
       {
         itemId: "78256661-1189-45cb-9d4d-6253c654a652",
         name: "rozdzielnica",
+        categoryId: "7a776a11-de96-4702-b4df-b4157a07780d",
       },
       {
         itemId: "3e9f4923-8530-4d14-ae31-c4a7b9733374",
         name: "kabel trójfazowy 10m",
+        categoryId: "0887400d-8a7c-4aec-a162-82a510d3a148",
       },
       {
         itemId: "79a9d7a6-8e0b-4162-87a5-fa200afeabbd",
         name: "drabina",
+        categoryId: "8b10c898-7617-4226-91d3-5b9b2edb45ae",
       },
       {
         itemId: "39aa06e5-a718-43a8-9e20-bd91e33bc7d8",
         name: "półka",
+        categoryId: "8b10c898-7617-4226-91d3-5b9b2edb45ae",
       },
       {
         itemId: "c43a0a80-757f-4442-98f8-8e8a69201ff6",
         name: "zmiotka",
+        categoryId: "8b10c898-7617-4226-91d3-5b9b2edb45ae",
       },
       {
         itemId: "405b2f73-81af-444e-8f2b-5f944feffdca",
         name: "lutownica",
+        categoryId: "f7b1dc41-6cb8-4bad-836d-d48667e61507",
       },
       {
         itemId: "3befe3ce-d9e4-4809-9c79-cdfc416cd90a",
-        name: "subwoofer",
+        name: "subwoofer HK",
+        categoryId: "31eed529-b22a-4b40-aa72-67b6dc14a725",
       },
       {
         itemId: "6022b27e-7dfd-46e3-b8b3-c1e92cfcd4a1",
-        name: "tweeter x4",
+        name: "tweeter",
+        categoryId: "6c620a38-9f44-4648-9202-fa7fc9ca1f43",
       },
       {
         itemId: "4dfddab4-5bbd-4563-9411-e4f0e5435e74",
         name: "instrukcja montażu zestawu 5.1",
+        categoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
       },
       {
         itemId: "5ecc0d86-d8e8-4589-8986-e835fadc36e8",
         name: "mikrofon strojeniowy Shure",
+        categoryId: "480fa84c-b559-48fe-8cf1-d4a22b322ea5",
       },
       {
         itemId: "185525b4-127c-45d2-a4e0-6f4789a43f23",
-        name: "mikser",
+        name: "Impact Si",
+        categoryId: "8ce76808-6d36-420b-89bd-3baf3f972153",
       },
       {
         itemId: "3b88939c-6316-4dfb-ad28-9b91bb44a671",
-        name: "kabel XLR 10m x2",
+        name: "kabel XLR 10m",
+        categoryId: "5d128a35-c6fa-4ad0-9c94-a55b3215ce88",
       },
       {
         itemId: "5da853fe-548f-4e19-ae54-f4e42e26acf6",
-        name: "kabel XLR 5m x4",
+        name: "kabel XLR 5m",
+        categoryId: "5d128a35-c6fa-4ad0-9c94-a55b3215ce88",
       },
       {
         itemId: "acee73a8-3e8b-41e4-a2d3-ce6c3e870de5",
-        name: "głośnik bluetooth",
+        name: "głośnik bluetooth JBL Charge 3",
+        categoryId: "6c620a38-9f44-4648-9202-fa7fc9ca1f43",
       },
       {
         itemId: "991e10ba-9ec9-418e-9b5f-f393f80f4c75",
         name: "słuchawki bluetooth",
+        categoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
       },
       {
         itemId: "4c4900ed-84e4-421b-9828-4871181cef8d",
         name: "kabel minijack 2m",
+        categoryId: "a02759a0-bb2d-4d22-aaa8-14d5a3fe0855",
+      },
+    ),
+    categories: new Array<Category>(
+      {
+        name: "nagłośnienie",
+        categoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
+      },
+      {
+        name: "oświetlenie",
+        categoryId: "b64e44ac-7447-4922-859e-1df0a273db43",
+      },
+      {
+        name: "zasilanie",
+        categoryId: "7a776a11-de96-4702-b4df-b4157a07780d",
+      },
+      {
+        name: "pozostałe",
+        categoryId: "8b10c898-7617-4226-91d3-5b9b2edb45ae",
+      },
+      // nagłośnienie
+      {
+        name: "mikrofony",
+        categoryId: "480fa84c-b559-48fe-8cf1-d4a22b322ea5",
+        parentCategoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
+      },
+      {
+        name: "głośniki",
+        categoryId: "6c620a38-9f44-4648-9202-fa7fc9ca1f43",
+        parentCategoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
+      },
+      {
+        name: "subwoofery",
+        categoryId: "31eed529-b22a-4b40-aa72-67b6dc14a725",
+        parentCategoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
+      },
+      {
+        name: "statywy mikrofonowe",
+        categoryId: "f096f654-2bd6-4fe2-a635-0346083acdca",
+        parentCategoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
+      },
+      {
+        name: "statywy głośnikowe",
+        categoryId: "98b9dc9d-4749-4b60-b0f2-268a3af25f5c",
+        parentCategoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
+      },
+      {
+        name: "miksery",
+        categoryId: "8ce76808-6d36-420b-89bd-3baf3f972153",
+        parentCategoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
+      },
+      {
+        name: "kable audio",
+        categoryId: "7bb4d313-d747-4218-9017-890799192efe",
+        parentCategoryId: "383e8344-8af2-4f88-9c66-91309b073bfb",
+      },
+      // kable
+      {
+        name: "XLR",
+        categoryId: "5d128a35-c6fa-4ad0-9c94-a55b3215ce88",
+        parentCategoryId: "7bb4d313-d747-4218-9017-890799192efe",
+      },
+      {
+        name: "jack",
+        categoryId: "a13bf061-ebca-4dbf-bc2b-815b80181e36",
+        parentCategoryId: "7bb4d313-d747-4218-9017-890799192efe",
+      },
+      {
+        name: "minijack",
+        categoryId: "a02759a0-bb2d-4d22-aaa8-14d5a3fe0855",
+        parentCategoryId: "7bb4d313-d747-4218-9017-890799192efe",
+      },
+      // oświetlenie
+      {
+        name: "głowy",
+        categoryId: "67abcb4b-04df-4fb8-bc82-761d07c977ac",
+        parentCategoryId: "b64e44ac-7447-4922-859e-1df0a273db43",
+      },
+      {
+        name: "żarowe",
+        categoryId: "c3bcc320-dfa0-4658-bdd6-fc7a31036097",
+        parentCategoryId: "b64e44ac-7447-4922-859e-1df0a273db43",
+      },
+      {
+        name: "kable do oświetlenia",
+        categoryId: "fb3f07b5-81c8-4ec0-b01d-460bf21cfafc",
+        parentCategoryId: "b64e44ac-7447-4922-859e-1df0a273db43",
+      },
+      // kable
+      {
+        name: "DMX",
+        categoryId: "0309d1ef-9069-4571-aff1-175434a85b5c",
+        parentCategoryId: "b64e44ac-7447-4922-859e-1df0a273db43",
+      },
+      // zasilanie
+      {
+        name: "kable elektryczne",
+        categoryId: "0887400d-8a7c-4aec-a162-82a510d3a148",
+        parentCategoryId: "7a776a11-de96-4702-b4df-b4157a07780d",
+      },
+      // kable
+      {
+        name: "IEC",
+        categoryId: "35625e42-e888-4f7a-a981-c25a0c5158ba",
+        parentCategoryId: "7a776a11-de96-4702-b4df-b4157a07780d",
+      },
+      {
+        name: "IEC 'podaj dalej'",
+        categoryId: "3816255e-03be-44d6-b04a-1611252e03ba",
+        parentCategoryId: "7a776a11-de96-4702-b4df-b4157a07780d",
+      },
+      // różne
+      {
+        name: "sprzęt elektryczny",
+        categoryId: "f7b1dc41-6cb8-4bad-836d-d48667e61507",
+        parentCategoryId: "8b10c898-7617-4226-91d3-5b9b2edb45ae",
       },
     ),
   },
@@ -308,29 +443,52 @@ export const demoData: Record<typeof demoOrganizations[number]["organizationId"]
       {
         itemId: "1f8b55e5-c5eb-4706-b6e2-fc2c103e94f5",
         name: "Kubuś Puchatek: historia Stumilowego Lasu",
+        categoryId: "f5a5995c-ad6c-4560-b655-0dd346323e92",
       },
       {
         itemId: "c44b0b61-db5b-494e-b1ed-fc9c0607ad52",
         name: "Pingwin Obieżyświat",
+        categoryId: "f5a5995c-ad6c-4560-b655-0dd346323e92",
       },
       {
         itemId: "f139e39a-313e-406d-b360-67167efd2722",
         name: "Podręcznik do przedmiotu Historia i Teraźniejszość",
+        categoryId: "5e03f517-ca77-403e-b252-a07a8f016c8c",
       },
       {
         itemId: "aa0d8294-0aed-43e7-a6f5-4fec14f5e3bd",
         name: "Atlas Świata",
+        categoryId: "5e03f517-ca77-403e-b252-a07a8f016c8c",
       },
       {
         itemId: "13b04492-443e-4b70-9892-0971b1ab7526",
         name: "Klaser ze znaczkami pocztowymi z lat 1992-1994",
+        categoryId: "7654e89e-0065-4670-93c1-72ca4c694eb1",
       },
     ),
+    categories: new Array<Category>(
+      {
+        name: "książki",
+        categoryId: "7654e89e-0065-4670-93c1-72ca4c694eb1",
+      },
+      // książki
+      {
+        name: "dla dzieci",
+        categoryId: "f5a5995c-ad6c-4560-b655-0dd346323e92",
+        parentCategoryId: "7654e89e-0065-4670-93c1-72ca4c694eb1",
+      },
+      {
+        name: "podręczniki",
+        categoryId: "5e03f517-ca77-403e-b252-a07a8f016c8c",
+        parentCategoryId: "7654e89e-0065-4670-93c1-72ca4c694eb1",
+      },
+    )
   },
   "a787df42-7513-4f4a-a94a-e5ae6eb4b4eb": { // "The Engineers Basement"
     users: [],
     lendings: [],
     events: [],
     items: [],
+    categories: [],
   },
 }
