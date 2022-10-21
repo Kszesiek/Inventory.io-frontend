@@ -6,32 +6,31 @@ import {useSelector} from "react-redux";
 import {IRootState} from "../../../store/store";
 import {Item} from "../../../store/items";
 import {InventoryStackScreenProps} from "../../../types";
+import {useRef} from "react";
+import {OpacityButton} from "../../../components/Themed/OpacityButton";
+import * as React from "react";
+import {Modalize} from "react-native-modalize";
 
 export default function Inventory({ navigation, route }: InventoryStackScreenProps<'Inventory'>) {
   const backgroundColor = useThemeColor({}, 'background');
   const cardBackgroundColor = useThemeColor({}, 'cardBackground');
+  const tintColor = useThemeColor({}, 'tint');
 
   const items = useSelector((state: IRootState) => state.items.items);
   const categories = useSelector((state: IRootState) => state.categories.categories);
+
+  const categoriesModalizeRef = useRef<Modalize>(null);
+  const filtersModalizeRef = useRef<Modalize>(null);
 
   const itemTitle: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans Bold',
     color: useThemeColor({}, "tint"),
     fontSize: 15,
     marginBottom: 5,
-    // textAlign: 'center',
   }
 
   function searchShortcutPressed() {
     console.log("search button pressed");
-  }
-
-  function categoriesPressed() {
-    console.log("categories pressed");
-  }
-
-  function filtersPressed() {
-    console.log("filters pressed");
   }
 
   function cardPressed(itemId: string) {
@@ -39,39 +38,80 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
     navigation.navigate("ItemDetails", { itemId: itemId });
   }
 
+  function Categories() {
+    return (
+      <View style={{flex: 1, overflow: "visible"}}>
+        <Text style={{textAlign: 'center', fontSize: 26, color: tintColor, letterSpacing: 1,}}>Wybierz kategorię</Text>
+        <View style={{flex: 1}} />
+        <OpacityButton
+          style={styles.bottomDrawerConfirmButton}
+          onPress={() => categoriesModalizeRef.current?.close()}
+        >
+          Potwierdź
+        </OpacityButton>
+      </View>
+    )
+  }
+
+  function Filters() {
+    return (
+      <View style={{flex: 1}}>
+        <Text style={{textAlign: 'center', fontSize: 26, color: tintColor, letterSpacing: 1,}}>Filtry</Text>
+        <View style={{flex: 1}} />
+        <OpacityButton
+          style={styles.bottomDrawerConfirmButton}
+          onPress={() => filtersModalizeRef.current?.close()}
+        >
+          Potwierdź
+        </OpacityButton>
+      </View>
+    )
+  }
+
+  function categoriesPressed() {
+    console.log("categories pressed");
+    categoriesModalizeRef.current?.open();
+  }
+
+  function filtersPressed() {
+    console.log("filters pressed");
+    filtersModalizeRef.current?.open();
+  }
+
   return (
-    <FlatList
+    <>
+      <FlatList
       style={{backgroundColor}}
       contentContainerStyle={styles.flatList}
       data={items}
       ListHeaderComponent={
-      <View>
-        <View key="filterbar" style={styles.filterBar}>
-          <TouchableCard style={styles.filterButton} onPress={categoriesPressed}>
-            <Text>Kategorie</Text>
-          </TouchableCard>
-          <TouchableCard style={styles.filterButton} onPress={filtersPressed}>
-            <Text>Filtry</Text>
-          </TouchableCard>
-        </View>
-        <View key="searchbar" style={{...styles.searchBar, backgroundColor: cardBackgroundColor}}>
-          <TextInput
-            style={styles.searchBarInput}
-            placeholder="Wyszukaj w inwentarzu..."
-          />
-          <TouchableCard
-            style={[styles.searchBarButton, {
-              borderTopLeftRadius: 0,
-              borderBottomLeftRadius: 0,
-              paddingRight: 2,
-              backgroundColor: useThemeColor({}, 'tint'),
-            }]}
-            onPress={searchShortcutPressed}
+        <View>
+          <View key="filterbar" style={styles.filterBar}>
+            <TouchableCard style={styles.filterButton} onPress={categoriesPressed}>
+              <Text>Kategorie</Text>
+            </TouchableCard>
+            <TouchableCard style={styles.filterButton} onPress={filtersPressed}>
+              <Text>Filtry</Text>
+            </TouchableCard>
+          </View>
+          <View key="searchbar" style={{...styles.searchBar, backgroundColor: cardBackgroundColor}}>
+            <TextInput
+              style={styles.searchBarInput}
+              placeholder="Wymszukaj w inwentarzu..."
+            />
+            <TouchableCard
+              style={[styles.searchBarButton, {
+                borderTopLeftRadius: 0,
+                borderBottomLeftRadius: 0,
+                paddingRight: 2,
+                backgroundColor: useThemeColor({}, 'tint'),
+              }]}
+              onPress={searchShortcutPressed}
             >
               <FontAwesome name="search" size={30} color={backgroundColor} />
-          </TouchableCard>
+            </TouchableCard>
+          </View>
         </View>
-      </View>
       }
       ListEmptyComponent={
         <View style={styles.noContentContainer}>
@@ -79,14 +119,31 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
           <Text style={styles.noContentText}>Aby dodać przedmiot, użyj przycisku u góry ekranu.</Text>
         </View>}
       renderItem={(item: ListRenderItemInfo<Item>) => {return (
-          <TouchableCard style={styles.card} onPress={() => cardPressed(item.item.itemId)}>
-            <Text style={[styles.cardText, itemTitle]}>{item.item.name}</Text>
-            <Text style={styles.cardText}>Kategoria: {categories.find(category => category.categoryId === item.item.categoryId)?.name || <Text style={{fontStyle: 'italic', fontSize: 13}}>nieznana kategoria</Text>}</Text>
-          </TouchableCard>
-        )
+        <TouchableCard style={styles.card} onPress={() => cardPressed(item.item.itemId)}>
+          <Text style={[styles.cardText, itemTitle]}>{item.item.name}</Text>
+          <Text style={styles.cardText}>Kategoria: {categories.find(category => category.categoryId === item.item.categoryId)?.name || <Text style={{fontStyle: 'italic', fontSize: 13}}>nieznana kategoria</Text>}</Text>
+        </TouchableCard>
+      )
       }}
     />
-  )
+    <Modalize
+      ref={categoriesModalizeRef}
+      modalStyle={{...styles.modalStyle, backgroundColor}}
+      // closeAnimationConfig={{
+      //   timing: 100,
+      // }}
+    >
+      {Categories()}
+    </Modalize>
+      <Modalize
+        ref={filtersModalizeRef}
+        modalStyle={{...styles.modalStyle, backgroundColor}}
+      >
+        {Filters()}
+      </Modalize>
+
+  </>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -136,6 +193,18 @@ const styles = StyleSheet.create({
   cardText: {
     textAlign: 'left',
     width: '100%',
+  },
+  modalStyle: {
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    marginTop: 40,
+    paddingTop: 30,
+  },
+  bottomDrawerConfirmButton: {
+    margin: 15,
+    paddingHorizontal: 40,
+    paddingVertical: 8,
+    alignSelf: 'center',
   },
   noContentContainer: {
     flexGrow: 1,

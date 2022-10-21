@@ -83,7 +83,7 @@ export default function Homescreen({ navigation, route }: HomescreenStackScreenP
 
   return (
     <ScrollView style={{...styles.mainContainer, backgroundColor}}>
-      <Text style={{backgroundColor: 'darkviolet'}}>{fetchedMessage}</Text>
+      {fetchedMessage.length > 0 && <Text style={{backgroundColor: 'darkviolet'}}>{fetchedMessage}</Text>}
       <View key="searchbar" style={{...styles.searchBar, backgroundColor: useThemeColor({}, 'cardBackground')}}>
         <TouchableCard
           style={[styles.searchBarButton, {
