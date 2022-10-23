@@ -40,32 +40,30 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
 
   function Categories() {
     return (
-      <View style={{flex: 1, overflow: "visible"}}>
+      <>
         <Text style={{textAlign: 'center', fontSize: 26, color: tintColor, letterSpacing: 1,}}>Wybierz kategorię</Text>
-        <View style={{flex: 1}} />
         <OpacityButton
           style={styles.bottomDrawerConfirmButton}
           onPress={() => categoriesModalizeRef.current?.close()}
         >
           Potwierdź
         </OpacityButton>
-      </View>
+      </>
     )
   }
 
   function Filters() {
     return (
-      <View style={{flex: 1}}>
+      <>
         <Text style={{textAlign: 'center', fontSize: 26, color: tintColor, letterSpacing: 1,}}>Filtry</Text>
-        <View style={{flex: 1}} />
         <OpacityButton
           style={styles.bottomDrawerConfirmButton}
           onPress={() => filtersModalizeRef.current?.close()}
         >
           Potwierdź
         </OpacityButton>
-      </View>
-    )
+      </>
+      )
   }
 
   function categoriesPressed() {
@@ -129,18 +127,15 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
     <Modalize
       ref={categoriesModalizeRef}
       modalStyle={{...styles.modalStyle, backgroundColor}}
-      // closeAnimationConfig={{
-      //   timing: 100,
-      // }}
     >
       {Categories()}
     </Modalize>
-      <Modalize
-        ref={filtersModalizeRef}
-        modalStyle={{...styles.modalStyle, backgroundColor}}
-      >
-        {Filters()}
-      </Modalize>
+    <Modalize
+      ref={filtersModalizeRef}
+      modalStyle={{...styles.modalStyle, backgroundColor}}
+    >
+      {Filters()}
+    </Modalize>
 
   </>
   );
@@ -198,7 +193,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     marginTop: 40,
-    paddingTop: 30,
+    flex: 1,
   },
   bottomDrawerConfirmButton: {
     margin: 15,
