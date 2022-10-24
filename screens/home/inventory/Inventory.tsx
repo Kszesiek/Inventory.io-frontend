@@ -10,6 +10,7 @@ import {useRef} from "react";
 import {OpacityButton} from "../../../components/Themed/OpacityButton";
 import * as React from "react";
 import {Modalize} from "react-native-modalize";
+import CategoriesList from "../../../components/CategoriesList";
 
 export default function Inventory({ navigation, route }: InventoryStackScreenProps<'Inventory'>) {
   const backgroundColor = useThemeColor({}, 'background');
@@ -41,7 +42,8 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
   function Categories() {
     return (
       <>
-        <Text style={{textAlign: 'center', fontSize: 26, color: tintColor, letterSpacing: 1,}}>Wybierz kategorię</Text>
+        <Text style={[styles.modalTitle, {color: tintColor}]}>Wybierz kategorię</Text>
+        <CategoriesList categories={categories} />
         <OpacityButton
           style={styles.bottomDrawerConfirmButton}
           onPress={() => categoriesModalizeRef.current?.close()}
@@ -55,7 +57,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
   function Filters() {
     return (
       <>
-        <Text style={{textAlign: 'center', fontSize: 26, color: tintColor, letterSpacing: 1,}}>Filtry</Text>
+        <Text style={[styles.modalTitle, {color: tintColor}]}>Filtry</Text>
         <OpacityButton
           style={styles.bottomDrawerConfirmButton}
           onPress={() => filtersModalizeRef.current?.close()}
@@ -194,6 +196,13 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 30,
     marginTop: 40,
     flex: 1,
+  },
+  modalTitle: {
+    textAlign: 'center',
+    fontSize: 26,
+    letterSpacing: 1,
+    marginTop: 15,
+    marginBottom: 10,
   },
   bottomDrawerConfirmButton: {
     margin: 15,
