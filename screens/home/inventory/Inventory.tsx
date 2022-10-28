@@ -1,16 +1,17 @@
 import {TextInput, useThemeColor, View, Text} from "../../../components/Themed";
 import {TouchableCard} from "../../../components/Themed/TouchableCard";
 import {FontAwesome} from "@expo/vector-icons";
-import {FlatList, ListRenderItemInfo, StyleProp, StyleSheet, TextStyle} from "react-native";
+import {Animated, FlatList, ListRenderItemInfo, StyleProp, StyleSheet, TextStyle} from "react-native";
 import {useSelector} from "react-redux";
 import {IRootState} from "../../../store/store";
 import {Item} from "../../../store/items";
 import {InventoryStackScreenProps} from "../../../types";
-import {useRef} from "react";
+import {useRef, useState} from "react";
 import {OpacityButton} from "../../../components/Themed/OpacityButton";
 import * as React from "react";
 import {Modalize} from "react-native-modalize";
-import CategoriesList from "../../../components/CategoriesList";
+import {Category} from "../../../store/categories";
+import CategoriesNavigatorWannabe from "../../../components/CategoriesNavigatorWannabe";
 
 export default function Inventory({ navigation, route }: InventoryStackScreenProps<'Inventory'>) {
   const backgroundColor = useThemeColor({}, 'background');
@@ -19,6 +20,8 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
 
   const items = useSelector((state: IRootState) => state.items.items);
   const categories = useSelector((state: IRootState) => state.categories.categories);
+
+  const [chosenCategory, setChosenCategory] = useState<string>("");
 
   const categoriesModalizeRef = useRef<Modalize>(null);
   const filtersModalizeRef = useRef<Modalize>(null);
@@ -41,16 +44,16 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
 
   function Categories() {
     return (
-      <>
+      <Animated.View style={{flex: 1}}>
         <Text style={[styles.modalTitle, {color: tintColor}]}>Wybierz kategorię</Text>
-        <CategoriesList categories={categories} />
+        <CategoriesNavigatorWannabe />
         <OpacityButton
           style={styles.bottomDrawerConfirmButton}
           onPress={() => categoriesModalizeRef.current?.close()}
         >
           Potwierdź
         </OpacityButton>
-      </>
+      </Animated.View>
     )
   }
 
@@ -78,6 +81,9 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
     filtersModalizeRef.current?.open();
   }
 
+  const [isCategoryCorrect, setIsCategoryCorrect] = useState<boolean>(false);
+  const [currentCategory, setCurrentCategory] = useState<Category | undefined>();
+
   return (
     <>
       <FlatList
@@ -97,7 +103,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
           <View key="searchbar" style={{...styles.searchBar, backgroundColor: cardBackgroundColor}}>
             <TextInput
               style={styles.searchBarInput}
-              placeholder="Wymszukaj w inwentarzu..."
+              placeholder="Wyszukaj w inwentarzu..."
             />
             <TouchableCard
               style={[styles.searchBarButton, {
@@ -118,27 +124,39 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
           <Text style={[styles.noContentText, {fontSize: 16}]}>Brak przedmiotów do wyświetlenia.</Text>
           <Text style={styles.noContentText}>Aby dodać przedmiot, użyj przycisku u góry ekranu.</Text>
         </View>}
-      renderItem={(item: ListRenderItemInfo<Item>) => {return (
-        <TouchableCard style={styles.card} onPress={() => cardPressed(item.item.itemId)}>
-          <Text style={[styles.cardText, itemTitle]}>{item.item.name}</Text>
-          <Text style={styles.cardText}>Kategoria: {categories.find(category => category.categoryId === item.item.categoryId)?.name || <Text style={{fontStyle: 'italic', fontSize: 13}}>nieznana kategoria</Text>}</Text>
-        </TouchableCard>
-      )
+      renderItem={(item: ListRenderItemInfo<Item>) => {
+        // setIsCategoryCorrect(chosenCategory === "");
+        // if (!isCategoryCorrect) {
+        //   setCurrentCategory(categories.find((category: Category) => category.categoryId === chosenCategory)!);
+        //   if (currentCategory!.categoryId === item.item.categoryId)
+        //     setIsCategoryCorrect(true);
+        //
+        //   while (currentCategory!.parentCategoryId !== undefined) {
+        //     setCurrentCategory(categories.find((category: Category) => category.categoryId === chosenCategory)!);
+        //     if (currentCategory!.categoryId === item.item.categoryId)
+        //       setIsCategoryCorrect(true);
+        //   }
+        // }
+
+        return (
+          <TouchableCard key={item.item.itemId} style={styles.card} onPress={() => cardPressed(item.item.itemId)}>
+            <Text style={[styles.cardText, itemTitle]}>{item.item.name}</Text>
+            <Text style={styles.cardText}>Kategoria: {categories.find(category => category.categoryId === item.item.categoryId)?.name || <Text style={{fontStyle: 'italic', fontSize: 13}}>nieznana kategoria</Text>}</Text>
+          </TouchableCard>
+        )
       }}
     />
     <Modalize
       ref={categoriesModalizeRef}
       modalStyle={{...styles.modalStyle, backgroundColor}}
-    >
-      {Categories()}
-    </Modalize>
+      customRenderer={Categories()}
+    />
     <Modalize
       ref={filtersModalizeRef}
       modalStyle={{...styles.modalStyle, backgroundColor}}
     >
       {Filters()}
     </Modalize>
-
   </>
   );
 }

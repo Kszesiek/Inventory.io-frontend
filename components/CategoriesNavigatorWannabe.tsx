@@ -28,12 +28,12 @@ export default function CategoriesNavigatorWannabe() {
       Animated.timing(currentWindow === 1 ? firstWindow : secondWindow, {
         toValue: direction === 'forwards' ? screen.width / 2 : -screen.width / 2,
         duration: animDuration,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
       Animated.timing(currentWindow === 1 ? secondWindow : firstWindow, {
         toValue: 0,
         duration: animDuration,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
     ]).start();
   }
@@ -47,7 +47,7 @@ export default function CategoriesNavigatorWannabe() {
   }
 
   return (
-    <View style={{flex: 1, justifyContent: 'flex-end'}}>
+    <View style={{flexGrow: 1, justifyContent: 'flex-end',}}>
       <Animated.View style={{...styles.container, backgroundColor: 'red', right: firstWindow, zIndex: currentWindow === 1 ? -1 : -2}}>
         <Text>WINDOW 1.{"\n"}Current: {currentWindow}</Text>
       </Animated.View>
