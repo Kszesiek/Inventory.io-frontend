@@ -7,16 +7,22 @@ import {Category} from "../store/categories";
 
 export const demoOrganizations: Organization[] = [
   {
-    organizationId: "718d29cc-ac8b-40fc-83ea-1c24a3b1f610",
+    id: "86519777-5cf5-4af5-8e56-d5640cb26c8c",
     name: 'Amplitron',
+    short_name: 'AMP',
+    description: 'Klub Studencki Amplitron. Est. 1970.',
   },
   {
-    organizationId: "e9391d5f-3b6b-48b3-bcb0-1022369dceb1",
+    id: "e9391d5f-3b6b-48b3-bcb0-1022369dceb1",
     name: 'Antykwariat',
+    short_name: 'ANTIQ',
+    description: 'Antykwariat ANTIQUE. Twoje miejsce z antykami.',
   },
   {
-    organizationId: "a787df42-7513-4f4a-a94a-e5ae6eb4b4eb",
+    id: "a787df42-7513-4f4a-a94a-e5ae6eb4b4eb",
     name: 'Wypożyczalnia sprzętu estradowego "The Engineers Basement"',
+    short_name: 'TEB',
+    description: '',
   },
 ];
 
@@ -28,8 +34,8 @@ type demoBatch = {
   categories: Array<Category>,
 }
 
-export const demoData: Record<typeof demoOrganizations[number]["organizationId"], demoBatch> = {
-  "718d29cc-ac8b-40fc-83ea-1c24a3b1f610": { // Amplitron
+export const demoData: Record<typeof demoOrganizations[number]["id"], demoBatch> = {
+  "86519777-5cf5-4af5-8e56-d5640cb26c8c": { // Amplitron
     users: new Array<User>(
       {
         userId: "eed0be02-f83e-46c8-a4aa-2dcae02dc12f",

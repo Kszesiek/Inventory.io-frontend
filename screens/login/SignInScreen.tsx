@@ -18,7 +18,8 @@ import {itemActions} from "../../store/items";
 import {eventActions} from "../../store/events";
 import {userActions} from "../../store/users";
 import {IRootState} from "../../store/store";
-import {getOrganizations, logIn} from "../../utilities/auth";
+import {logIn} from "../../endpoints/auth";
+import {getOrganizations} from "../../endpoints/organizations";
 import {categoryActions} from "../../store/categories";
 
 export default function SignInScreen({ navigation, route }: LoginStackScreenProps<'SignIn'>) {
@@ -43,25 +44,26 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
     setIsAuthenticating(true);
 
     if (demoMode) {
-      dispatch(appWideActions.signIn({username: username, userId: Math.random().toString(), token: Math.random().toString()}));
+      dispatch(appWideActions.signIn({username: 'itsmejohndoe', name: 'John', surname: 'Doe', email: 'johndoe@example.com'}));
       await dispatch(organizationsActions.setOrganizations(demoOrganizations));
     } else {
-      try {
-        const response = await logIn(username, password);
-        if (response !== null) {
-          const organizations = await getOrganizations(response.token);
-          await dispatch(organizationsActions.setOrganizations(organizations));
+      const response = await logIn(dispatch, username, password);
+      if (!response) {
+        Alert.alert('Logowanie nie powiodło się', 'Sprawdź dane logowania i spróbuj ponownie.');
+      } else {
+        const response = await getOrganizations(dispatch);
+        if (!response) {
+          Alert.alert('Ło cie panie!', 'No i co ja mam teraz zrobić 🙈🙈🙈');
+        } else {
           await dispatch(appWideActions.signIn({
-              username: response.username,
-              token: response.token,
-              userId: response.userId
-            }));
+            username: 'itsmejohndoe',
+            name: 'John',
+            surname: 'Doe',
+            email: 'johndoe@example.com',
+          }));
         }
-      } catch (error) {
-        Alert.alert('Logowanie nie powiodło się', 'Sprawdź dane logowania i spróbuj ponownie.')
       }
     }
-
     setIsAuthenticating(false);
   }
 

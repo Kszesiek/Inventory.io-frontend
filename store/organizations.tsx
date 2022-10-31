@@ -1,16 +1,20 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 
 export interface Organization {
-  organizationId: string;
+  id: string;
   name: string;
+  short_name: string;
+  description: string;
 }
 
 export function isOrganization(object: any): object is Organization {
   return (
     object &&
     typeof object === 'object' &&
-    typeof object['organizationId'] === 'string' &&
-    typeof object['name'] === 'string'
+    typeof object['id'] === 'string' &&
+    typeof object['name'] === 'string' &&
+    typeof object['short_name'] === 'string' &&
+    typeof object['description'] === 'string'
   );
 }
 
@@ -27,17 +31,17 @@ export const organizationsSlice = createSlice({
       state.organizations = action.payload;
     },
     addOrganization: (state, action) => {
-      if (!state.organizations.some(organization => organization.organizationId === action.payload.organizationId)) {
+      if (!state.organizations.some(organization => organization.id === action.payload.id)) {
         state.organizations.push(action.payload);
       }
     },
-    removeOrganization: (state, action: PayloadAction<{organizationId: Organization["organizationId"]}>) => {
-      if (state.organizations.find(organization => organization.organizationId === action.payload.organizationId)) {
-        state.organizations = state.organizations.filter(organization => organization.organizationId !== action.payload.organizationId);
+    removeOrganization: (state, action: PayloadAction<{id: Organization["id"]}>) => {
+      if (state.organizations.find(organization => organization.id === action.payload.id)) {
+        state.organizations = state.organizations.filter(organization => organization.id !== action.payload.id);
       }
     },
     modifyOrganization: (state, action) => {
-      const index = state.organizations.findIndex(organization => organization.organizationId === action.payload.organization.organizationId);
+      const index = state.organizations.findIndex(organization => organization.id === action.payload.organization.id);
       if (index >= 0) {
         state.organizations[index] = action.payload.organization;
       }

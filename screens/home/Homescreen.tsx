@@ -17,8 +17,7 @@ import axios from "axios";
 
 export default function Homescreen({ navigation, route }: HomescreenStackScreenProps<'Homescreen'>) {
   const events: Array<Event> = useSelector((state: IRootState) => state.events.events)
-  const lendings: Array<LendingForEvent | LendingPrivate> = useSelector((state: IRootState) => state.lendings.lendings)
-  const token: string = useSelector((state: IRootState) => state.appWide.token)!
+  const lendings: Array<LendingForEvent | LendingPrivate> = useSelector((state: IRootState) => state.lendings.lendings);
 
   const backgroundColor = useThemeColor({}, 'background');
 
@@ -49,13 +48,13 @@ export default function Homescreen({ navigation, route }: HomescreenStackScreenP
 
   const [fetchedMessage, setFetchedMessage] = useState<string>("");
 
-  useEffect(() => {
-    console.log(token);
-    axios.get('https://react-native-course-2601f-default-rtdb.europe-west1.firebasedatabase.app/msg.json?auth=' + token).then((response) => {
-      setFetchedMessage(response.data);
-    });
-
-  }, []);
+  // useEffect(() => {
+  //   console.log(token);
+  //   axios.get('https://react-native-course-2601f-default-rtdb.europe-west1.firebasedatabase.app/msg.json?auth=' + token).then((response) => {
+  //     setFetchedMessage(response.data);
+  //   });
+  //
+  // }, []);
 
   const boldedText: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans Bold',

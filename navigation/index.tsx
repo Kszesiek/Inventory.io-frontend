@@ -52,11 +52,12 @@ import CreateOrganization from "../screens/organizations/CreateOrganization";
 import WelcomeStackNavigator from "./WelcomeStackNavigator";
 import useCachedResources from "../hooks/useCachedResources";
 import {categoryActions} from "../store/categories";
+import {Organization} from "../store/organizations";
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   const chosenTheme: "light" | "dark" | null | undefined = useSelector((state: IRootState) => state.appWide.theme === 'auto' ? colorScheme : state.appWide.theme);
   const organizations = useSelector((state: IRootState) => state.organizations.organizations);
-  const token = useSelector((state: IRootState) => state.appWide.token);
+  const username = useSelector((state: IRootState) => state.appWide.username);
 
   const isLoadingComplete = useCachedResources();
 
@@ -68,7 +69,7 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
         // linking={LinkingConfiguration}
         theme={chosenTheme === 'dark' ? DarkTheme : DefaultTheme}>
 
-        {!token ?
+        {!username ?
           <LoginNavigator/>
           :
           organizations.length > 0 ?
@@ -86,7 +87,7 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
 
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 
-function HomeStackNavigator(props: {organizations: OrganizationDetails[]}) {
+function HomeStackNavigator(props: {organizations: Organization[]}) {
   const headerColor = useThemeColor({}, 'header');
 
   return (
@@ -153,24 +154,19 @@ function CustomHomeDrawerContent(props: DrawerContentComponentProps) {
   );
 }
 
-type OrganizationDetails = {
-  organizationId: string,
-  name: string
-};
 
-
-function HomeDrawerNavigator(props: {organizations: OrganizationDetails[]}) {
+function HomeDrawerNavigator(props: {organizations: Organization[]}) {
   const headerColor = useThemeColor({}, 'header');
   const dispatch = useDispatch();
 
   useEffect(() => {
     async function loadData () {
       await Promise.all([
-        dispatch(eventActions.loadEvents(demoData[props.organizations[0].organizationId].events)),
-        dispatch(itemActions.loadItems(demoData[props.organizations[0].organizationId].items)),
-        dispatch(lendingActions.loadLendings(demoData[props.organizations[0].organizationId].lendings)),
-        dispatch(userActions.loadUsers(demoData[props.organizations[0].organizationId].users)),
-        dispatch(categoryActions.loadCategories(demoData[props.organizations[0].organizationId].categories)),
+        dispatch(eventActions.loadEvents(demoData[props.organizations[0].id].events)),
+        dispatch(itemActions.loadItems(demoData[props.organizations[0].id].items)),
+        dispatch(lendingActions.loadLendings(demoData[props.organizations[0].id].lendings)),
+        dispatch(userActions.loadUsers(demoData[props.organizations[0].id].users)),
+        dispatch(categoryActions.loadCategories(demoData[props.organizations[0].id].categories)),
       ])
     }
     loadData()
@@ -187,9 +183,9 @@ function HomeDrawerNavigator(props: {organizations: OrganizationDetails[]}) {
       }}
       drawerContent={(props) => <CustomHomeDrawerContent {...props} />}
     >
-      {props.organizations.map((organization: OrganizationDetails) => (
+      {props.organizations.map((organization: Organization) => (
         <HomeDrawer.Screen
-          key={organization.organizationId}
+          key={organization.id}
           name={organization.name}
           component={HomeTabNavigator}
           options={{
@@ -197,11 +193,11 @@ function HomeDrawerNavigator(props: {organizations: OrganizationDetails[]}) {
           }}
           listeners={{
             drawerItemPress: (e) => {
-              const isDemo: boolean = demoData.hasOwnProperty(organization.organizationId);
-              dispatch(eventActions.loadEvents(isDemo ? demoData[organization.organizationId].events : []));
-              dispatch(itemActions.loadItems(isDemo ? demoData[organization.organizationId].items : []));
-              dispatch(lendingActions.loadLendings(isDemo ? demoData[organization.organizationId].lendings : []));
-              dispatch(userActions.loadUsers(isDemo ? demoData[organization.organizationId].users : []));
+              const isDemo: boolean = demoData.hasOwnProperty(organization.id);
+              dispatch(eventActions.loadEvents(isDemo ? demoData[organization.id].events : []));
+              dispatch(itemActions.loadItems(isDemo ? demoData[organization.id].items : []));
+              dispatch(lendingActions.loadLendings(isDemo ? demoData[organization.id].lendings : []));
+              dispatch(userActions.loadUsers(isDemo ? demoData[organization.id].users : []));
             }
           }}
         />

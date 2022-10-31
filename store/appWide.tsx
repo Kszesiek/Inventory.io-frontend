@@ -7,8 +7,9 @@ export const appWideSlice = createSlice({
     theme: 'auto' as 'auto' | 'light' | 'dark',
     demoMode: true,
     username: undefined as string | undefined,
-    userId: undefined as string | undefined,
-    token: undefined as string | undefined,
+    name: undefined as string | undefined,
+    surname: undefined as string | undefined,
+    email: undefined as string | undefined,
   },
   reducers: {
     setTheme: (state, action: {payload: 'auto' | 'light' | 'dark'}) => {
@@ -20,21 +21,29 @@ export const appWideSlice = createSlice({
     },
     signOut: (state) => {
       state.username = undefined;
-      state.userId = undefined;
-      state.token = undefined;
+      state.name = undefined;
+      state.surname = undefined;
+      state.email = undefined;
 
-      AsyncStorage.removeItem("username");
-      AsyncStorage.removeItem("userId");
-      AsyncStorage.removeItem("token");
+      AsyncStorage.multiRemove([
+        "username",
+        "name",
+        "surname",
+        "email",
+      ]);
     },
     signIn: (state, action) => {
       state.username = action.payload.username;
-      state.userId = action.payload.userId;
-      state.token = action.payload.token;
+      state.name = action.payload.name;
+      state.surname = action.payload.surname;
+      state.email = action.payload.email;
 
-      AsyncStorage.setItem("username", action.payload.username);
-      AsyncStorage.setItem("userId", action.payload.userId);
-      AsyncStorage.setItem("token", action.payload.token);
+      AsyncStorage.multiSet([
+        ["username", action.payload.username],
+        ["name", action.payload.name],
+        ["surname", action.payload.surname],
+        ["email", action.payload.email],
+      ]);
     },
   },
 });
