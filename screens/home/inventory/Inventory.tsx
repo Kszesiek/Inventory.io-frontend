@@ -21,7 +21,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
   const items = useSelector((state: IRootState) => state.items.items);
   const categories = useSelector((state: IRootState) => state.categories.categories);
 
-  const [chosenCategory, setChosenCategory] = useState<string>("");
+  const [chosenCategory, setChosenCategory] = useState<Category | undefined>(undefined);
 
   const categoriesModalizeRef = useRef<Modalize>(null);
   const filtersModalizeRef = useRef<Modalize>(null);
@@ -45,8 +45,8 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
   function Categories() {
     return (
       <Animated.View style={{flex: 1}}>
-        <Text style={[styles.modalTitle, {color: tintColor}]}>Wybierz kategorię</Text>
-        <CategoriesNavigatorWannabe />
+        <Text style={[styles.modalTitle, {color: tintColor}]}>{chosenCategory === undefined ? "Wybierz kategorię" : "Kategoria: " + chosenCategory?.name || <Text style={[styles.modalTitle, {color: tintColor, fontStyle: 'italic'}]}>nieznana kategoria</Text>}</Text>
+        <CategoriesNavigatorWannabe currentCategory={chosenCategory} setCurrentCategory={setChosenCategory} />
         <OpacityButton
           style={styles.bottomDrawerConfirmButton}
           onPress={() => categoriesModalizeRef.current?.close()}
@@ -80,9 +80,6 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
     console.log("filters pressed");
     filtersModalizeRef.current?.open();
   }
-
-  const [isCategoryCorrect, setIsCategoryCorrect] = useState<boolean>(false);
-  const [currentCategory, setCurrentCategory] = useState<Category | undefined>();
 
   return (
     <>
