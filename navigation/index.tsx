@@ -2,13 +2,11 @@
  * If you are not familiar with React Navigation, refer to the "Fundamentals" guide:
  * https://reactnavigation.org/docs/getting-started
  */
-import {FontAwesome, Ionicons} from '@expo/vector-icons';
+import {FontAwesome} from '@expo/vector-icons';
 import {
   NavigationContainer,
   DefaultTheme,
   DarkTheme,
-  useNavigation,
-  CommonActions,
 } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -20,7 +18,7 @@ import {
   useDrawerProgress
 } from '@react-navigation/drawer';
 import * as React from 'react';
-import {ColorSchemeName, Pressable, StyleSheet, TouchableOpacity} from 'react-native';
+import {ColorSchemeName, Pressable, StyleSheet} from 'react-native';
 
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
@@ -29,7 +27,7 @@ import NotFoundScreen from '../screens/old screens/NotFoundScreen';
 import TabOneScreen from '../screens/old screens/TabOneScreen';
 import TabTwoScreen from '../screens/old screens/TabTwoScreen';
 import {
-  RootStackParamList,
+  HomeStackParamList,
   OldRootStackParamList,
   OldRootTabParamList,
   RootTabScreenProps,
@@ -49,52 +47,68 @@ import {lendingActions} from "../store/lendings";
 import {userActions} from "../store/users";
 import LoginNavigator from "./LoginStackNavigator";
 import HomeTabNavigator from "./HomeTabNavigator";
-import Welcome from "../screens/firstLogIn/welcome";
-import CreateOrganization from "../screens/CreateOrganization";
+import CreateOrganization from "../screens/organizations/CreateOrganization";
+// import JoinOrganization from "../screens/organizations/JoinOrganization";
+import WelcomeStackNavigator from "./WelcomeStackNavigator";
+import useCachedResources from "../hooks/useCachedResources";
+import {categoryActions} from "../store/categories";
+import {Organization} from "../store/organizations";
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   const chosenTheme: "light" | "dark" | null | undefined = useSelector((state: IRootState) => state.appWide.theme === 'auto' ? colorScheme : state.appWide.theme);
+  const organizations = useSelector((state: IRootState) => state.organizations.organizations);
+  const username = useSelector((state: IRootState) => state.appWide.username);
 
-  return (
-    <NavigationContainer
-      // linking={LinkingConfiguration}
-      theme={chosenTheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <RootNavigator />
-    </NavigationContainer>
-  );
+  const isLoadingComplete = useCachedResources();
+
+  if (!isLoadingComplete) {
+    return null;
+  } else {
+    return (
+      <NavigationContainer
+        // linking={LinkingConfiguration}
+        theme={chosenTheme === 'dark' ? DarkTheme : DefaultTheme}>
+
+        {!username ?
+          <LoginNavigator/>
+          :
+          organizations.length > 0 ?
+            <HomeStackNavigator organizations={organizations} />
+            // <HomeDrawerNavigator organizations={organizations}/>
+            :
+            <WelcomeStackNavigator/>
+        }
+      </NavigationContainer>
+    );
+  }
 }
 
 // ROOT
 
-const RootStack = createNativeStackNavigator<RootStackParamList>();
+const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 
-function RootNavigator() {
-  const organizations = useSelector((state: IRootState) => state.organizations.organizations)
+function HomeStackNavigator(props: {organizations: Organization[]}) {
   const headerColor = useThemeColor({}, 'header');
-  const textColor = useThemeColor({}, 'text');
-  const navigation = useNavigation();
 
   return (
-    <RootStack.Navigator
+    <HomeStack.Navigator
       screenOptions={{
         headerShown: false,
-        headerLeft: () => (
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" color={textColor} size={30} style={{padding: 10}} />
-          </TouchableOpacity>
-        ),
+        headerTitleAlign: 'center',
+        headerStyle: {backgroundColor: headerColor},
       }}
     >
-      <RootStack.Screen name="Login" component={LoginNavigator} />
-      <RootStack.Screen name="Home">{() => HomeDrawerNavigator(organizations)}</RootStack.Screen>
-      <RootStack.Screen name="Welcome" component={Welcome} />
-      <RootStack.Screen name="CreateOrganization" component={CreateOrganization} options={{
+      <HomeStack.Screen name="HomeDrawer">{() => HomeDrawerNavigator({organizations: props.organizations})}</HomeStack.Screen>
+      <HomeStack.Screen name="CreateOrganization" component={CreateOrganization} options={{
         headerShown: true,
-        headerTitleAlign: 'center',
         headerTitle: 'Załóż organizację',
-        headerStyle: {backgroundColor: headerColor},
+      }}  />
+      <HomeStack.Screen name="JoinOrganization" component={CreateOrganization} options={{ // TODO: Change to JoinOrganization once it is created
+        headerShown: true,
+        headerTitle: 'Dołącz do organizacji',
       }} />
-    </RootStack.Navigator>
+
+    </HomeStack.Navigator>
   );
 }
 
@@ -112,7 +126,7 @@ function CustomHomeDrawerContent(props: DrawerContentComponentProps) {
 
   function createOrganizationPressed() {
     console.log("create organization pressed");
-    props.navigation.navigate("CreateOrganization");
+    props.navigation.navigate("CreateOrganization", { doesGoBack: true });
   }
 
   return (
@@ -140,24 +154,19 @@ function CustomHomeDrawerContent(props: DrawerContentComponentProps) {
   );
 }
 
-type OrganizationDetails = {
-  organizationId: string,
-  name: string
-};
 
-
-function HomeDrawerNavigator(props: OrganizationDetails[]) {
+function HomeDrawerNavigator(props: {organizations: Organization[]}) {
   const headerColor = useThemeColor({}, 'header');
   const dispatch = useDispatch();
-  const navigation = useNavigation();
 
   useEffect(() => {
     async function loadData () {
       await Promise.all([
-        dispatch(eventActions.loadEvents(demoData[props[0].organizationId].events)),
-        dispatch(itemActions.loadItems(demoData[props[0].organizationId].items)),
-        dispatch(lendingActions.loadLendings(demoData[props[0].organizationId].lendings)),
-        dispatch(userActions.loadUsers(demoData[props[0].organizationId].users)),
+        dispatch(eventActions.loadEvents(demoData[props.organizations[0].id].events)),
+        dispatch(itemActions.loadItems(demoData[props.organizations[0].id].items)),
+        dispatch(lendingActions.loadLendings(demoData[props.organizations[0].id].lendings)),
+        dispatch(userActions.loadUsers(demoData[props.organizations[0].id].users)),
+        dispatch(categoryActions.loadCategories(demoData[props.organizations[0].id].categories)),
       ])
     }
     loadData()
@@ -174,38 +183,21 @@ function HomeDrawerNavigator(props: OrganizationDetails[]) {
       }}
       drawerContent={(props) => <CustomHomeDrawerContent {...props} />}
     >
-      {props.map((organization: OrganizationDetails) => ( // props.length > 0 ?
+      {props.organizations.map((organization: Organization) => (
         <HomeDrawer.Screen
-          key={organization.organizationId}
+          key={organization.id}
           name={organization.name}
           component={HomeTabNavigator}
+          options={{
+            unmountOnBlur: true,
+          }}
           listeners={{
             drawerItemPress: (e) => {
-              e.preventDefault()
-
-              navigation.dispatch({
-                ...CommonActions.reset({
-                  index: 0,
-                  routes: [{
-                    name: "Home",
-                  }]
-                })
-              });
-
-              navigation.dispatch({
-                ...CommonActions.reset({
-                  index: 0,
-                  routes: [{
-                    name: organization.name,
-                  }]
-                })
-              })
-
-              const isDemo: boolean = demoData.hasOwnProperty(organization.organizationId)
-                dispatch(eventActions.loadEvents(isDemo ? demoData[organization.organizationId].events : []))
-                dispatch(itemActions.loadItems(isDemo ? demoData[organization.organizationId].items : []))
-                dispatch(lendingActions.loadLendings(isDemo ? demoData[organization.organizationId].lendings : []))
-                dispatch(userActions.loadUsers(isDemo ? demoData[organization.organizationId].users : []))
+              const isDemo: boolean = demoData.hasOwnProperty(organization.id);
+              dispatch(eventActions.loadEvents(isDemo ? demoData[organization.id].events : []));
+              dispatch(itemActions.loadItems(isDemo ? demoData[organization.id].items : []));
+              dispatch(lendingActions.loadLendings(isDemo ? demoData[organization.id].lendings : []));
+              dispatch(userActions.loadUsers(isDemo ? demoData[organization.id].users : []));
             }
           }}
         />

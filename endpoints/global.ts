@@ -1,0 +1,1 @@
+export const serverAddress: string = "http://10.8.0.10:8080/api/v1/"

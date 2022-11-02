@@ -2,11 +2,14 @@ import {useEffect, useRef, useState} from "react";
 import {Animated, Dimensions, StatusBar, StyleSheet} from "react-native";
 import {Text, TouchableOpacity, useThemeColor, View} from "../../components/Themed";
 import {OpacityButton} from "../../components/Themed/OpacityButton";
-import {RootStackScreenProps} from "../../types";
+import {WelcomeStackScreenProps} from "../../types";
 import {Ionicons} from "@expo/vector-icons";
 import * as React from "react";
+import {appWideActions} from "../../store/appWide";
+import {useDispatch} from "react-redux";
 
-export default function Welcome({ navigation, route }: RootStackScreenProps<'Welcome'>) {
+export default function Welcome({ navigation, route }: WelcomeStackScreenProps<'Welcome'>) {
+  const dispatch = useDispatch();
   const deviceWidth = Dimensions.get('window').width;
   const tintColor = useThemeColor({}, "tint");
   const textColor = useThemeColor({}, "text");
@@ -15,7 +18,7 @@ export default function Welcome({ navigation, route }: RootStackScreenProps<'Wel
   const [welcome, setWelcome] = useState(true);
   const buttonSlideAnim = useRef(new Animated.Value(0)).current;
 
-    useEffect(() => {
+  useEffect(() => {
     Animated.sequence([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -85,7 +88,7 @@ export default function Welcome({ navigation, route }: RootStackScreenProps<'Wel
 
   function joinOrganizationPressed() {
     console.log("Join organization pressed");
-    somethingPressed(() => navigation.goBack());  // navigate("JoinOrganization")
+    somethingPressed(() => navigation.navigate("JoinOrganization"));
   }
 
   return (
@@ -105,9 +108,7 @@ export default function Welcome({ navigation, route }: RootStackScreenProps<'Wel
               padding: 20,
             }}
           >
-            <TouchableOpacity
-              onPress={navigation.goBack}
-            >
+            <TouchableOpacity onPress={() => {dispatch(appWideActions.signOut())}}>
               <Ionicons name='chevron-back' size={30} style={{ color: textColor}} />
             </TouchableOpacity>
           </Animated.View>

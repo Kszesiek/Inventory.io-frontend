@@ -6,10 +6,13 @@ import {Ionicons} from "@expo/vector-icons";
 import * as React from "react";
 import Homescreen from "../screens/home/Homescreen";
 import BarcodeScanner from "../screens/home/BarcodeScanner";
+import {useDispatch} from "react-redux";
+import {appWideActions} from "../store/appWide";
 
 const HomescreenStack = createNativeStackNavigator<HomescreenStackParamList>();
 
 export default function HomescreenNavigator(props: {navigation: any, route: any}) {
+  const dispatch = useDispatch();
   const textColor = useThemeColor({}, 'text');
   const headerColor = useThemeColor({}, 'header');
 
@@ -37,7 +40,7 @@ export default function HomescreenNavigator(props: {navigation: any, route: any}
             </TouchableOpacity>
           ),
           headerRight: ({tintColor}) => (
-            <TouchableOpacity onPress={() => props.navigation.replace("Login")}>
+            <TouchableOpacity onPress={() => dispatch(appWideActions.signOut())}>
               <Ionicons name="log-out" color={tintColor} size={30} style={{padding: 10}} />
             </TouchableOpacity>
           ),

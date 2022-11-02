@@ -3,12 +3,12 @@ import {HomeTabParamList} from "../types";
 import {useThemeColor} from "../components/Themed";
 import {TouchableOpacity} from "react-native";
 import {Feather, Ionicons} from "@expo/vector-icons";
-import Inventory from "../screens/home/Inventory";
 import More from "../screens/home/More";
 import * as React from "react";
 import LendingNavigator from "./LendingStackNavigator";
 import EventNavigator from "./EventStackNavigator";
 import HomescreenNavigator from "./HomescreenStackNavigator";
+import InventoryNavigator from "./InventoryStackNavigator";
 
 const HomeTab = createBottomTabNavigator<HomeTabParamList>();
 
@@ -67,10 +67,10 @@ export default function HomeTabNavigator(props: {navigation: any, route: any}) {
           // ),
         }} />
       <HomeTab.Screen
-        name="Inventory"
-        component={Inventory}
+        name="InventoryNavigator"
+        component={InventoryNavigator}
         options={{
-          title: "Inwentarz",
+          headerShown: false,
           tabBarLabel: "Inwentarz",
           tabBarIcon: ({color, size}) => (
             <Ionicons name="library" size={size} color={color} />

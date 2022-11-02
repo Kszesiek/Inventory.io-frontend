@@ -9,26 +9,13 @@ import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 // import { DrawerScreenProps } from '@react-navigation/drawer';
 import {LendingForEvent, LendingPrivate} from "./store/lendings";
 import {Event} from "./store/events";
+import {Item} from "./store/items";
 
-declare global {
-  namespace ReactNavigation {
-    interface RootParamList extends OldRootStackParamList {}
-  }
-}
-
-// ROOT STACK
-
-export type RootStackParamList = {
-  Login: NavigatorScreenParams<LoginStackParamList>;
-  Home: undefined; // NavigatorScreenParams<any>; // <HomeDrawerParamList>;
-  Welcome: undefined;
-  CreateOrganization: undefined;
-};
-
-export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<
-  RootStackParamList,
-  Screen
-  >;
+// declare global {
+//   namespace ReactNavigation {
+//     interface RootParamList extends OldRootStackParamList {}
+//   }
+// }
 
 // LOGIN STACK
 
@@ -45,6 +32,19 @@ export type LoginStackScreenProps<Screen extends keyof LoginStackParamList> = Na
   Screen
   >;
 
+// HOME STACK
+
+export type HomeStackParamList = {
+  HomeDrawer: undefined;
+  CreateOrganization: { doesGoBack: boolean } | undefined;
+  JoinOrganization: undefined;
+}
+
+export type HomeStackScreenProps<Screen extends keyof HomeStackParamList> = NativeStackScreenProps<
+  HomeStackParamList,
+  Screen
+>;
+
 // HOME DRAWER
 
 // export type HomeDrawerParamList = {
@@ -56,19 +56,19 @@ export type LoginStackScreenProps<Screen extends keyof LoginStackParamList> = Na
 // export type HomeDrawerScreenProps<Screen extends keyof HomeDrawerParamList> = DrawerScreenProps<
 //   HomeDrawerParamList,
 //   Screen
-//   >;
+// >;
 
 // HOME TAB
 
 export type HomeTabParamList = {
   HomescreenNavigator: undefined;
-  Inventory: undefined;
+  InventoryNavigator: undefined;
   LendingNavigator: undefined;
-  Members: undefined;
   EventNavigator: undefined;
   More: undefined;
-  AppSettings: undefined;
-  UserSettings: undefined;
+  // Members: undefined;
+  // AppSettings: undefined;
+  // UserSettings: undefined;
 };
 
 export type HomeTabScreenProps<Screen extends keyof HomeTabParamList> = BottomTabScreenProps<
@@ -85,6 +85,19 @@ export type HomescreenStackParamList = {
 
 export type HomescreenStackScreenProps<Screen extends keyof HomescreenStackParamList> = NativeStackScreenProps<
   HomescreenStackParamList,
+  Screen
+  >;
+
+// INVENTORY STACK
+
+export type InventoryStackParamList = {
+  Inventory: undefined;
+  AddEditItem: { item: Item } | undefined;
+  ItemDetails: { itemId: string };
+};
+
+export type InventoryStackScreenProps<Screen extends keyof InventoryStackParamList> = NativeStackScreenProps<
+  InventoryStackParamList,
   Screen
   >;
 
@@ -114,6 +127,18 @@ export type EventStackScreenProps<Screen extends keyof EventStackParamList> = Na
   Screen
 >;
 
+// WELCOME STACK
+
+export type WelcomeStackParamList = {
+  Welcome: undefined;
+  CreateOrganization: undefined;
+  JoinOrganization: undefined;
+};
+
+export type WelcomeStackScreenProps<Screen extends keyof WelcomeStackParamList> = NativeStackScreenProps<
+  WelcomeStackParamList,
+  Screen
+  >;
 
 
 

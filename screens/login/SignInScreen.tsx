@@ -1,4 +1,4 @@
-import {StyleSheet, Image, Platform, KeyboardAvoidingView} from 'react-native';
+import {StyleSheet, Image, Platform, KeyboardAvoidingView, Alert} from 'react-native';
 
 import {Text, View} from '../../components/Themed';
 import {LoginStackScreenProps} from '../../types';
@@ -18,13 +18,16 @@ import {itemActions} from "../../store/items";
 import {eventActions} from "../../store/events";
 import {userActions} from "../../store/users";
 import {IRootState} from "../../store/store";
+import {logIn} from "../../endpoints/auth";
+import {getOrganizations} from "../../endpoints/organizations";
+import {categoryActions} from "../../store/categories";
 
 export default function SignInScreen({ navigation, route }: LoginStackScreenProps<'SignIn'>) {
   const dispatch = useDispatch();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
 
-  const organizations = useSelector((state: IRootState) => state.organizations.organizations);
   const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
 
   useEffect(() => {
@@ -33,21 +36,35 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
     dispatch(eventActions.wipeEvents());
     dispatch(organizationsActions.wipeOrganizations());
     dispatch(userActions.wipeUsers());
+    dispatch(categoryActions.wipeCategories())
   }, [])
 
   const onSignInPressed = async () => {
     console.log("Sign in pressed");
-    dispatch(appWideActions.signIn({username: username, userId: Math.random().toString()}));
+    setIsAuthenticating(true);
+
     if (demoMode) {
+      dispatch(appWideActions.signIn({username: 'itsmejohndoe', name: 'John', surname: 'Doe', email: 'johndoe@example.com'}));
       await dispatch(organizationsActions.setOrganizations(demoOrganizations));
-      navigation.getParent()!.navigate("Home");
     } else {
-      await dispatch(organizationsActions.setOrganizations([]));
-      if (organizations.length > 0)
-        navigation.getParent()!.navigate("Home");
-      else
-        navigation.getParent()!.navigate("Welcome");
+      const response = await logIn(dispatch, username, password);
+      if (!response) {
+        Alert.alert('Logowanie nie powiodło się', 'Sprawdź dane logowania i spróbuj ponownie.');
+      } else {
+        const response = await getOrganizations(dispatch);
+        if (!response) {
+          Alert.alert('Ło cie panie!', 'No i co ja mam teraz zrobić 🙈🙈🙈');
+        } else {
+          await dispatch(appWideActions.signIn({
+            username: 'itsmejohndoe',
+            name: 'John',
+            surname: 'Doe',
+            email: 'johndoe@example.com',
+          }));
+        }
+      }
     }
+    setIsAuthenticating(false);
   }
 
   const onRegisterPressed = () => {

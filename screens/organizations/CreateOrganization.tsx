@@ -1,13 +1,13 @@
-import {useThemeColor, View} from "../components/Themed";
+import {useThemeColor, View} from "../../components/Themed";
 import * as React from "react";
 import {Alert, FlatList, StyleSheet} from "react-native";
-import Input from "../components/Input";
+import Input from "../../components/Input";
 import {useDispatch} from "react-redux";
 import {useState} from "react";
-import {RootStackScreenProps} from "../types";
-import {writeOutArray} from "../utilities/enlist";
-import {Organization, organizationsActions} from "../store/organizations";
-import {OpacityButton} from "../components/Themed/OpacityButton";
+import {HomeStackScreenProps, WelcomeStackScreenProps} from "../../types";
+import {writeOutArray} from "../../utilities/enlist";
+import {Organization, organizationsActions} from "../../store/organizations";
+import {OpacityButton} from "../../components/Themed/OpacityButton";
 
 export type ValidValuePair = {
   value: string
@@ -18,10 +18,12 @@ type inputValuesType = {
   name: ValidValuePair
 }
 
-export default function CreateOrganization({ navigation, route }: RootStackScreenProps<'CreateOrganization'>) {
+export default function CreateOrganization({ navigation, route }: WelcomeStackScreenProps<'CreateOrganization'> | HomeStackScreenProps<'CreateOrganization'>) {
   const dispatch = useDispatch();
   const backgroundColor = useThemeColor({}, 'background');
   const cancelColor = useThemeColor({}, "delete");
+
+  const doesGoBack = route.params?.doesGoBack;
 
   const [inputs, setInputs]: [inputValuesType, Function] = useState(
   {
@@ -51,7 +53,7 @@ export default function CreateOrganization({ navigation, route }: RootStackScree
     if (!nameIsValid) {
       const wrongDataArray: string[] = []
       if (!nameIsValid)
-        wrongDataArray.push("event name")
+        wrongDataArray.push("organization name")
 
       const wrongDataString: string = writeOutArray(wrongDataArray)
 
@@ -65,8 +67,7 @@ export default function CreateOrganization({ navigation, route }: RootStackScree
     }
 
     await dispatch(organizationsActions.addOrganization(organizationData));
-
-    navigation.navigate("Home");
+    doesGoBack && navigation.goBack();
   }
 
   function inputChangedHandler<InputParam extends keyof typeof inputs>(inputIdentifier: InputParam, enteredValue: string) {
