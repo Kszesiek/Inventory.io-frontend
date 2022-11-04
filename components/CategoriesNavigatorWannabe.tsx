@@ -6,7 +6,6 @@ import {Category} from "../store/categories";
 import {useSelector} from "react-redux";
 import {IRootState} from "../store/store";
 import {TouchableCard} from "./Themed/TouchableCard";
-import {TouchableText} from "./Themed/TouchableText";
 
 export default function CategoriesNavigatorWannabe({currentCategory, setCurrentCategory}: {currentCategory: Category | undefined, setCurrentCategory: React.Dispatch<React.SetStateAction<Category | undefined>>}) {
   const screen = useWindowDimensions();
@@ -18,7 +17,7 @@ export default function CategoriesNavigatorWannabe({currentCategory, setCurrentC
   const firstWindow = useRef(new Animated.Value(0)).current;
   const secondWindow = useRef(new Animated.Value(screen.width)).current;
 
-  const [firstCategoriesList, setFirstCategoriesList] = useState<Category[]>(categories.filter((category) => category.parentCategoryId === undefined));
+  const [firstCategoriesList, setFirstCategoriesList] = useState<Category[]>(categories.filter((category) => category.parentCategoryId === currentCategory?.categoryId));
   const [secondCategoriesList, setSecondCategoriesList] = useState<Category[]>([]);
 
   const animDuration: number = 300;
@@ -61,58 +60,28 @@ export default function CategoriesNavigatorWannabe({currentCategory, setCurrentC
     changeScreen( (!!currentCategory && newCategoryId === currentCategory.parentCategoryId) ? 'backwards' : 'forwards');
   }
 
-  function previousScreen() {
-    changeScreen('backwards');
-  }
-
-  function nextScreen() {
-    changeScreen('forwards');
+  function numberedCategoriesList(screenID: 1 | 2) {
+    return (
+      <Animated.View style={{...styles.container, backgroundColor, right: screenID === 1 ? firstWindow : secondWindow, zIndex: currentWindow === screenID ? -1 : -2}}>
+        <Text style={{backgroundColor: 'magenta'}}>WINDOW {screenID} / Current: {currentWindow}</Text>
+        {!!currentCategory &&
+            <TouchableCard key={'backwards'} style={styles.categoryCard} onPress={() => goToSubcategory(screenID, currentCategory?.parentCategoryId)}>
+                <Text style={{fontSize: 20}}>powrót</Text>
+            </TouchableCard>
+        }
+        {(screenID === 1 ? firstCategoriesList : secondCategoriesList).map((item) =>
+          <TouchableCard key={item.categoryId} style={styles.categoryCard} onPress={() => goToSubcategory(screenID, item.categoryId)}>
+            <Text style={{fontSize: 20}}>{item.name}</Text>
+          </TouchableCard>
+        )}
+      </Animated.View>
+    )
   }
 
   return (
     <View style={{flexGrow: 1, justifyContent: 'flex-end',}}>
-      <Animated.View style={{...styles.container, backgroundColor/*: 'red'*/, right: firstWindow, zIndex: currentWindow === 1 ? -1 : -2}}>
-        <Text style={{backgroundColor: 'magenta'}}>WINDOW 1 / Current: {currentWindow}</Text>
-        {!!currentCategory && !!currentCategory.parentCategoryId &&
-          // <TouchableText
-          //   onPress={() => goToSubcategory(1, currentCategory?.parentCategoryId)}
-          // >
-          //   {"< powrót"}
-          // </TouchableText>
-          <TouchableCard key={'backwards'} style={styles.categoryCard} onPress={() => goToSubcategory(1, currentCategory?.parentCategoryId)}>
-            <Text style={{fontSize: 22}}>powrót</Text>
-          </TouchableCard>
-        }
-        {firstCategoriesList.map((item) =>
-          <TouchableCard key={item.categoryId} style={styles.categoryCard}  onPress={() => goToSubcategory(1, item.categoryId)}>
-            <Text style={{fontSize: 22}}>{item.name}</Text>
-          </TouchableCard>
-        )}
-      </Animated.View>
-      <Animated.View style={{...styles.container, backgroundColor/*: 'blue'*/, right: secondWindow, zIndex: currentWindow === 2 ? -1 : -2}}>
-        <Text style={{backgroundColor: 'magenta'}}>WINDOW 2 / Current: {currentWindow}</Text>
-        {!!currentCategory &&
-            <TouchableCard key={'backwards'} style={styles.categoryCard} onPress={() => goToSubcategory(2, currentCategory?.parentCategoryId)}>
-                <Text style={{fontSize: 22}}>powrót</Text>
-            </TouchableCard>
-        }
-        {secondCategoriesList.map((item) =>
-          <TouchableCard
-            key={item.categoryId}
-            style={[
-              styles.categoryCard,
-              // currentCategory?.categoryId === item.categoryId && categories.find((catItem: Category) => catItem.parentCategoryId === item.categoryId) === undefined && {backgroundColor: tintColor}
-            ]}
-            onPress={() => {
-              // if (categories.find((catItem: Category) => catItem.parentCategoryId === item.categoryId) !== undefined) {
-                goToSubcategory(2, item.categoryId);
-              // }
-            }}
-          >
-            <Text style={{fontSize: 22}}>{item.name}</Text>
-          </TouchableCard>
-        )}
-      </Animated.View>
+      {numberedCategoriesList(1)}
+      {numberedCategoriesList(2)}
     </View>
   );
 }

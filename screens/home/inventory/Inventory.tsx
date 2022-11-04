@@ -81,20 +81,41 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
     filtersModalizeRef.current?.open();
   }
 
+  function checkCategoryAffiliation<CategoryId extends typeof categories[number]["categoryId"]>(itemCategoryId: CategoryId, chosenCategoryId: CategoryId): boolean {
+    let currentCategory: Category | undefined = categories.find((category: Category) => category.categoryId === itemCategoryId);
+
+    while (currentCategory !== undefined) {
+      if (currentCategory.categoryId === chosenCategoryId) {
+        return true;
+      }
+
+      currentCategory = categories.find((category: Category) => category.categoryId === currentCategory!.parentCategoryId);
+    }
+    return false;
+  }
+
+  const itemsCategorized: typeof items = items.filter((item) => {
+    if (chosenCategory === undefined) {
+      return true;
+    }
+
+    return checkCategoryAffiliation(item.categoryId, chosenCategory.categoryId);
+  })
+
   return (
     <>
       <FlatList
       style={{backgroundColor}}
       contentContainerStyle={styles.flatList}
-      data={items}
+      data={itemsCategorized}
       ListHeaderComponent={
         <View>
           <View key="filterbar" style={styles.filterBar}>
             <TouchableCard style={styles.filterButton} onPress={categoriesPressed}>
-              <Text>Kategorie</Text>
+              <Text style={{textAlign: 'center'}} numberOfLines={1}>Kategoria: {!!chosenCategory ? chosenCategory.name : "wszystkie"}</Text>
             </TouchableCard>
             <TouchableCard style={styles.filterButton} onPress={filtersPressed}>
-              <Text>Filtry</Text>
+              <Text style={{textAlign: 'center'}} numberOfLines={1}>Filtry</Text>
             </TouchableCard>
           </View>
           <View key="searchbar" style={{...styles.searchBar, backgroundColor: cardBackgroundColor}}>
@@ -118,7 +139,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
       }
       ListEmptyComponent={
         <View style={styles.noContentContainer}>
-          <Text style={[styles.noContentText, {fontSize: 16}]}>Brak przedmiotów do wyświetlenia.</Text>
+          <Text style={[styles.noContentText, {fontSize: 16}]}>Brak przedmiotów do wyświetlenia{!!chosenCategory && " w tej kategorii"}.</Text>
           <Text style={styles.noContentText}>Aby dodać przedmiot, użyj przycisku u góry ekranu.</Text>
         </View>}
       renderItem={(item: ListRenderItemInfo<Item>) => {
@@ -182,10 +203,12 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   filterButton: {
-    padding: 7,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
     borderRadius: 100,
     flex: 1,
     marginHorizontal: 5,
+    alignItems: 'stretch',
   },
   searchBarButton: {
     height: 40,
@@ -209,12 +232,12 @@ const styles = StyleSheet.create({
   modalStyle: {
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    marginTop: 40,
+    marginTop: 25,
     flex: 1,
   },
   modalTitle: {
     textAlign: 'center',
-    fontSize: 26,
+    fontSize: 24,
     letterSpacing: 1,
     marginTop: 15,
     marginBottom: 10,
