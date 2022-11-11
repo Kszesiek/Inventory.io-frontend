@@ -45,7 +45,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
   function Categories() {
     return (
       <Animated.View style={{flex: 1}}>
-        <Text style={[styles.modalTitle, {color: tintColor}]}>{chosenCategory === undefined ? "Wybierz kategorię" : "Kategoria: " + chosenCategory?.name || <Text style={[styles.modalTitle, {color: tintColor, fontStyle: 'italic'}]}>nieznana kategoria</Text>}</Text>
+        <Text style={[styles.modalTitle, {color: tintColor}]} numberOfLines={1}>Kategoria: {chosenCategory === undefined ? "wszystkie" : chosenCategory?.name || <Text style={[styles.modalTitle, {color: tintColor, fontStyle: 'italic'}]}>nieznana kategoria</Text>}</Text>
         <CategoriesNavigatorWannabe currentCategory={chosenCategory} setCurrentCategory={setChosenCategory} />
         <OpacityButton
           style={styles.bottomDrawerConfirmButton}
