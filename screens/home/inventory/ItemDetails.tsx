@@ -33,8 +33,8 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
 
   async function deletePressed() {
     console.log("delete button pressed");
+    navigation.replace("Inventory");
     await dispatch(itemActions.removeItem({itemId: item.itemId}));
-    navigation.goBack();
   }
 
   function editPressed() {

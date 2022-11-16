@@ -32,8 +32,8 @@ export default function EventDetails({ navigation, route }: EventStackScreenProp
 
   async function deletePressed() {
     console.log("delete button pressed");
+    navigation.replace("Events");
     await dispatch(eventActions.removeEvent({eventId: event.eventId}));
-    navigation.goBack();
   }
 
   function editPressed() {
