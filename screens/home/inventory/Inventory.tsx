@@ -18,10 +18,13 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
   const cardBackgroundColor = useThemeColor({}, 'cardBackground');
   const tintColor = useThemeColor({}, 'tint');
 
-  const items = useSelector((state: IRootState) => state.items.items);
-  const categories = useSelector((state: IRootState) => state.categories.categories);
+  const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
+  const demoItems = useSelector((state: IRootState) => state.items.items);
+  const demoCategories = useSelector((state: IRootState) => state.categories.categories);
+  const [itemsToDisplay, setItemsToDisplay] = useState<Item[]>(demoMode ? demoItems : []);
 
   const [chosenCategory, setChosenCategory] = useState<Category | undefined>(undefined);
+  const [textToSearch, setTextToSearch] = useState<string>('');
 
   const categoriesModalizeRef = useRef<Modalize>(null);
   const filtersModalizeRef = useRef<Modalize>(null);
@@ -35,6 +38,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
 
   function searchShortcutPressed() {
     console.log("search button pressed");
+    getMatchingItems();
   }
 
   function cardPressed(itemId: string) {
@@ -81,33 +85,46 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
     filtersModalizeRef.current?.open();
   }
 
-  function checkCategoryAffiliation<CategoryId extends typeof categories[number]["categoryId"]>(itemCategoryId: CategoryId, chosenCategoryId: CategoryId): boolean {
-    let currentCategory: Category | undefined = categories.find((category: Category) => category.categoryId === itemCategoryId);
+  function getMatchingItems() {
+    if (demoMode) {
+      const itemsCategorized: Item[] = demoItems.filter((item) => {
+        if (chosenCategory === undefined) {
+          return true;
+        } else {
+          return checkCategoryAffiliation(item.categoryId, chosenCategory.categoryId);
+        }
+      });
+
+      const itemsFiltered: Item[] = itemsCategorized;
+
+      const itemsSearched: Item[] = itemsFiltered.filter((item) => {
+        return item.name.toLowerCase().includes(textToSearch.toLowerCase());
+      });
+      setItemsToDisplay(itemsSearched);
+    } else {
+      setItemsToDisplay([]); // TODO: ADD SEARCHING ON SERVER SIDE
+    }
+  }
+
+  function checkCategoryAffiliation<CategoryId extends typeof demoCategories[number]["categoryId"]>(itemCategoryId: CategoryId, chosenCategoryId: CategoryId): boolean {
+    let currentCategory: Category | undefined = demoCategories.find((category: Category) => category.categoryId === itemCategoryId);
 
     while (currentCategory !== undefined) {
       if (currentCategory.categoryId === chosenCategoryId) {
         return true;
       }
 
-      currentCategory = categories.find((category: Category) => category.categoryId === currentCategory!.parentCategoryId);
+      currentCategory = demoCategories.find((category: Category) => category.categoryId === currentCategory!.parentCategoryId);
     }
     return false;
   }
-
-  const itemsCategorized: typeof items = items.filter((item) => {
-    if (chosenCategory === undefined) {
-      return true;
-    }
-
-    return checkCategoryAffiliation(item.categoryId, chosenCategory.categoryId);
-  })
 
   return (
     <>
       <FlatList
       style={{backgroundColor}}
       contentContainerStyle={styles.flatList}
-      data={itemsCategorized}
+      data={itemsToDisplay}
       ListHeaderComponent={
         <View>
           <View key="filterbar" style={styles.filterBar}>
@@ -122,6 +139,8 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
             <TextInput
               style={styles.searchBarInput}
               placeholder="Wyszukaj w inwentarzu..."
+              value={textToSearch}
+              onChangeText={setTextToSearch}
             />
             <TouchableCard
               style={[styles.searchBarButton, {
@@ -159,7 +178,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
         return (
           <TouchableCard key={item.item.itemId} style={styles.card} onPress={() => cardPressed(item.item.itemId)}>
             <Text style={[styles.cardText, itemTitle]}>{item.item.name}</Text>
-            <Text style={styles.cardText}>Kategoria: {categories.find(category => category.categoryId === item.item.categoryId)?.name || <Text style={{fontStyle: 'italic', fontSize: 13}}>nieznana kategoria</Text>}</Text>
+            <Text style={styles.cardText}>Kategoria: {demoCategories.find(category => category.categoryId === item.item.categoryId)?.name || <Text style={{fontStyle: 'italic', fontSize: 13}}>nieznana kategoria</Text>}</Text>
           </TouchableCard>
         )
       }}
