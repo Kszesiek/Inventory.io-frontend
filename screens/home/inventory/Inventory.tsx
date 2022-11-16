@@ -19,9 +19,9 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
   const tintColor = useThemeColor({}, 'tint');
 
   const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
-  const demoItems = useSelector((state: IRootState) => state.items.items);
-  const demoCategories = useSelector((state: IRootState) => state.categories.categories);
-  const [itemsToDisplay, setItemsToDisplay] = useState<Item[]>(demoMode ? demoItems : []);
+  const items = useSelector((state: IRootState) => state.items.items);
+  const categories = useSelector((state: IRootState) => state.categories.categories);
+  const [itemsToDisplay, setItemsToDisplay] = useState<Item[]>(items);
 
   const [chosenCategory, setChosenCategory] = useState<Category | undefined>(undefined);
   const [textToSearch, setTextToSearch] = useState<string>('');
@@ -87,7 +87,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
 
   function getMatchingItems() {
     if (demoMode) {
-      const itemsCategorized: Item[] = demoItems.filter((item) => {
+      const itemsCategorized: Item[] = items.filter((item) => {
         if (chosenCategory === undefined) {
           return true;
         } else {
@@ -106,15 +106,15 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
     }
   }
 
-  function checkCategoryAffiliation<CategoryId extends typeof demoCategories[number]["categoryId"]>(itemCategoryId: CategoryId, chosenCategoryId: CategoryId): boolean {
-    let currentCategory: Category | undefined = demoCategories.find((category: Category) => category.categoryId === itemCategoryId);
+  function checkCategoryAffiliation<CategoryId extends typeof categories[number]["categoryId"]>(itemCategoryId: CategoryId, chosenCategoryId: CategoryId): boolean {
+    let currentCategory: Category | undefined = categories.find((category: Category) => category.categoryId === itemCategoryId);
 
     while (currentCategory !== undefined) {
       if (currentCategory.categoryId === chosenCategoryId) {
         return true;
       }
 
-      currentCategory = demoCategories.find((category: Category) => category.categoryId === currentCategory!.parentCategoryId);
+      currentCategory = categories.find((category: Category) => category.categoryId === currentCategory!.parentCategoryId);
     }
     return false;
   }
@@ -178,7 +178,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
         return (
           <TouchableCard key={item.item.itemId} style={styles.card} onPress={() => cardPressed(item.item.itemId)}>
             <Text style={[styles.cardText, itemTitle]}>{item.item.name}</Text>
-            <Text style={styles.cardText}>Kategoria: {demoCategories.find(category => category.categoryId === item.item.categoryId)?.name || <Text style={{fontStyle: 'italic', fontSize: 13}}>nieznana kategoria</Text>}</Text>
+            <Text style={styles.cardText}>Kategoria: {categories.find(category => category.categoryId === item.item.categoryId)?.name || <Text style={{fontStyle: 'italic', fontSize: 13}}>nieznana kategoria</Text>}</Text>
           </TouchableCard>
         )
       }}
