@@ -109,7 +109,7 @@ export default function Welcome({ navigation, route }: WelcomeStackScreenProps<'
             }}
           >
             <TouchableOpacity onPress={() => {dispatch(appWideActions.signOut())}}>
-              <Ionicons name='chevron-back' size={30} style={{ color: textColor}} />
+              <Ionicons name='chevron-back' size={36} style={{ color: textColor}} />
             </TouchableOpacity>
           </Animated.View>
           <Animated.View

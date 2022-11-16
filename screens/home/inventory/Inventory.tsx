@@ -175,7 +175,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
               }]}
               onPress={searchButtonPressed}
             >
-              <FontAwesome name="search" size={30} color={backgroundColor} />
+              <FontAwesome name="search" size={32} color={backgroundColor} />
             </TouchableCard>
           </View>
         </View>

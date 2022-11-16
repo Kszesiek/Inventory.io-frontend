@@ -22,7 +22,7 @@ export default function EventNavigator() {
         headerStyle: {backgroundColor: headerColor},
         headerLeft: () => (
           <TouchableOpacity onPress={navigation.goBack}>
-            <Ionicons name='chevron-back' size={30} style={{ color: textColor}} />
+            <Ionicons name='chevron-back' size={36} style={{ color: textColor}} />
           </TouchableOpacity>
         ),
       })}
@@ -31,7 +31,7 @@ export default function EventNavigator() {
         title: "Wydarzenia",
         headerRight: () => (
           <TouchableOpacity onPress={() => navigation.navigate("AddEditEvent")}>
-            <Ionicons name='add' size={32} style={{ color: textColor}}  />
+            <Ionicons name='add' size={36} style={{ color: textColor}}  />
           </TouchableOpacity>
         ),
         headerLeft: () => (

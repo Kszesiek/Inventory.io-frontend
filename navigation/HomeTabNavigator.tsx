@@ -23,7 +23,7 @@ export default function HomeTabNavigator(props: {navigation: any, route: any}) {
         headerTitleAlign: "center",
         headerLeft: () => (
           <TouchableOpacity onPress={() => props.navigation.navigate("HomescreenNavigator")}>
-            <Ionicons name="chevron-back" color={textColor} size={30} style={{padding: 10}} />
+            <Ionicons name="chevron-back" color={textColor} size={36} style={{padding: 10}} />
           </TouchableOpacity>
         ),
         headerTintColor: textColor,
@@ -57,12 +57,12 @@ export default function HomeTabNavigator(props: {navigation: any, route: any}) {
           ),
           // headerLeft: ({tintColor}) => (
           //   <TouchableOpacity onPress={props.navigation.openDrawer}>
-          //     <Ionicons name="menu" color={tintColor} size={30} style={{padding: 10}} />
+          //     <Ionicons name="menu" color={tintColor} size={36} style={{padding: 10}} />
           //   </TouchableOpacity>
           // ),
           // headerRight: ({tintColor}) => (
           //   <TouchableOpacity onPress={() => props.navigation.replace("Login")}>
-          //     <Ionicons name="log-out" color={tintColor} size={30} style={{padding: 10}} />
+          //     <Ionicons name="log-out" color={tintColor} size={36} style={{padding: 10}} />
           //   </TouchableOpacity>
           // ),
         }} />

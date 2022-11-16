@@ -22,7 +22,7 @@ export default function WelcomeStackNavigator() {
         headerShown: false,
         headerLeft: () => (
           <TouchableOpacity onPress={navigation.goBack}>
-            <Ionicons name='chevron-back' size={30} style={{ color: textColor}} />
+            <Ionicons name='chevron-back' size={36} style={{ color: textColor}} />
           </TouchableOpacity>
         ),
       })}

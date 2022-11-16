@@ -88,7 +88,7 @@ export default function Homescreen({ navigation, route }: HomescreenStackScreenP
         }
           onPress={barcodeShortcutPressed}
         >
-          <MaterialCommunityIcons name="barcode-scan" size={35} color={useThemeColor({}, 'background')} />
+          <MaterialCommunityIcons name="barcode-scan" size={36} color={useThemeColor({}, 'background')} />
         </TouchableCard>
         <TextInput
           style={styles.searchBarInput}
@@ -106,7 +106,7 @@ export default function Homescreen({ navigation, route }: HomescreenStackScreenP
           }
           onPress={searchShortcutPressed}
         >
-          <FontAwesome name="search" size={30} color={useThemeColor({}, 'background')} />
+          <FontAwesome name="search" size={32} color={useThemeColor({}, 'background')} />
         </TouchableCard>
       </View>
       <Card key="events" style={styles.menuCard}>

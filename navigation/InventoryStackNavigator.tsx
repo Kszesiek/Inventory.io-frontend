@@ -22,7 +22,7 @@ export default function InventoryNavigator() {
         headerStyle: {backgroundColor: headerColor},
         headerLeft: () => (
           <TouchableOpacity onPress={navigation.goBack}>
-            <Ionicons name='chevron-back' size={30} style={{ color: textColor}} />
+            <Ionicons name='chevron-back' size={36} style={{ color: textColor}} />
           </TouchableOpacity>
         ),
       })}
@@ -31,7 +31,7 @@ export default function InventoryNavigator() {
         title: "Inwentarz",
         headerRight: () => (
           <TouchableOpacity onPress={() => navigation.navigate("AddEditItem")}>
-            <Ionicons name='add' size={32} style={{ color: textColor}}  />
+            <Ionicons name='add' size={36} style={{ color: textColor}}  />
           </TouchableOpacity>
         ),
         headerLeft: () => (

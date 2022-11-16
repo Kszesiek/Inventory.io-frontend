@@ -24,7 +24,7 @@ export default function HomescreenNavigator(props: {navigation: any, route: any}
         headerStyle: {backgroundColor: headerColor},
         headerLeft: () => (
           <TouchableOpacity onPress={navigation.goBack}>
-            <Ionicons name='chevron-back' size={30} style={{ color: textColor}} />
+            <Ionicons name='chevron-back' size={36} style={{ color: textColor}} />
           </TouchableOpacity>
         ),
       })}
@@ -36,12 +36,12 @@ export default function HomescreenNavigator(props: {navigation: any, route: any}
           title: "Strona główna",
           headerLeft: ({tintColor}) => (
             <TouchableOpacity onPress={props.navigation.openDrawer}>
-              <Ionicons name="menu" color={tintColor} size={30} style={{padding: 10}} />
+              <Ionicons name="menu" color={tintColor} size={32} style={{padding: 10}} />
             </TouchableOpacity>
           ),
           headerRight: ({tintColor}) => (
             <TouchableOpacity onPress={() => dispatch(appWideActions.signOut())}>
-              <Ionicons name="log-out" color={tintColor} size={30} style={{padding: 10}} />
+              <Ionicons name="log-out" color={tintColor} size={32} style={{padding: 10}} />
             </TouchableOpacity>
           ),
         }} />
