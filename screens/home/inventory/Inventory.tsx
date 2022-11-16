@@ -23,10 +23,15 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
   const categories = useSelector((state: IRootState) => state.categories.categories);
   const [itemsToDisplay, setItemsToDisplay] = useState<Item[]>(items);
 
+  // changed instantly
+  const [selectedCategory, setSelectedCategory] = useState<Category | undefined>(undefined);
+  const [selectedFilters, setSelectedFilters] = useState<any[]>([]);
   const [textInput, setTextInput] = useState<string>(route.params?.searchPhrase || "");
 
+  // changed when pressing search button
   const [chosenCategory, setChosenCategory] = useState<Category | undefined>(undefined);
-  const [textToSearch, setTextToSearch] = useState<string>(route.params?.searchPhrase || "");
+  const [chosenFilters, setChosenFilters] = useState<any[]>([]);
+  const [chosenText, setChosenText] = useState<string>(route.params?.searchPhrase || "");
 
   const categoriesModalizeRef = useRef<Modalize>(null);
   const filtersModalizeRef = useRef<Modalize>(null);
@@ -41,19 +46,23 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
   // For searching from the homescreen
   useEffect(() => {
     const searchPhrase = route.params?.searchPhrase || ""
-    setTextToSearch(searchPhrase);
     setTextInput(searchPhrase);
+    setSelectedCategory(undefined);
+    setChosenText(searchPhrase);
     setChosenCategory(undefined);
   }, [route.params?.searchPhrase]);
 
   // for every change in categories, filters or phrase to search
   useEffect(() => {
+    console.log("useEffect triggered");
     getMatchingItems();
-  }, [textToSearch, chosenCategory])
+  }, [chosenText, chosenCategory, chosenFilters])
 
   function searchButtonPressed() {
     console.log("search button pressed");
-    setTextToSearch(textInput);
+    setChosenText(textInput);
+    setChosenCategory(selectedCategory);
+    setChosenFilters(selectedFilters);
   }
 
   function cardPressed(itemId: string) {
@@ -65,7 +74,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
     return (
       <Animated.View style={{flex: 1}}>
         <Text style={[styles.modalTitle, {color: tintColor}]} numberOfLines={1}>Kategoria: {chosenCategory === undefined ? "wszystkie" : chosenCategory?.name || <Text style={[styles.modalTitle, {color: tintColor, fontStyle: 'italic'}]}>nieznana kategoria</Text>}</Text>
-        <CategoriesNavigatorWannabe currentCategory={chosenCategory} setCurrentCategory={setChosenCategory} />
+        <CategoriesNavigatorWannabe currentCategory={selectedCategory} setCurrentCategory={setSelectedCategory} />
         <OpacityButton
           style={styles.bottomDrawerConfirmButton}
           onPress={() => categoriesModalizeRef.current?.close()}
@@ -113,7 +122,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
       const itemsFiltered: Item[] = itemsCategorized;
 
       const itemsSearched: Item[] = itemsFiltered.filter((item) => {
-        return item.name.toLowerCase().includes(textToSearch.toLowerCase());
+        return item.name.toLowerCase().includes(chosenText.toLowerCase());
       });
       setItemsToDisplay(itemsSearched);
     } else {

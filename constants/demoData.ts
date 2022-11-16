@@ -237,18 +237,18 @@ export const demoData: Record<typeof demoOrganizations[number]["id"], demoBatch>
       },
       {
         itemId: "185525b4-127c-45d2-a4e0-6f4789a43f23",
-        name: "Impact Si",
+        name: "SI Impact",
         categoryId: "8ce76808-6d36-420b-89bd-3baf3f972153",
       },
       {
         itemId: "3b88939c-6316-4dfb-ad28-9b91bb44a671",
         name: "kabel XLR 10m",
-        categoryId: "5d128a35-c6fa-4ad0-9c94-a55b3215ce88",
+        categoryId: "7bb4d313-d747-4218-9017-890799192efe",
       },
       {
         itemId: "5da853fe-548f-4e19-ae54-f4e42e26acf6",
         name: "kabel XLR 5m",
-        categoryId: "5d128a35-c6fa-4ad0-9c94-a55b3215ce88",
+        categoryId: "7bb4d313-d747-4218-9017-890799192efe",
       },
       {
         itemId: "acee73a8-3e8b-41e4-a2d3-ce6c3e870de5",
