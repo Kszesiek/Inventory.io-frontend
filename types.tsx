@@ -91,7 +91,7 @@ export type HomescreenStackScreenProps<Screen extends keyof HomescreenStackParam
 // INVENTORY STACK
 
 export type InventoryStackParamList = {
-  Inventory: undefined;
+  Inventory: { searchPhrase: string } | undefined;
   AddEditItem: { item: Item } | undefined;
   ItemDetails: { itemId: string };
 };

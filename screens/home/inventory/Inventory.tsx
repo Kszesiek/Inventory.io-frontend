@@ -6,7 +6,7 @@ import {useSelector} from "react-redux";
 import {IRootState} from "../../../store/store";
 import {Item} from "../../../store/items";
 import {InventoryStackScreenProps} from "../../../types";
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {OpacityButton} from "../../../components/Themed/OpacityButton";
 import * as React from "react";
 import {Modalize} from "react-native-modalize";
@@ -23,8 +23,10 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
   const categories = useSelector((state: IRootState) => state.categories.categories);
   const [itemsToDisplay, setItemsToDisplay] = useState<Item[]>(items);
 
+  const [textInput, setTextInput] = useState<string>(route.params?.searchPhrase || "");
+
   const [chosenCategory, setChosenCategory] = useState<Category | undefined>(undefined);
-  const [textToSearch, setTextToSearch] = useState<string>('');
+  const [textToSearch, setTextToSearch] = useState<string>(route.params?.searchPhrase || "");
 
   const categoriesModalizeRef = useRef<Modalize>(null);
   const filtersModalizeRef = useRef<Modalize>(null);
@@ -36,9 +38,22 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
     marginBottom: 5,
   }
 
-  function searchShortcutPressed() {
-    console.log("search button pressed");
+  // For searching from the homescreen
+  useEffect(() => {
+    const searchPhrase = route.params?.searchPhrase || ""
+    setTextToSearch(searchPhrase);
+    setTextInput(searchPhrase);
+    setChosenCategory(undefined);
+  }, [route.params?.searchPhrase]);
+
+  // for every change in categories, filters or phrase to search
+  useEffect(() => {
     getMatchingItems();
+  }, [textToSearch, chosenCategory])
+
+  function searchButtonPressed() {
+    console.log("search button pressed");
+    setTextToSearch(textInput);
   }
 
   function cardPressed(itemId: string) {
@@ -139,8 +154,8 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
             <TextInput
               style={styles.searchBarInput}
               placeholder="Wyszukaj w inwentarzu..."
-              value={textToSearch}
-              onChangeText={setTextToSearch}
+              value={textInput}
+              onChangeText={setTextInput}
             />
             <TouchableCard
               style={[styles.searchBarButton, {
@@ -149,7 +164,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
                 paddingRight: 2,
                 backgroundColor: useThemeColor({}, 'tint'),
               }]}
-              onPress={searchShortcutPressed}
+              onPress={searchButtonPressed}
             >
               <FontAwesome name="search" size={30} color={backgroundColor} />
             </TouchableCard>
