@@ -1,6 +1,6 @@
-import {TextInput, useThemeColor, View, Text} from "../../../components/Themed";
+import {TextInput, useThemeColor, View, Text, TouchableOpacity} from "../../../components/Themed";
 import {TouchableCard} from "../../../components/Themed/TouchableCard";
-import {FontAwesome} from "@expo/vector-icons";
+import {FontAwesome, Ionicons} from "@expo/vector-icons";
 import {Animated, FlatList, ListRenderItemInfo, StyleProp, StyleSheet, TextStyle} from "react-native";
 import {useSelector} from "react-redux";
 import {IRootState} from "../../../store/store";
@@ -17,6 +17,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
   const backgroundColor = useThemeColor({}, 'background');
   const cardBackgroundColor = useThemeColor({}, 'cardBackground');
   const tintColor = useThemeColor({}, 'tint');
+  const textColor = useThemeColor({}, 'text');
 
   const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
   const items = useSelector((state: IRootState) => state.items.items);
@@ -73,7 +74,23 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
   function Categories() {
     return (
       <Animated.View style={{flex: 1}}>
-        <Text style={[styles.modalTitle, {color: tintColor}]} numberOfLines={1}>Kategoria: {chosenCategory === undefined ? "wszystkie" : chosenCategory?.name || <Text style={[styles.modalTitle, {color: tintColor, fontStyle: 'italic'}]}>nieznana kategoria</Text>}</Text>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'transparent', paddingVertical: 12, paddingHorizontal: 10,}}>
+          <TouchableOpacity
+            style={{height: !selectedCategory ? 0 : undefined}} // trick to make it invisible (changing opacity makes a fading animation)
+            disabled={!selectedCategory}
+            onPress={() => console.log("Go to previous category")}
+          >
+            <Ionicons name="chevron-back" color={textColor} size={30} style={{marginHorizontal: 10}} />
+          </TouchableOpacity>
+          <Text
+            style={[styles.modalTitle, {color: tintColor}]}
+            numberOfLines={1}
+          >
+            Kategoria: {chosenCategory === undefined ? "wszystkie" : chosenCategory?.name || <Text style={[styles.modalTitle, {color: tintColor, fontStyle: 'italic'}]}>nieznana kategoria</Text>}</Text>
+          <View style={{opacity: 0}}>
+            <Ionicons name="chevron-back" color={textColor} size={30} style={{marginHorizontal: 10}} />
+          </View>
+        </View>
         <CategoriesNavigatorWannabe currentCategory={selectedCategory} setCurrentCategory={setSelectedCategory} />
         <OpacityButton
           style={styles.bottomDrawerConfirmButton}
@@ -282,8 +299,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 24,
     letterSpacing: 1,
-    marginTop: 15,
-    marginBottom: 10,
   },
   bottomDrawerConfirmButton: {
     margin: 15,

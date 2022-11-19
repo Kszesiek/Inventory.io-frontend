@@ -1,17 +1,22 @@
 import * as React from "react";
-import {Animated, StyleSheet, useWindowDimensions} from "react-native";
+import {Animated, FlatList, StyleSheet, useWindowDimensions} from "react-native";
 import {useRef, useState} from "react";
-import {View, Text, useThemeColor} from "./Themed";
+import {View, Text, useThemeColor, TouchableOpacity} from "./Themed";
 import {Category} from "../store/categories";
 import {useSelector} from "react-redux";
 import {IRootState} from "../store/store";
 import {TouchableCard} from "./Themed/TouchableCard";
+import {Ionicons} from "@expo/vector-icons";
 
 export default function CategoriesNavigatorWannabe({currentCategory, setCurrentCategory}: {currentCategory: Category | undefined, setCurrentCategory: React.Dispatch<React.SetStateAction<Category | undefined>>}) {
   const screen = useWindowDimensions();
   const backgroundColor = useThemeColor({}, 'background');
+  const cardBackgroundColor = useThemeColor({}, 'cardBackground');
+  const textColor = useThemeColor({}, 'text');
+  const tintColor = useThemeColor({}, 'tint');
 
   const categories: Category[] = useSelector((state: IRootState) => state.categories.categories)
+  const [categoriesTree, setCategoriesTree] = useState<Category[]>([]);
 
   const [currentWindow, setCurrentWindow] = useState<1|2>(1);
   const firstWindow = useRef(new Animated.Value(0)).current;
@@ -48,7 +53,7 @@ export default function CategoriesNavigatorWannabe({currentCategory, setCurrentC
     ]).start();
   }
 
-  function goToSubcategory(whichWindow: 1 | 2, newCategoryId: string | undefined) {
+  function goToSubcategory(whichWindow: 1 | 2, newCategoryId: string | undefined, animationDirection?: 'forwards' | 'backwards') {
     const newWindow = whichWindow === 1 ? 2 : 1;
     if (newWindow === 1) {
       setFirstCategoriesList(categories.filter((item) => item.parentCategoryId === newCategoryId));
@@ -57,7 +62,15 @@ export default function CategoriesNavigatorWannabe({currentCategory, setCurrentC
     }
     setCurrentCategory(categories.find((category) => category.categoryId === newCategoryId));
 
-    changeScreen( (!!currentCategory && newCategoryId === currentCategory.parentCategoryId) ? 'backwards' : 'forwards');
+    changeScreen(animationDirection || (!!currentCategory && newCategoryId === currentCategory.parentCategoryId) ? 'backwards' : 'forwards');
+  }
+
+  function goBackInCategoriesTree(categoryId: string) {
+    let newCategoriesTree: typeof categoriesTree = categoriesTree;
+    while(newCategoriesTree.length > 0 && newCategoriesTree[0].categoryId !== categoryId) {
+      newCategoriesTree = newCategoriesTree.slice(1, categoriesTree.length);
+    }
+    setCategoriesTree(newCategoriesTree);
   }
 
   function numberedCategoriesList(screenID: 1 | 2) {
@@ -65,12 +78,26 @@ export default function CategoriesNavigatorWannabe({currentCategory, setCurrentC
       <Animated.View style={{...styles.container, backgroundColor, right: screenID === 1 ? firstWindow : secondWindow, zIndex: currentWindow === screenID ? -1 : -2}}>
         <Text style={{backgroundColor: 'magenta'}}>WINDOW {screenID} / Current: {currentWindow}</Text>
         {!!currentCategory &&
-            <TouchableCard key={'backwards'} style={styles.categoryCard} onPress={() => goToSubcategory(screenID, currentCategory?.parentCategoryId)}>
-                <Text style={{fontSize: 20}}>powrót</Text>
-            </TouchableCard>
+          <TouchableCard
+            key={'backwards'}
+            style={styles.categoryCard}
+            onPress={() => {
+              goToSubcategory(screenID, currentCategory?.parentCategoryId);
+              setCategoriesTree(categoriesTree.slice(1, categoriesTree.length));
+            }}
+          >
+            <Text style={{fontSize: 20}}>powrót</Text>
+          </TouchableCard>
         }
-        {(screenID === 1 ? firstCategoriesList : secondCategoriesList).map((item) =>
-          <TouchableCard key={item.categoryId} style={styles.categoryCard} onPress={() => goToSubcategory(screenID, item.categoryId)}>
+        {(screenID === 1 ? firstCategoriesList : secondCategoriesList).map((item: Category) =>
+          <TouchableCard
+            key={item.categoryId}
+            style={styles.categoryCard}
+            onPress={() => {
+              goToSubcategory(screenID, item.categoryId);
+              setCategoriesTree([item].concat(categoriesTree));
+            }}
+          >
             <Text style={{fontSize: 20}}>{item.name}</Text>
           </TouchableCard>
         )}
@@ -79,9 +106,64 @@ export default function CategoriesNavigatorWannabe({currentCategory, setCurrentC
   }
 
   return (
-    <View style={{flexGrow: 1, justifyContent: 'flex-end',}}>
-      {numberedCategoriesList(1)}
-      {numberedCategoriesList(2)}
+    <View style={{flexGrow: 1,}}>
+      <View style={{borderRadius: 12, marginHorizontal: 10, overflow: 'hidden', marginBottom: 10,}}>
+        <FlatList
+          horizontal={true}
+          inverted={true}
+          data={categoriesTree}
+          style={{
+            backgroundColor: 'blue',
+          }}
+          contentContainerStyle={{
+            backgroundColor: backgroundColor,
+            flexGrow: 1,
+            justifyContent: 'flex-end',
+          }}
+          keyExtractor={item => item.categoryId}
+          ListFooterComponentStyle={{flexDirection: 'row'}}
+          ListFooterComponent={
+            <>
+              <TouchableOpacity
+                style={[
+                  styles.categoryTreeItem,
+                  {backgroundColor: !!currentCategory ? cardBackgroundColor : tintColor}
+                ]}
+                onPress={() => {
+                  console.log("setting categories tree to empty...");
+                  setCategoriesTree([]);
+                  console.log("..and changing screen");
+                  goToSubcategory(currentWindow, undefined, 'backwards');
+                }}
+              >
+                <Text style={styles.categoryTreeLabel}>wszystkieeeeeeeeeeeeee</Text>
+              </TouchableOpacity>
+              {/*{!!currentCategory && <Ionicons name='chevron-forward' size={16} style={{ color: textColor, alignSelf: 'center'}} />}*/}
+            </>
+          }
+          renderItem={({item}) => {
+            return (<View style={{flexDirection: 'row', backgroundColor: 'transparent', height: '100%'}}>
+              <Ionicons name='chevron-forward' size={16} style={{ color: textColor, alignSelf: 'center'}} />
+              <TouchableOpacity
+                style={[
+                  styles.categoryTreeItem,
+                  {backgroundColor: (categoriesTree.length > 0 && categoriesTree[0] === item) ? tintColor : cardBackgroundColor}
+                ]}
+                onPress={() => {
+                  goToSubcategory(currentWindow, item.categoryId, 'backwards');
+                  goBackInCategoriesTree(item.categoryId);
+                }}
+              >
+                <Text style={styles.categoryTreeLabel}>{item.name}</Text>
+              </TouchableOpacity>
+            </View>)
+          }}
+        />
+      </View>
+      <View style={{flex: 1}}>
+        {numberedCategoriesList(1)}
+        {numberedCategoriesList(2)}
+      </View>
     </View>
   );
 }
@@ -92,10 +174,19 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: 'stretch',
     position: 'absolute',
+    paddingHorizontal: 10,
   },
   categoryCard: {
     padding: 10,
-    marginHorizontal: 10,
     marginVertical: 5,
+  },
+  categoryTreeItem: {
+    borderRadius: 12,
+    alignSelf: 'center',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+  },
+  categoryTreeLabel: {
+    fontSize: 14,
   },
 })
