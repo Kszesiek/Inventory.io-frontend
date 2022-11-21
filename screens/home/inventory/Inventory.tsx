@@ -1,6 +1,6 @@
-import {TextInput, useThemeColor, View, Text, TouchableOpacity} from "../../../components/Themed";
+import {TextInput, useThemeColor, View, Text} from "../../../components/Themed";
 import {TouchableCard} from "../../../components/Themed/TouchableCard";
-import {FontAwesome, Ionicons} from "@expo/vector-icons";
+import {FontAwesome} from "@expo/vector-icons";
 import {Animated, FlatList, ListRenderItemInfo, StyleProp, StyleSheet, TextStyle} from "react-native";
 import {useSelector} from "react-redux";
 import {IRootState} from "../../../store/store";
@@ -11,13 +11,12 @@ import {OpacityButton} from "../../../components/Themed/OpacityButton";
 import * as React from "react";
 import {Modalize} from "react-native-modalize";
 import {Category} from "../../../store/categories";
-import CategoriesNavigatorWannabe from "../../../components/CategoriesNavigatorWannabe";
+import CategoriesChooser from "../../../components/CategoriesChooser";
 
 export default function Inventory({ navigation, route }: InventoryStackScreenProps<'Inventory'>) {
   const backgroundColor = useThemeColor({}, 'background');
   const cardBackgroundColor = useThemeColor({}, 'cardBackground');
   const tintColor = useThemeColor({}, 'tint');
-  const textColor = useThemeColor({}, 'text');
 
   const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
   const items = useSelector((state: IRootState) => state.items.items);
@@ -74,30 +73,11 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
   function Categories() {
     return (
       <Animated.View style={{flex: 1}}>
-        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'transparent', paddingVertical: 12, paddingHorizontal: 10,}}>
-          <TouchableOpacity
-            style={{height: !selectedCategory ? 0 : undefined}} // trick to make it invisible (changing opacity makes a fading animation)
-            disabled={!selectedCategory}
-            onPress={() => console.log("Go to previous category")}
-          >
-            <Ionicons name="chevron-back" color={textColor} size={30} style={{marginHorizontal: 10}} />
-          </TouchableOpacity>
-          <Text
-            style={[styles.modalTitle, {color: tintColor}]}
-            numberOfLines={1}
-          >
-            Kategoria: {chosenCategory === undefined ? "wszystkie" : chosenCategory?.name || <Text style={[styles.modalTitle, {color: tintColor, fontStyle: 'italic'}]}>nieznana kategoria</Text>}</Text>
-          <View style={{opacity: 0}}>
-            <Ionicons name="chevron-back" color={textColor} size={30} style={{marginHorizontal: 10}} />
-          </View>
-        </View>
-        <CategoriesNavigatorWannabe currentCategory={selectedCategory} setCurrentCategory={setSelectedCategory} />
-        <OpacityButton
-          style={styles.bottomDrawerConfirmButton}
-          onPress={() => categoriesModalizeRef.current?.close()}
-        >
-          Potwierdź
-        </OpacityButton>
+        <CategoriesChooser
+          currentCategory={selectedCategory}
+          setCurrentCategory={setSelectedCategory}
+          modalizeRef={categoriesModalizeRef}
+        />
       </Animated.View>
     )
   }
@@ -170,7 +150,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
         <View>
           <View key="filterbar" style={styles.filterBar}>
             <TouchableCard style={styles.filterButton} onPress={categoriesPressed}>
-              <Text style={{textAlign: 'center'}} numberOfLines={1}>Kategoria: {!!chosenCategory ? chosenCategory.name : "wszystkie"}</Text>
+              <Text style={{textAlign: 'center'}} numberOfLines={1}>Kategoria: {!!selectedCategory ? selectedCategory.name : "wszystkie"}</Text>
             </TouchableCard>
             <TouchableCard style={styles.filterButton} onPress={filtersPressed}>
               <Text style={{textAlign: 'center'}} numberOfLines={1}>Filtry</Text>
@@ -203,19 +183,6 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
           <Text style={styles.noContentText}>Aby dodać przedmiot, użyj przycisku u góry ekranu.</Text>
         </View>}
       renderItem={(item: ListRenderItemInfo<Item>) => {
-        // setIsCategoryCorrect(chosenCategory === "");
-        // if (!isCategoryCorrect) {
-        //   setCurrentCategory(categories.find((category: Category) => category.categoryId === chosenCategory)!);
-        //   if (currentCategory!.categoryId === item.item.categoryId)
-        //     setIsCategoryCorrect(true);
-        //
-        //   while (currentCategory!.parentCategoryId !== undefined) {
-        //     setCurrentCategory(categories.find((category: Category) => category.categoryId === chosenCategory)!);
-        //     if (currentCategory!.categoryId === item.item.categoryId)
-        //       setIsCategoryCorrect(true);
-        //   }
-        // }
-
         return (
           <TouchableCard key={item.item.itemId} style={styles.card} onPress={() => cardPressed(item.item.itemId)}>
             <Text style={[styles.cardText, itemTitle]}>{item.item.name}</Text>
