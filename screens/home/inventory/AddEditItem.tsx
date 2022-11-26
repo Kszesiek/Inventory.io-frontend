@@ -179,9 +179,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 15,
   },
-  dateAmountRow: {
-    flexDirection: 'row',
-  },
   buttons: {
     flexDirection: 'row',
     justifyContent: 'center',

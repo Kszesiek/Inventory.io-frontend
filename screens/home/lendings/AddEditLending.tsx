@@ -251,7 +251,7 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
       }}
   /> : <></>
 
-  const dateComponent = <View style={styles.dateAmountRow}>
+  const dateComponent = <View style={styles.dateRow}>
     <Input
       label="Data początku"
       isInvalid={inputs.startDate.isInvalid}
@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 15,
   },
-  dateAmountRow: {
+  dateRow: {
     flexDirection: 'row',
   },
   buttons: {

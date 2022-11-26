@@ -1,8 +1,9 @@
 import {Alert, FlatList, StyleSheet} from "react-native";
-import {useThemeColor, View} from "../../../components/Themed";
+import {useThemeColor, View, Text, getPlaceholderColor} from "../../../components/Themed";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import {EventStackScreenProps} from "../../../types";
 import {useDispatch} from "react-redux";
-import {useLayoutEffect, useState} from "react";
+import {useEffect, useLayoutEffect, useState} from "react";
 import {
   Event,
   isEvent,
@@ -11,6 +12,8 @@ import {
 import {writeOutArray} from "../../../utilities/enlist";
 import Input from "../../../components/Input";
 import {OpacityButton} from "../../../components/Themed/OpacityButton";
+import {TouchableCard} from "../../../components/Themed/TouchableCard";
+import {displayDate, displayTime} from "../../../utilities/date";
 
 export type ValidValuePair = {
   value: string
@@ -30,7 +33,17 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
   const isEditing = !!event;
 
   const backgroundColor = useThemeColor({}, "background");
+  const textColor = useThemeColor({}, 'text');
   const cancelColor = useThemeColor({}, "delete");
+  const placeholderTextColor = getPlaceholderColor(textColor, textColor);
+
+  const [startDate, setStartDate] = useState<Date | undefined>(!!event && isEvent(event) ? new Date(event.startDate) : undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(!!event && isEvent(event) ? new Date(event.endDate) : undefined);
+  const [showStartDateDialog, setShowStartDateDialog] = useState<boolean>(false);
+  const [showStartTimeDialog, setShowStartTimeDialog] = useState<boolean>(false);
+  const [showEndDateDialog, setShowEndDateDialog] = useState<boolean>(false);
+  const [showEndTimeDialog, setShowEndTimeDialog] = useState<boolean>(false);
+
 
   const [inputs, setInputs]: [inputValuesType, Function] = useState(
   {
@@ -48,9 +61,33 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
     },
   });
 
+  useEffect(() => {
+    console.log("StartDate changed");
+    if (startDate === undefined)
+      return;
+    setInputs((currentInputValues: typeof inputs) => {
+      return {
+        ...currentInputValues,
+        startDate: {value: startDate.toISOString(), isInvalid: false},
+      }
+    })
+  }, [startDate]);
+
+  useEffect(() => {
+    console.log("EndDate changed");
+    if (endDate === undefined)
+      return;
+    setInputs((currentInputValues: typeof inputs) => {
+      return {
+        ...currentInputValues,
+        endDate: {value: endDate.toISOString(), isInvalid: false},
+      }
+    })
+  }, [endDate]);
+
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: isEditing ? "Edytuj wypożyczenie" : "Stwórz wypożyczenie"
+      title: isEditing ? "Edytuj wydarzenie" : "Stwórz wydarzenie"
     });
   }, [navigation, isEditing])
 
@@ -60,10 +97,10 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
   }
 
   async function submitPressed() {
-    const dateRegex = /^20(0[0-9]|1[0-9]|2[0-9])-(0[1-9]|1[0-2])-(0[1-9]|1\d|2\d|3[01])$/;
-    const startDateIsValid: boolean = dateRegex.test(inputs.startDate.value) && new Date(inputs.startDate.value).toString() !== "Invalid Date";
-    const endDateIsValid: boolean = dateRegex.test(inputs.endDate.value) && new Date(inputs.endDate.value).toString() !== "Invalid Date";
-    const nameIsValid: boolean = inputs.name.value.trim().length >= 0;
+    const startDateIsValid: boolean = new Date(inputs.startDate.value).toString() !== "Invalid Date";
+    const endDateIsValid: boolean = new Date(inputs.endDate.value).toString() !== "Invalid Date";
+    const nameIsValid: boolean = inputs.name.value.trim().length > 0;
+    const startEndTimeIsValid: boolean = !startDateIsValid || !endDateIsValid || new Date(inputs.endDate.value) >= new Date(inputs.startDate.value);
 
     setInputs((currentInputs: inputValuesType) => {
       return {
@@ -73,16 +110,16 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
         },
         startDate: {
           value: currentInputs.startDate.value,
-          isInvalid: !startDateIsValid,
+          isInvalid: !startDateIsValid || !startEndTimeIsValid,
         },
         endDate: {
           value: currentInputs.endDate.value,
-          isInvalid: !endDateIsValid,
+          isInvalid: !endDateIsValid || !startEndTimeIsValid,
         },
       }
     });
 
-    if (!nameIsValid || !startDateIsValid || !endDateIsValid) {
+    if (!nameIsValid || !startDateIsValid || !endDateIsValid || !startEndTimeIsValid) {
       const wrongDataArray: string[] = []
       if (!startDateIsValid)
         wrongDataArray.push("start date")
@@ -90,6 +127,8 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
         wrongDataArray.push("end date")
       if (!nameIsValid)
         wrongDataArray.push("event name")
+      if (!startEndTimeIsValid)
+        wrongDataArray.push("start and end time od date")
 
       const wrongDataString: string = writeOutArray(wrongDataArray)
 
@@ -151,32 +190,98 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
       // autoCapitalize: 'sentences',  // default is sentences
     }} />
 
-  const dateComponent = <View style={styles.dateAmountRow}>
-    <Input
-      label="Data początku"
-      isInvalid={inputs.startDate.isInvalid}
-      style={styles.input}
-      // onErrorText="Please enter a date between 2000-01-01 and 2029-12-31 following template YYYY-MM-DD"
-      textInputProps={{
-        placeholder: "YYYY-MM-DD",
-        maxLength: 10,
-        onChangeText: inputChangedHandler.bind(null, "startDate"),
-        value: inputs.startDate.value,
-      }}
-    />
-    <View style={{width: 10}}/>
-    <Input
-      label="Data końca"
-      isInvalid={inputs.endDate.isInvalid}
-      style={styles.input}
-      // onErrorText="Please enter a date between 2000-01-01 and 2029-12-31 following template YYYY-MM-DD"
-      textInputProps={{
-        placeholder: "YYYY-MM-DD",
-        maxLength: 10,
-        onChangeText: inputChangedHandler.bind(null, "endDate"),
-        value: inputs.endDate.value,
-      }}
-    />
+  const startDateComponent = <View style={styles.dateRow}>
+    <View style={{...styles.dateItem, flex: 5}}>
+      <Text numberOfLines={1} style={{
+        fontSize: 16,
+        marginBottom: 4,
+      }}>
+        Data rozpoczęcia
+      </Text>
+      <TouchableCard
+        style={[styles.dateTouchableCard, inputs.startDate.isInvalid && {backgroundColor: cancelColor}]}
+        onPress={() => {
+          setShowStartDateDialog(true);
+        }}
+      >
+        <Text numberOfLines={1} style={{
+          paddingVertical: 6,
+          paddingHorizontal: 10,
+          fontSize: 18,
+        }}>
+          {!!startDate ? displayDate(startDate) : <Text style={{fontStyle: "italic", fontSize: 14, color: placeholderTextColor}}>wybierz datę</Text>}
+        </Text>
+      </TouchableCard>
+    </View>
+    <View style={{flex: 4, ...styles.dateItem}}>
+      <Text style={{
+        fontSize: 16,
+        marginBottom: 4,
+      }}>
+        Godzina rozpoczęcia
+      </Text>
+      <TouchableCard
+        style={[styles.dateTouchableCard, inputs.startDate.isInvalid && {backgroundColor: cancelColor}]}
+        onPress={() => {
+          setShowStartTimeDialog(true);
+        }}
+      >
+        <Text style={{
+          paddingVertical: 6,
+          paddingHorizontal: 10,
+          fontSize: 18,
+        }}>
+          {!!startDate ? displayTime(startDate) : <Text style={{fontStyle: "italic", fontSize: 14, color: placeholderTextColor}}>wybierz godzinę</Text>}
+        </Text>
+      </TouchableCard>
+    </View>
+  </View>
+
+  const endDateComponent = <View style={styles.dateRow}>
+    <View style={{flex: 5, ...styles.dateItem}}>
+      <Text numberOfLines={1} style={{
+        fontSize: 16,
+        marginBottom: 4,
+      }}>
+        Data zakończenia
+      </Text>
+      <TouchableCard
+        style={[styles.dateTouchableCard, inputs.endDate.isInvalid && {backgroundColor: cancelColor}]}
+        onPress={() => {
+          setShowEndDateDialog(true);
+        }}
+      >
+        <Text numberOfLines={1} style={{
+          paddingVertical: 6,
+          paddingHorizontal: 10,
+          fontSize: 18,
+        }}>
+          {!!endDate ? displayDate(endDate) : <Text style={{fontStyle: "italic", fontSize: 14, color: placeholderTextColor}}>wybierz datę</Text>}
+        </Text>
+      </TouchableCard>
+    </View>
+    <View style={{flex: 4, ...styles.dateItem}}>
+      <Text style={{
+        fontSize: 16,
+        marginBottom: 4,
+      }}>
+        Godzina zakończenia
+      </Text>
+      <TouchableCard
+        style={[styles.dateTouchableCard, inputs.endDate.isInvalid && {backgroundColor: cancelColor}]}
+        onPress={() => {
+          setShowEndTimeDialog(true);
+        }}
+      >
+        <Text style={{
+          paddingVertical: 6,
+          paddingHorizontal: 10,
+          fontSize: 18,
+        }}>
+          {!!endDate ? displayTime(endDate) : <Text style={{fontStyle: "italic", fontSize: 14, color: placeholderTextColor}}>wybierz godzinę</Text>}
+        </Text>
+      </TouchableCard>
+    </View>
   </View>
 
   const buttonsComponent = <View style={styles.buttons}>
@@ -186,18 +291,79 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
 
   const listElements = [
     eventNameComponent,
-    dateComponent,
+    startDateComponent,
+    endDateComponent,
   ]
 
   return (
-    <FlatList
-      data={listElements}
-      renderItem={item => item.item}
-      keyExtractor={(item, index) => index.toString()}
-      contentContainerStyle={{backgroundColor, ...styles.container}}
-      ListFooterComponent={buttonsComponent}
-      ListFooterComponentStyle={{flexGrow: 1, justifyContent: 'flex-end'}}
-    />
+    <>
+      <FlatList
+        data={listElements}
+        renderItem={item => item.item}
+        keyExtractor={(item, index) => index.toString()}
+        contentContainerStyle={{backgroundColor, ...styles.container}}
+        ListFooterComponent={buttonsComponent}
+        ListFooterComponentStyle={{flexGrow: 1, justifyContent: 'flex-end'}}
+      />
+      { showStartDateDialog && <DateTimePicker
+          mode={"date"}
+          firstDayOfWeek={1}
+          locale={"pl-PL"}
+          value={startDate|| new Date()}
+          is24Hour={true}
+          display="default"
+          maximumDate={!!endDate ? endDate : undefined}
+          onChange={(event, date) => {
+            setShowStartDateDialog(false);
+            date && date.setUTCSeconds(0, 0) && setStartDate(date);
+          }}
+      />}
+      { showStartTimeDialog && <DateTimePicker
+        // positiveButton={{label: 'OK', textColor: 'green'}}
+        // negativeButton={{label: 'BBB', textColor: 'red'}}
+        // textColor={textColor}
+        mode={"time"}
+        firstDayOfWeek={1}
+        locale={"pl-PL"}
+        value={startDate|| new Date()}
+        is24Hour={true}
+        // display="spinner"
+        maximumDate={!!endDate ? endDate : undefined}
+        onChange={(event, date) => {
+          setShowStartTimeDialog(false);
+          date && date.setUTCSeconds(0, 0) && setStartDate(date);
+        }}
+      />}
+      { showEndDateDialog && <DateTimePicker
+          mode={"date"}
+          firstDayOfWeek={1}
+          locale={"pl-PL"}
+          value={endDate|| new Date()}
+          is24Hour={true}
+          display="default"
+          minimumDate={!!startDate ? startDate : undefined}
+          onChange={(event, date) => {
+            setShowEndDateDialog(false);
+            date && date.setUTCSeconds(0, 0) && setEndDate(date);
+          }}
+      />}
+      { showEndTimeDialog && <DateTimePicker
+        // positiveButton={{label: 'OK', textColor: 'green'}}
+        // negativeButton={{label: 'BBB', textColor: 'red'}}
+        // textColor={textColor}
+          mode={"time"}
+          firstDayOfWeek={1}
+          locale={"pl-PL"}
+          value={endDate|| new Date()}
+          is24Hour={true}
+        // display="spinner"
+          minimumDate={!!startDate ? startDate : undefined}
+          onChange={(event, date) => {
+            setShowEndTimeDialog(false);
+            date && date.setUTCSeconds(0, 0) && setEndDate(date);
+          }}
+      />}
+    </>
   )
 }
 
@@ -207,7 +373,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 15,
   },
-  dateAmountRow: {
+  dateRow: {
     flexDirection: 'row',
   },
   buttons: {
@@ -220,5 +386,18 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-  }
+  },
+  dateTouchableCard: {
+    // shadowColor: 'black',
+    // shadowOpacity: 0.26,
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowRadius: 8,
+    // elevation: 5,
+    borderRadius: 10,
+    alignItems: 'stretch',
+  },
+  dateItem: {
+    marginHorizontal: 4,
+    marginVertical: 8,
+  },
 });
