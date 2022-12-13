@@ -22,13 +22,22 @@ export const organizationsSlice = createSlice({
   name: 'organizations',
   initialState: {
     organizations: new Array<Organization>(),
+    currentOrganization: undefined as Organization | undefined,
+
   },
   reducers: {
     signOut: (state) => {
       state.organizations = [];
+      state.currentOrganization = undefined;
+    },
+    changeOrganization: (state, action: PayloadAction<Organization>) => {
+      state.currentOrganization = action.payload;
     },
     setOrganizations: (state, action: PayloadAction<Organization[]>) => {
       state.organizations = action.payload;
+      if (action.payload.length > 0) {
+        state.currentOrganization = action.payload[0];
+      }
     },
     addOrganization: (state, action) => {
       if (!state.organizations.some(organization => organization.id === action.payload.id)) {

@@ -2,7 +2,7 @@
  * If you are not familiar with React Navigation, refer to the "Fundamentals" guide:
  * https://reactnavigation.org/docs/getting-started
  */
-import {FontAwesome} from '@expo/vector-icons';
+import {FontAwesome, Ionicons} from '@expo/vector-icons';
 import {
   NavigationContainer,
   DefaultTheme,
@@ -18,7 +18,7 @@ import {
   useDrawerProgress
 } from '@react-navigation/drawer';
 import * as React from 'react';
-import {ColorSchemeName, Pressable, StyleSheet} from 'react-native';
+import {ColorSchemeName, Image, Pressable, StyleSheet, TouchableOpacity} from 'react-native';
 
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
@@ -34,8 +34,6 @@ import {
 } from '../types';
 import {Text, useThemeColor, View} from "../components/Themed";
 import Animated, {Adaptable} from "react-native-reanimated";
-import {OpacityButton} from "../components/Themed/OpacityButton";
-// import LinkingConfiguration from './LinkingConfiguration';
 
 import {useDispatch, useSelector} from "react-redux";
 import {IRootState} from "../store/store";
@@ -52,7 +50,10 @@ import CreateOrganization from "../screens/organizations/CreateOrganization";
 import WelcomeStackNavigator from "./WelcomeStackNavigator";
 import useCachedResources from "../hooks/useCachedResources";
 import {categoryActions} from "../store/categories";
-import {Organization} from "../store/organizations";
+import {Organization, organizationsActions} from "../store/organizations";
+import Logo from "../assets/images/inventory.png";
+import {TouchableCard} from "../components/Themed/TouchableCard";
+// import LinkingConfiguration from './LinkingConfiguration';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   const chosenTheme: "light" | "dark" | null | undefined = useSelector((state: IRootState) => state.appWide.theme === 'auto' ? colorScheme : state.appWide.theme);
@@ -118,6 +119,7 @@ const HomeDrawer = createDrawerNavigator();
 
 function CustomHomeDrawerContent(props: DrawerContentComponentProps) {
   const progress = useDrawerProgress() as Adaptable<number>;
+  const textColor = useThemeColor({}, 'text');
 
   const translateX = Animated.interpolateNode(progress, {
     inputRange: [0, 1],
@@ -129,26 +131,34 @@ function CustomHomeDrawerContent(props: DrawerContentComponentProps) {
     props.navigation.navigate("CreateOrganization", { doesGoBack: true });
   }
 
+  function profileSettingsPressed() {
+    console.log("profile settings pressed");
+    // props.navigation.navigate("SomeProfileScreenOrNavigator");
+  }
+
   return (
     <>
       <DrawerContentScrollView {...props}>
         <Animated.View style={{ transform: [{ translateX }] }}>
           <View style={drawerStyles.titleView}>
             <Text style={drawerStyles.titleText}>Twoje organizacje</Text>
+            <TouchableOpacity onPress={createOrganizationPressed} style={drawerStyles.titleAddButton}>
+              <Ionicons name='add' size={28} color={textColor} />
+            </TouchableOpacity>
           </View>
           <DrawerItemList {...props} />
         </Animated.View>
       </DrawerContentScrollView>
       <Animated.View style={{ transform: [{ translateX }] }}>
-        <View style={drawerStyles.bottomView}>
-          <OpacityButton
-            style={drawerStyles.bottomButton}
-            textStyle={{fontSize: 16}}
-            onPress={createOrganizationPressed}
-          >
-            Utwórz organizację
-          </OpacityButton>
-        </View>
+        <TouchableCard style={drawerStyles.profileView} onPress={profileSettingsPressed}>
+          <View style={drawerStyles.organizationPictureContainer}>
+            <Image source={Logo} style={drawerStyles.organizationPicture} resizeMode='contain' />
+          </View>
+          <Text style={drawerStyles.profileUsername}>USERNAME</Text>
+          <TouchableOpacity onPress={profileSettingsPressed} style={drawerStyles.profileSettingsContainer}>
+            <Ionicons name='settings' size={26} color={textColor} />
+          </TouchableOpacity>
+        </TouchableCard>
       </Animated.View>
     </>
   );
@@ -194,6 +204,7 @@ function HomeDrawerNavigator(props: {organizations: Organization[]}) {
           listeners={{
             drawerItemPress: (e) => {
               const isDemo: boolean = demoData.hasOwnProperty(organization.id);
+              dispatch(organizationsActions.changeOrganization(organization));
               dispatch(eventActions.loadEvents(isDemo ? demoData[organization.id].events : []));
               dispatch(itemActions.loadItems(isDemo ? demoData[organization.id].items : []));
               dispatch(lendingActions.loadLendings(isDemo ? demoData[organization.id].lendings : []));
@@ -243,19 +254,46 @@ const drawerStyles = StyleSheet.create({
     marginLeft: 12,
     marginTop: 40,
     marginBottom: 30,
+    flexDirection: 'row',
     backgroundColor: 'transparent',
   },
   titleText: {
     fontSize: 18,
+    flex: 1,
+    textAlignVertical: 'center',
   },
-  bottomView: {
-    backgroundColor: 'transparent',
-    alignItems: 'center',
-    marginBottom: 20,
+  titleAddButton: {
+    paddingHorizontal: 10,
+  },
+  profileView: {
+    flexDirection: 'row',
+    marginBottom: 18,
     marginTop: 10,
+    marginHorizontal: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
   },
-  bottomButton: {
-    paddingVertical: 8,
+  organizationPictureContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '15%',
+    aspectRatio: 1,
+    backgroundColor: 'transparent',
+    marginRight: 10,
+  },
+  organizationPicture: {
+    height: '100%',
+    backgroundColor: 'transparent',
+  },
+  profileUsername: {
+    textAlignVertical: 'center',
+    fontSize: 18,
+    flex: 1,
+  },
+  profileSettingsContainer: {
+    marginLeft: 10,
+    justifyContent: 'center',
   },
 })
 

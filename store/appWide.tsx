@@ -10,6 +10,7 @@ export const appWideSlice = createSlice({
     name: undefined as string | undefined,
     surname: undefined as string | undefined,
     email: undefined as string | undefined,
+    organizationName: undefined as string | undefined,
   },
   reducers: {
     setTheme: (state, action: {payload: 'auto' | 'light' | 'dark'}) => {
@@ -24,12 +25,14 @@ export const appWideSlice = createSlice({
       state.name = undefined;
       state.surname = undefined;
       state.email = undefined;
+      state.organizationName = undefined;
 
       AsyncStorage.multiRemove([
         "username",
         "name",
         "surname",
         "email",
+        "organizationName",
       ]);
     },
     signIn: (state, action) => {

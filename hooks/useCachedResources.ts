@@ -45,7 +45,6 @@ export default function useCachedResources() {
         if (demoMode === "false" || demoMode == "true") {
           await dispatch(appWideActions.setDemoMode(demoMode === "true"));
         }
-
       } catch (e) {
         // We might want to provide this error information to an error reporting service
         console.warn(e);

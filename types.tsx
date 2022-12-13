@@ -65,7 +65,7 @@ export type HomeTabParamList = {
   InventoryNavigator: undefined;
   LendingNavigator: undefined;
   EventNavigator: undefined;
-  More: undefined;
+  MoreNavigator: undefined;
   // Members: undefined;
   // AppSettings: undefined;
   // UserSettings: undefined;
@@ -124,6 +124,19 @@ export type EventStackParamList = {
 
 export type EventStackScreenProps<Screen extends keyof EventStackParamList> = NativeStackScreenProps<
   EventStackParamList,
+  Screen
+>;
+
+// MORE STACK
+
+export type MoreStackParamList = {
+  More: undefined;
+  HenryStickmin: undefined;
+  UsersNavigator: undefined;
+};
+
+export type MoreStackScreenProps<Screen extends keyof MoreStackParamList> = NativeStackScreenProps<
+  MoreStackParamList,
   Screen
 >;
 

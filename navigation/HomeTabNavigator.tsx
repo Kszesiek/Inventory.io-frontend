@@ -3,12 +3,12 @@ import {HomeTabParamList} from "../types";
 import {useThemeColor} from "../components/Themed";
 import {TouchableOpacity} from "react-native";
 import {Feather, Ionicons} from "@expo/vector-icons";
-import More from "../screens/home/More";
 import * as React from "react";
 import LendingNavigator from "./LendingStackNavigator";
 import EventNavigator from "./EventStackNavigator";
 import HomescreenNavigator from "./HomescreenStackNavigator";
 import InventoryNavigator from "./InventoryStackNavigator";
+import MoreNavigator from "./MoreStackNavigator";
 
 const HomeTab = createBottomTabNavigator<HomeTabParamList>();
 
@@ -20,6 +20,7 @@ export default function HomeTabNavigator(props: {navigation: any, route: any}) {
     <HomeTab.Navigator
       initialRouteName="HomescreenNavigator"
       screenOptions={{
+        headerShown: false,
         headerTitleAlign: "center",
         headerLeft: () => (
           <TouchableOpacity onPress={() => props.navigation.navigate("HomescreenNavigator")}>
@@ -50,7 +51,6 @@ export default function HomeTabNavigator(props: {navigation: any, route: any}) {
         name="HomescreenNavigator"
         component={HomescreenNavigator}
         options={{
-          headerShown: false,
           tabBarLabel: "Strona główna",
           tabBarIcon: ({color, size}) => (
             <Ionicons name="home" size={size} color={color} />
@@ -70,7 +70,6 @@ export default function HomeTabNavigator(props: {navigation: any, route: any}) {
         name="InventoryNavigator"
         component={InventoryNavigator}
         options={{
-          headerShown: false,
           tabBarLabel: "Inwentarz",
           tabBarIcon: ({color, size}) => (
             <Ionicons name="library" size={size} color={color} />
@@ -80,7 +79,6 @@ export default function HomeTabNavigator(props: {navigation: any, route: any}) {
         name="LendingNavigator"
         component={LendingNavigator}
         options={{
-          headerShown: false,
           tabBarLabel: "Wypożyczenia",
           tabBarIcon: ({color, size}) => (
             <Ionicons name="push" size={size} color={color} />
@@ -90,17 +88,15 @@ export default function HomeTabNavigator(props: {navigation: any, route: any}) {
         name="EventNavigator"
         component={EventNavigator}
         options={{
-          headerShown: false,
           tabBarLabel: "Wydarzenia",
           tabBarIcon: ({color, size}) => (
             <Ionicons name="calendar" size={size} color={color} />
           ),
         }} />
       <HomeTab.Screen
-        name="More"
-        component={More}
+        name="MoreNavigator"
+        component={MoreNavigator}
         options={{
-          title: "Więcej",
           tabBarLabel: "Więcej",
           tabBarIcon: ({color, size}) => (
             <Feather name="more-horizontal" size={size} color={color} />
