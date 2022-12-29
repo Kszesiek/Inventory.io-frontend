@@ -40,7 +40,7 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
         isInvalid: false,
       },
       category: {
-        value: !!item && isItem(item) ? categories.find(category => category.categoryId === item.categoryId)?.name || "" : "",
+        value: !!item && isItem(item) ? categories.find(category => category.id === item.categoryId)?.name || "" : "",
         isInvalid: false,
       },
     });
@@ -90,13 +90,13 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
       {
         itemId: item.itemId,
         name: inputs.name.value,
-        categoryId: categories.find(category => category.name === inputs.category.value)!.categoryId,
+        categoryId: categories.find(category => category.name === inputs.category.value)!.id,
       }
       :
       {
         itemId: Math.random().toString(),
         name: inputs.name.value,
-        categoryId: categories.find(category => category.name === inputs.category.value)!.categoryId,
+        categoryId: categories.find(category => category.name === inputs.category.value)!.id,
       }
 
     if (isEditing) {
