@@ -76,8 +76,13 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
         <CategoriesChooser
           currentCategory={selectedCategory}
           setCurrentCategory={setSelectedCategory}
-          modalizeRef={categoriesModalizeRef}
         />
+        <OpacityButton
+          style={styles.bottomDrawerConfirmButton}
+          onPress={() => categoriesModalizeRef.current?.close()}
+        >
+          Potwierdź
+        </OpacityButton>
       </Animated.View>
     )
   }
