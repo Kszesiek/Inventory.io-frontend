@@ -10,6 +10,7 @@ import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import {LendingForEvent, LendingPrivate} from "./store/lendings";
 import {Event} from "./store/events";
 import {Item} from "./store/items";
+import {Member} from "./store/members";
 
 // declare global {
 //   namespace ReactNavigation {
@@ -132,11 +133,26 @@ export type EventStackScreenProps<Screen extends keyof EventStackParamList> = Na
 export type MoreStackParamList = {
   More: undefined;
   HenryStickmin: undefined;
-  UsersNavigator: undefined;
+  MembersNavigator: undefined;
+  WarehousesNavigator: undefined;
+  CategoriesNavigator: undefined;
 };
 
 export type MoreStackScreenProps<Screen extends keyof MoreStackParamList> = NativeStackScreenProps<
   MoreStackParamList,
+  Screen
+>;
+
+// MEMBERS STACK
+
+export type MembersStackParamList = {
+  Members: undefined;
+  AddEditMember: { member: Member } | undefined;
+  MemberDetails: { memberId: string };
+};
+
+export type MembersStackScreenProps<Screen extends keyof MembersStackParamList> = NativeStackScreenProps<
+  MembersStackParamList,
   Screen
 >;
 

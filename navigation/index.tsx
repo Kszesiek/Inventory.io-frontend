@@ -53,6 +53,7 @@ import {categoryActions} from "../store/categories";
 import {Organization, organizationsActions} from "../store/organizations";
 import Logo from "../assets/images/inventory.png";
 import {TouchableCard} from "../components/Themed/TouchableCard";
+import {membersActions} from "../store/members";
 // import LinkingConfiguration from './LinkingConfiguration';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
@@ -176,6 +177,7 @@ function HomeDrawerNavigator(props: {organizations: Organization[]}) {
         dispatch(itemActions.loadItems(demoData[props.organizations[0].id].items)),
         dispatch(lendingActions.loadLendings(demoData[props.organizations[0].id].lendings)),
         dispatch(userActions.loadUsers(demoData[props.organizations[0].id].users)),
+        dispatch(membersActions.loadMembers(demoData[props.organizations[0].id].users)), // going to change that most likely
         dispatch(categoryActions.loadCategories(demoData[props.organizations[0].id].categories)),
       ])
     }
@@ -204,11 +206,14 @@ function HomeDrawerNavigator(props: {organizations: Organization[]}) {
           listeners={{
             drawerItemPress: (e) => {
               const isDemo: boolean = demoData.hasOwnProperty(organization.id);
-              dispatch(organizationsActions.setCurrentOrganization(organization));
-              dispatch(eventActions.loadEvents(isDemo ? demoData[organization.id].events : []));
-              dispatch(itemActions.loadItems(isDemo ? demoData[organization.id].items : []));
-              dispatch(lendingActions.loadLendings(isDemo ? demoData[organization.id].lendings : []));
-              dispatch(userActions.loadUsers(isDemo ? demoData[organization.id].users : []));
+              Promise.all([
+                dispatch(organizationsActions.setCurrentOrganization(organization)),
+                dispatch(eventActions.loadEvents(isDemo ? demoData[organization.id].events : [])),
+                dispatch(itemActions.loadItems(isDemo ? demoData[organization.id].items : [])),
+                dispatch(lendingActions.loadLendings(isDemo ? demoData[organization.id].lendings : [])),
+                dispatch(userActions.loadUsers(isDemo ? demoData[organization.id].users : [])),
+                dispatch(membersActions.loadMembers(demoData[props.organizations[0].id].users)), // going to change that most likely
+              ])
             }
           }}
         />

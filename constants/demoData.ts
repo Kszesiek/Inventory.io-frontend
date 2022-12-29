@@ -1,9 +1,9 @@
 import {Organization} from "../store/organizations";
-import {User} from "../store/users";
 import {Event} from "../store/events";
 import {LendingForEvent, LendingPrivate} from "../store/lendings";
 import {Item} from "../store/items";
 import {Category} from "../store/categories";
+import {Member} from "../store/members";
 
 export const demoOrganizations: Organization[] = [
   {
@@ -27,7 +27,7 @@ export const demoOrganizations: Organization[] = [
 ];
 
 type demoBatch = {
-  users: Array<User>,
+  users: Array<Member>,
   lendings: Array<LendingPrivate | LendingForEvent>,
   events: Array<Event>,
   items: Array<Item>,
@@ -36,25 +36,25 @@ type demoBatch = {
 
 export const demoData: Record<typeof demoOrganizations[number]["id"], demoBatch> = {
   "86519777-5cf5-4af5-8e56-d5640cb26c8c": { // Amplitron
-    users: new Array<User>(
+    users: new Array<Member>(
       {
-        userId: "eed0be02-f83e-46c8-a4aa-2dcae02dc12f",
+        id: "eed0be02-f83e-46c8-a4aa-2dcae02dc12f",
         username: "itsmejohndoe",
         name: "John",
         surname: "Doe",
       },
       {
-        userId: "b517ed77-5ce5-4457-ba1e-b8a1fba4d376",
+        id: "b517ed77-5ce5-4457-ba1e-b8a1fba4d376",
         username: "JustClarence",
         name: "Clarence",
         surname: "Walter",
       },{
-        userId: "f141ec5f-3d2b-4e71-a4ba-1a72f872c4ab",
+        id: "f141ec5f-3d2b-4e71-a4ba-1a72f872c4ab",
         username: "YourGuyRoy",
         name: "Roy",
         surname: "Whitings",
       },{
-        userId: "7f7feb57-d63d-4fc4-b60c-8281c5c8109c",
+        id: "7f7feb57-d63d-4fc4-b60c-8281c5c8109c",
         username: "TheRealGlobetrotterGrover",
         name: "Grover",
         surname: "Globetrotter",
@@ -453,20 +453,20 @@ export const demoData: Record<typeof demoOrganizations[number]["id"], demoBatch>
     ),
   },
   "e9391d5f-3b6b-48b3-bcb0-1022369dceb1": { // Antykwariat
-    users: new Array<User>(
+    users: new Array<Member>(
       {
-        userId: "eed0be02-f83e-46c8-a4aa-2dcae02dc12f",
+        id: "eed0be02-f83e-46c8-a4aa-2dcae02dc12f",
         username: "itsmejohndoe",
         name: "John",
         surname: "Doe",
       },
       {
-        userId: "e429468d-6f08-4b46-9682-0a70be6983fb",
+        id: "e429468d-6f08-4b46-9682-0a70be6983fb",
         username: "EmployerOfTheMonth",
         name: "Harry",
         surname: "Grease",
       },{
-        userId: "2bbd2eda-6b62-40de-b122-e6c036bef7b3",
+        id: "2bbd2eda-6b62-40de-b122-e6c036bef7b3",
         username: "TheNewGirl",
         name: "Hannah",
         surname: "Hendry",

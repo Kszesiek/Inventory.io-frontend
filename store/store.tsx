@@ -7,6 +7,7 @@ import lendingsReducer from './lendings';
 import organizationsReducer from './organizations';
 import categoriesReducer from './categories';
 import propertiesReducer from './properties';
+import membersReducer from './members';
 import appWideReducer from './appWide';
 
 const rootReducer = combineReducers({
@@ -17,6 +18,7 @@ const rootReducer = combineReducers({
   organizations: organizationsReducer,
   categories: categoriesReducer,
   properties: propertiesReducer,
+  members: membersReducer,
   appWide: appWideReducer,
 })
 

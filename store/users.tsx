@@ -1,17 +1,13 @@
 import {createSlice} from "@reduxjs/toolkit";
 
-export class User {
-  userId: string
+export interface UserTemplate {
   username: string
   name: string
   surname: string
+}
 
-  constructor(userId: string, username: string, name: string, surname: string) {
-    this.userId = userId;
-    this.username = username;
-    this.name = name;
-    this.surname = surname;
-  }
+export interface User extends UserTemplate{
+  id: string
 }
 
 export const usersSlice = createSlice({
@@ -21,18 +17,18 @@ export const usersSlice = createSlice({
   },
   reducers: {
     addUser: (state, action) => {
-      if (!state.users.some(user => user.userId === action.payload.user.userId)) {
+      if (!state.users.some(user => user.id === action.payload.user.id)) {
         state.users.push(action.payload.user);
       }
     },
     removeUser: (state, action) => {
-      if (state.users.find(user => user.userId === action.payload.userId)) {
-        state.users = state.users.filter(user => user.userId !== action.payload.userId);
+      if (state.users.find(user => user.id === action.payload.id)) {
+        state.users = state.users.filter(user => user.id !== action.payload.id);
       }
     },
 
     modifyUser: (state, action) => {
-      const index = state.users.findIndex(user => user.userId === action.payload.user.userId);
+      const index = state.users.findIndex(user => user.id === action.payload.user.id);
       if (index >= 0) {
         state.users[index] = action.payload.user;
       }

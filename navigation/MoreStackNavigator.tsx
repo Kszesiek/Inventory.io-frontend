@@ -4,6 +4,7 @@ import {useThemeColor} from "../components/Themed";
 import {TouchableOpacity} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
 import More from "../screens/home/more/More";
+import MembersStackNavigator from "./MembersStackNavigator";
 import * as React from "react";
 import HenryStickmin from "../screens/HenryStickmin";
 
@@ -44,6 +45,14 @@ export default function MoreNavigator() {
           </TouchableOpacity>
         )
       })} />
+
+      <MoreStack.Screen
+        name="MembersNavigator"
+        component={MembersStackNavigator}
+        options={{
+          headerShown: false
+        }}
+      />
     </MoreStack.Navigator>
   );
 }

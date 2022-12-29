@@ -59,7 +59,7 @@ export default function More({navigation, route}: MoreStackScreenProps<'More'>) 
         <Ionicons name='construct' size={22} style={{ color: textColor, marginRight: 10}} />
         <Text style={styles.cardText}>Ustawienia organizacji</Text>
       </TouchableCard>
-      <TouchableCard style={[styles.touchableCard, styles.listCard]}>
+      <TouchableCard style={[styles.touchableCard, styles.listCard]} onPress={() => navigation.navigate("MembersNavigator")}>
         <Ionicons name='people' size={22} style={{ color: textColor, marginRight: 10}} />
         <Text style={styles.cardText}>Członkowie</Text>
       </TouchableCard>
