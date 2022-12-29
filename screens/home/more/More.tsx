@@ -99,7 +99,7 @@ export default function More({navigation, route}: MoreStackScreenProps<'More'>) 
           ]);
         }}
       >
-        <Ionicons name="log-out" size={30} style={{ color: textColor, marginRight: 5}} />
+        <Ionicons name="log-out" size={30} style={{ color: textColor, marginRight: 5, marginVertical: -3}} />
         <Text style={styles.cardText}>Opuść organizację</Text>
       </TouchableCard>
       <TouchableCard
