@@ -5,6 +5,7 @@ import {TouchableOpacity} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
 import More from "../screens/home/more/More";
 import MembersStackNavigator from "./MembersStackNavigator";
+import CategoriesStackNavigator from "./CategoriesStackNavigator";
 import * as React from "react";
 import HenryStickmin from "../screens/HenryStickmin";
 
@@ -37,7 +38,6 @@ export default function MoreNavigator() {
       })} />
 
       <MoreStack.Screen name="HenryStickmin" component={HenryStickmin} options={({ navigation }) => ({
-
         title: "Feel distracted yet?",
         headerLeft: () => (
           <TouchableOpacity onPress={navigation.goBack}>
@@ -49,6 +49,14 @@ export default function MoreNavigator() {
       <MoreStack.Screen
         name="MembersNavigator"
         component={MembersStackNavigator}
+        options={{
+          headerShown: false
+        }}
+      />
+
+      <MoreStack.Screen
+        name="CategoriesNavigator"
+        component={CategoriesStackNavigator}
         options={{
           headerShown: false
         }}

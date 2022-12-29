@@ -212,7 +212,8 @@ function HomeDrawerNavigator(props: {organizations: Organization[]}) {
                 dispatch(itemActions.loadItems(isDemo ? demoData[organization.id].items : [])),
                 dispatch(lendingActions.loadLendings(isDemo ? demoData[organization.id].lendings : [])),
                 dispatch(userActions.loadUsers(isDemo ? demoData[organization.id].users : [])),
-                dispatch(membersActions.loadMembers(demoData[props.organizations[0].id].users)), // going to change that most likely
+                dispatch(membersActions.loadMembers(isDemo ? demoData[organization.id].users : [])), // going to change that most likely
+                dispatch(categoryActions.loadCategories(isDemo ? demoData[organization.id].categories : [])),
               ])
             }
           }}

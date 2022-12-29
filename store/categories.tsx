@@ -50,14 +50,27 @@ export const categoriesSlice = createSlice({
     categories: new Array<Category>(),
   },
   reducers: {
+    addCategory: (state, action: PayloadAction<Category>) => {
+      if (!state.categories.some(category => category.id === action.payload.id)) {
+        state.categories.push(action.payload);
+      }
+    },
+    removeCategory: (state, action: PayloadAction<string>) => {
+      if (state.categories.find(category => category.id === action.payload)) {
+        state.categories = state.categories.filter(category => category.id !== action.payload);
+      }
+    },
+    modifyCategory: (state, action: PayloadAction<Category>) => {
+      const index = state.categories.findIndex(category => category.id === action.payload.id);
+      if (index >= 0) {
+        state.categories[index] = action.payload;
+      }
+    },
     loadCategories: (state, action: PayloadAction<Category[]>) => {
       state.categories = action.payload;
     },
     wipeCategories: (state) => {
       state.categories = new Array<Category>();
-    },
-    removeCategory: (state, action: PayloadAction<string>) => {
-      state.categories = state.categories.filter((category) => category.id !== action.payload);
     },
   },
 });

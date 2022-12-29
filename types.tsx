@@ -11,6 +11,7 @@ import {LendingForEvent, LendingPrivate} from "./store/lendings";
 import {Event} from "./store/events";
 import {Item} from "./store/items";
 import {Member} from "./store/members";
+import {Category} from "./store/categories";
 
 // declare global {
 //   namespace ReactNavigation {
@@ -153,6 +154,19 @@ export type MembersStackParamList = {
 
 export type MembersStackScreenProps<Screen extends keyof MembersStackParamList> = NativeStackScreenProps<
   MembersStackParamList,
+  Screen
+>;
+
+// CATEGORIES STACK
+
+export type CategoriesStackParamList = {
+  Categories: undefined;
+  AddEditCategory: { category: Category } | undefined;
+  CategoryDetails: { categoryId: string };
+};
+
+export type CategoriesStackScreenProps<Screen extends keyof CategoriesStackParamList> = NativeStackScreenProps<
+  CategoriesStackParamList,
   Screen
 >;
 

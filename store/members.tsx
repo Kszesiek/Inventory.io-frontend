@@ -37,7 +37,6 @@ export const membersSlice = createSlice({
         state.members = state.members.filter(member => member.id !== action.payload);
       }
     },
-
     modifyMember: (state, action: PayloadAction<Member>) => {
       const index = state.members.findIndex(member => member.id === action.payload.id);
       if (index >= 0) {
