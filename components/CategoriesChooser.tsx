@@ -7,16 +7,13 @@ import {useSelector} from "react-redux";
 import {IRootState} from "../store/store";
 import {TouchableCard} from "./Themed/TouchableCard";
 import {Ionicons} from "@expo/vector-icons";
-import {OpacityButton} from "./Themed/OpacityButton";
-import {IHandles} from "react-native-modalize/lib/options";
 
 type props = {
   currentCategory: Category | undefined
   setCurrentCategory: React.Dispatch<React.SetStateAction<Category | undefined>>
-  modalizeRef: React.RefObject<IHandles>
 }
 
-export default function CategoriesChooser({currentCategory, setCurrentCategory, modalizeRef}: props) {
+export default function CategoriesChooser({currentCategory, setCurrentCategory}: props) {
   const screen = useWindowDimensions();
   const backgroundColor = useThemeColor({}, 'background');
   const cardBackgroundColor = useThemeColor({}, 'cardBackground');
@@ -24,7 +21,7 @@ export default function CategoriesChooser({currentCategory, setCurrentCategory, 
   const tintColor = useThemeColor({}, 'tint');
 
   const categories: Category[] = useSelector((state: IRootState) => state.categories.categories)
-  const [categoriesTree, setCategoriesTree] = useState<Category[]>([]);
+  const [categoriesTree, setCategoriesTree] = useState<Category[]>(findCategoriesTree());
 
   const [currentWindow, setCurrentWindow] = useState<1|2>(1);
   const firstWindow = useRef(new Animated.Value(0)).current;
@@ -35,6 +32,21 @@ export default function CategoriesChooser({currentCategory, setCurrentCategory, 
   const [secondCategoriesList, setSecondCategoriesList] = useState<Category[]>([]);
 
   const animDuration: number = 300;
+
+  function findCategoriesTree(): Category[] {
+    if (currentCategory === undefined)
+      return [];
+
+    let categoriesPath: Category[] = [currentCategory];
+    let currCategory: Category = currentCategory;
+
+    while (currCategory.parent_category_id !== undefined) {
+      currCategory = categories.find((item: Category) => item.id === currCategory.parent_category_id)!;
+      categoriesPath.push(currCategory);
+    }
+
+    return categoriesPath.reverse()
+  }
 
   function changeScreen(direction: 'forwards' | 'backwards') {
     if (currentWindow === 1 && direction === 'forwards')
@@ -120,8 +132,8 @@ export default function CategoriesChooser({currentCategory, setCurrentCategory, 
   }
 
   return (
-    <View style={{flexGrow: 1, backgroundColor: 'transparent'}}>
-      <View style={{flexDirection: 'row', alignItems: 'center', backgroundColor: 'transparent', paddingVertical: 12, paddingHorizontal: 10, }}>
+    <View style={{flexGrow: 1}}>
+      <View style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 10, }}>
         <TouchableOpacity
           style={{height: !currentCategory ? 0 : undefined, }} // trick to make it invisible (changing opacity makes a fading animation)
           disabled={!currentCategory}
@@ -194,12 +206,6 @@ export default function CategoriesChooser({currentCategory, setCurrentCategory, 
         {numberedCategoriesList(1)}
         {numberedCategoriesList(2)}
       </View>
-      <OpacityButton
-        style={styles.confirmButton}
-        onPress={() => modalizeRef.current?.close()}
-      >
-        Potwierdź
-      </OpacityButton>
     </View>
   );
 }
@@ -229,12 +235,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 22,
     flex: 1,
-  },
-  confirmButton: {
-    margin: 15,
-    paddingHorizontal: 40,
-    paddingVertical: 8,
-    alignSelf: 'center',
   },
   noContentContainer: {
     flexGrow: 1,
