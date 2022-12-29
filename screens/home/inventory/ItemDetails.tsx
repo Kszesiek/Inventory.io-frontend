@@ -19,7 +19,7 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
   const item: Item = useSelector((state: IRootState) =>
     state.items.items.find((item: Item) => item.itemId === route.params.itemId)!);
   const category: Category | undefined = useSelector((state: IRootState) =>
-    state.categories.categories.find(item_ => item_.categoryId === item.categoryId));
+    state.categories.categories.find(item_ => item_.id === item.categoryId));
 
   useEffect(() => {
     navigation.setOptions({

@@ -22,17 +22,17 @@ export default function CategoriesListItem({category, categories, onPress, chose
   return (
     <>
       <TouchableCard
-        key={category.categoryId}
+        key={category.id}
         style={[
           styles.card,
           {marginLeft: 20 + 20 * indent},
-          chosenCategoryId === category.categoryId && {backgroundColor: chosenColor},
+          chosenCategoryId === category.id && {backgroundColor: chosenColor},
         ]}
-        onPress={() => onPress(category.categoryId)}
+        onPress={() => onPress(category.id)}
       >
         <Text style={styles.cardText}>{category.name}</Text>
         {
-          categories.findIndex((item: Category) => item.parentCategoryId === category.categoryId) >= 0 &&
+          categories.findIndex((item: Category) => item.parent_category_id === category.id) >= 0 &&
             <TouchableOpacity
               onPress={() => setChildrenVisible(!areChildrenVisible)}
               style={styles.showMoreCategories}
@@ -42,9 +42,9 @@ export default function CategoriesListItem({category, categories, onPress, chose
         }
       </TouchableCard>
       {
-        areChildrenVisible && categories.filter((item: Category) => item.parentCategoryId === category.categoryId).map((item: Category) =>
+        areChildrenVisible && categories.filter((item: Category) => item.parent_category_id === category.id).map((item: Category) =>
           <CategoriesListItem
-            key={item.categoryId}
+            key={item.id}
             category={item}
             categories={categories}
             indent={indent + 1}

@@ -31,7 +31,7 @@ export default function CategoriesChooser({currentCategory, setCurrentCategory, 
   const secondWindow = useRef(new Animated.Value(screen.width)).current;
   const categoriesScrollViewRef = useRef<ScrollView>(null);
 
-  const [firstCategoriesList, setFirstCategoriesList] = useState<Category[]>(categories.filter((category) => category.parentCategoryId === currentCategory?.categoryId));
+  const [firstCategoriesList, setFirstCategoriesList] = useState<Category[]>(categories.filter((category) => category.parent_category_id === currentCategory?.id));
   const [secondCategoriesList, setSecondCategoriesList] = useState<Category[]>([]);
 
   const animDuration: number = 300;
@@ -65,18 +65,18 @@ export default function CategoriesChooser({currentCategory, setCurrentCategory, 
   function goToSubcategory(whichWindow: 1 | 2, newCategoryId: string | undefined, animationDirection?: 'forwards' | 'backwards') {
     const newWindow = whichWindow === 1 ? 2 : 1;
     if (newWindow === 1) {
-      setFirstCategoriesList(categories.filter((item) => item.parentCategoryId === newCategoryId));
+      setFirstCategoriesList(categories.filter((item) => item.parent_category_id === newCategoryId));
     } else {
-      setSecondCategoriesList(categories.filter((item) => item.parentCategoryId === newCategoryId));
+      setSecondCategoriesList(categories.filter((item) => item.parent_category_id === newCategoryId));
     }
-    setCurrentCategory(categories.find((category) => category.categoryId === newCategoryId));
+    setCurrentCategory(categories.find((category) => category.id === newCategoryId));
 
-    changeScreen(animationDirection || (!!currentCategory && newCategoryId === currentCategory.parentCategoryId) ? 'backwards' : 'forwards');
+    changeScreen(animationDirection || (!!currentCategory && newCategoryId === currentCategory.parent_category_id) ? 'backwards' : 'forwards');
   }
 
   function goBackInCategoriesTree(categoryId: string) {
     let newCategoriesTree: typeof categoriesTree = categoriesTree;
-    while(newCategoriesTree.length > 0 && newCategoriesTree.slice(-1)[0].categoryId !== categoryId) {
+    while(newCategoriesTree.length > 0 && newCategoriesTree.slice(-1)[0].id !== categoryId) {
       newCategoriesTree = newCategoriesTree.slice(0, -1);
     }
     setCategoriesTree(newCategoriesTree);
@@ -97,13 +97,13 @@ export default function CategoriesChooser({currentCategory, setCurrentCategory, 
           flexGrow: 1,
         }}
       >
-        <Text style={{backgroundColor: 'magenta'}}>WINDOW {screenID} / Current: {currentWindow}</Text>
+        {/*<Text style={{backgroundColor: 'magenta'}}>WINDOW {screenID} / Current: {currentWindow}</Text>*/}
         {(screenID === 1 ? firstCategoriesList : secondCategoriesList).map((item: Category) =>
           <TouchableCard
-            key={item.categoryId}
+            key={item.id}
             style={styles.categoryCard}
             onPress={() => {
-              goToSubcategory(screenID, item.categoryId);
+              goToSubcategory(screenID, item.id);
               setCategoriesTree(categoriesTree.concat([item]));
             }}
           >
@@ -126,7 +126,7 @@ export default function CategoriesChooser({currentCategory, setCurrentCategory, 
           style={{height: !currentCategory ? 0 : undefined, }} // trick to make it invisible (changing opacity makes a fading animation)
           disabled={!currentCategory}
           onPress={() => {
-            goToSubcategory(currentWindow, currentCategory?.parentCategoryId);
+            goToSubcategory(currentWindow, currentCategory?.parent_category_id);
             setCategoriesTree(categoriesTree.slice(0, categoriesTree.length - 1));
           }}
         >
@@ -178,9 +178,9 @@ export default function CategoriesChooser({currentCategory, setCurrentCategory, 
                   {backgroundColor: (categoriesTree.length > 0 && categoriesTree[categoriesTree.length - 1] === item) ? tintColor : cardBackgroundColor}
                 ]}
                 onPress={() => {
-                  if (item.categoryId !== currentCategory?.categoryId) {
-                    goToSubcategory(currentWindow, item.categoryId, 'backwards');
-                    goBackInCategoriesTree(item.categoryId);
+                  if (item.id !== currentCategory?.id) {
+                    goToSubcategory(currentWindow, item.id, 'backwards');
+                    goBackInCategoriesTree(item.id);
                   }
                 }}
               >

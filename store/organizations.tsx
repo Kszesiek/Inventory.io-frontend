@@ -7,6 +7,12 @@ export interface Organization {
   description: string;
 }
 
+export interface OrganizationTemplate {
+  name: string;
+  short_name: string;
+  description: string;
+}
+
 export function isOrganization(object: any): object is Organization {
   return (
     object &&
@@ -30,7 +36,7 @@ export const organizationsSlice = createSlice({
       state.organizations = [];
       state.currentOrganization = undefined;
     },
-    changeOrganization: (state, action: PayloadAction<Organization>) => {
+    setCurrentOrganization: (state, action: PayloadAction<Organization>) => {
       state.currentOrganization = action.payload;
     },
     setOrganizations: (state, action: PayloadAction<Organization[]>) => {
@@ -39,14 +45,14 @@ export const organizationsSlice = createSlice({
         state.currentOrganization = action.payload[0];
       }
     },
-    addOrganization: (state, action) => {
+    addOrganization: (state, action: PayloadAction<Organization>) => {
       if (!state.organizations.some(organization => organization.id === action.payload.id)) {
-        state.organizations.push(action.payload);
+        state.organizations = state.organizations.concat([action.payload]);
       }
     },
-    removeOrganization: (state, action: PayloadAction<{id: Organization["id"]}>) => {
-      if (state.organizations.find(organization => organization.id === action.payload.id)) {
-        state.organizations = state.organizations.filter(organization => organization.id !== action.payload.id);
+    removeOrganization: (state, action: PayloadAction<string>) => {
+      if (state.organizations.find(organization => organization.id === action.payload)) {
+        state.organizations = state.organizations.filter(organization => organization.id !== action.payload);
       }
     },
     modifyOrganization: (state, action) => {

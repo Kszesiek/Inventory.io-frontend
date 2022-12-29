@@ -27,7 +27,7 @@ export default function CategoriesList({categories}: props) {
   return (
     <>
       {categories.map((category: Category) => {
-        if (category.parentCategoryId !== undefined)
+        if (category.parent_category_id !== undefined)
           return;
 
         return (

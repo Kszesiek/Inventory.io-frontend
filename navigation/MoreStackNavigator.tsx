@@ -3,7 +3,7 @@ import {MoreStackParamList} from "../types";
 import {useThemeColor} from "../components/Themed";
 import {TouchableOpacity} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
-import More from "../screens/home/More";
+import More from "../screens/home/more/More";
 import * as React from "react";
 import HenryStickmin from "../screens/HenryStickmin";
 

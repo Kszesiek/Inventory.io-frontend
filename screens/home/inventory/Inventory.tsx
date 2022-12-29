@@ -112,7 +112,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
         if (chosenCategory === undefined) {
           return true;
         } else {
-          return checkCategoryAffiliation(item.categoryId, chosenCategory.categoryId);
+          return checkCategoryAffiliation(item.categoryId, chosenCategory.id);
         }
       });
 
@@ -127,15 +127,15 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
     }
   }
 
-  function checkCategoryAffiliation<CategoryId extends typeof categories[number]["categoryId"]>(itemCategoryId: CategoryId, chosenCategoryId: CategoryId): boolean {
-    let currentCategory: Category | undefined = categories.find((category: Category) => category.categoryId === itemCategoryId);
+  function checkCategoryAffiliation<CategoryId extends typeof categories[number]["id"]>(itemCategoryId: CategoryId, chosenCategoryId: CategoryId): boolean {
+    let currentCategory: Category | undefined = categories.find((category: Category) => category.id === itemCategoryId);
 
     while (currentCategory !== undefined) {
-      if (currentCategory.categoryId === chosenCategoryId) {
+      if (currentCategory.id === chosenCategoryId) {
         return true;
       }
 
-      currentCategory = categories.find((category: Category) => category.categoryId === currentCategory!.parentCategoryId);
+      currentCategory = categories.find((category: Category) => category.id === currentCategory!.parent_category_id);
     }
     return false;
   }
@@ -186,7 +186,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
         return (
           <TouchableCard key={item.item.itemId} style={styles.card} onPress={() => cardPressed(item.item.itemId)}>
             <Text style={[styles.cardText, itemTitle]}>{item.item.name}</Text>
-            <Text style={styles.cardText}>Kategoria: {categories.find(category => category.categoryId === item.item.categoryId)?.name || <Text style={{fontStyle: 'italic', fontSize: 13}}>nieznana kategoria</Text>}</Text>
+            <Text style={styles.cardText}>Kategoria: {categories.find(category => category.id === item.item.categoryId)?.name || <Text style={{fontStyle: 'italic', fontSize: 13}}>nieznana kategoria</Text>}</Text>
           </TouchableCard>
         )
       }}

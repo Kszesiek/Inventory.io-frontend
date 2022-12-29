@@ -2,12 +2,14 @@ import {useThemeColor, View} from "../../components/Themed";
 import * as React from "react";
 import {Alert, FlatList, StyleSheet} from "react-native";
 import Input from "../../components/Input";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {useState} from "react";
 import {HomeStackScreenProps, WelcomeStackScreenProps} from "../../types";
 import {writeOutArray} from "../../utilities/enlist";
-import {Organization, organizationsActions} from "../../store/organizations";
+import {Organization, OrganizationTemplate, organizationsActions, isOrganization} from "../../store/organizations";
 import {OpacityButton} from "../../components/Themed/OpacityButton";
+import {IRootState} from "../../store/store";
+import {createOrganization} from "../../endpoints/organizations";
 
 export type ValidValuePair = {
   value: string
@@ -16,6 +18,8 @@ export type ValidValuePair = {
 
 type inputValuesType = {
   name: ValidValuePair
+  short_name: ValidValuePair
+  description: ValidValuePair
 }
 
 export default function CreateOrganization({ navigation, route }: WelcomeStackScreenProps<'CreateOrganization'> | HomeStackScreenProps<'CreateOrganization'>) {
@@ -23,11 +27,20 @@ export default function CreateOrganization({ navigation, route }: WelcomeStackSc
   const backgroundColor = useThemeColor({}, 'background');
   const cancelColor = useThemeColor({}, "delete");
 
+  const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
   const doesGoBack = route.params?.doesGoBack;
 
   const [inputs, setInputs]: [inputValuesType, Function] = useState(
   {
     name: {
+      value: "",
+      isInvalid: false,
+    },
+    short_name: {
+      value: "",
+      isInvalid: false,
+    },
+    description: {
       value: "",
       isInvalid: false,
     },
@@ -40,6 +53,8 @@ export default function CreateOrganization({ navigation, route }: WelcomeStackSc
 
   async function submitPressed() {
     const nameIsValid: boolean = inputs.name.value.trim().length >= 0;
+    const short_nameIsValid: boolean = inputs.short_name.value.trim().length >= 0;
+    const descriptionIsValid: boolean = inputs.description.value.trim().length >= 0;
 
     setInputs((currentInputs: inputValuesType) => {
       return {
@@ -47,13 +62,25 @@ export default function CreateOrganization({ navigation, route }: WelcomeStackSc
           value: currentInputs.name.value,
           isInvalid: !nameIsValid,
         },
+        short_name: {
+          value: currentInputs.short_name.value,
+          isInvalid: !short_nameIsValid,
+        },
+        description: {
+          value: currentInputs.description.value,
+          isInvalid: !descriptionIsValid,
+        },
       }
     });
 
-    if (!nameIsValid) {
+    if (!nameIsValid || !short_nameIsValid || !descriptionIsValid) {
       const wrongDataArray: string[] = []
       if (!nameIsValid)
         wrongDataArray.push("organization name")
+      if (!short_nameIsValid)
+        wrongDataArray.push("short name")
+      if (!descriptionIsValid)
+        wrongDataArray.push("description")
 
       const wrongDataString: string = writeOutArray(wrongDataArray)
 
@@ -61,12 +88,29 @@ export default function CreateOrganization({ navigation, route }: WelcomeStackSc
       return;
     }
 
-    const organizationData: Organization = {
-      organizationId: Math.random().toString(),
-      name: inputs.name.value,
+    if (demoMode) {
+      const organizationData: Organization = {
+        id: Math.random().toString(),
+        name: inputs.name.value,
+        short_name: inputs.short_name.value,
+        description:  inputs.description.value,
+      }
+      await dispatch(organizationsActions.addOrganization(organizationData));
+    } else {
+      const organizationTemplate: OrganizationTemplate = {
+        name: inputs.name.value,
+        short_name: inputs.short_name.value,
+        description:  inputs.description.value,
+      }
+      const response = await createOrganization(organizationTemplate);
+      if (!isOrganization(response)) {
+        Alert.alert('Nie udało się założyć organizacji', 'Sprawdź dane organizacji i spróbuj ponownie.');
+        return;
+      } else {
+        await dispatch(organizationsActions.addOrganization(response));
+      }
     }
 
-    await dispatch(organizationsActions.addOrganization(organizationData));
     doesGoBack && navigation.goBack();
   }
 
@@ -92,7 +136,34 @@ export default function CreateOrganization({ navigation, route }: WelcomeStackSc
       autoCorrect: false,  // default is true
       // autoCapitalize: 'sentences',  // default is sentences
       multiline: true,
+    }} />
 
+  const shortNameComponent = <Input
+    label="Skrót organizacji"
+    isInvalid={inputs.name.isInvalid}
+    // onErrorText="Please enter a description containing under 20 characters"
+    textInputProps={{
+      placeholder: "skrót twojej organizacji",
+      maxLength: 10,
+      onChangeText: inputChangedHandler.bind(null, "short_name"),
+      value: inputs.short_name.value,
+      autoCorrect: false,  // default is true
+      autoCapitalize: 'none',  // default is sentences
+      multiline: false,
+    }} />
+
+  const descriptionComponent = <Input
+    label="Opis organizacji"
+    isInvalid={inputs.name.isInvalid}
+    // onErrorText="Please enter a description containing under 4000 characters"
+    textInputProps={{
+      placeholder: "opis twojej organizacji",
+      maxLength: 4000,
+      onChangeText: inputChangedHandler.bind(null, "description"),
+      value: inputs.description.value,
+      autoCorrect: true,  // default is true
+      autoCapitalize: 'sentences',  // default is sentences
+      multiline: true,
     }} />
 
   const buttonsComponent = <View style={styles.buttons}>
@@ -102,6 +173,8 @@ export default function CreateOrganization({ navigation, route }: WelcomeStackSc
 
   const listElements = [
     nameComponent,
+    shortNameComponent,
+    descriptionComponent,
   ]
 
   return (

@@ -6,6 +6,7 @@ import usersReducer from './users';
 import lendingsReducer from './lendings';
 import organizationsReducer from './organizations';
 import categoriesReducer from './categories';
+import propertiesReducer from './properties';
 import appWideReducer from './appWide';
 
 const rootReducer = combineReducers({
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
   lendings: lendingsReducer,
   organizations: organizationsReducer,
   categories: categoriesReducer,
+  properties: propertiesReducer,
   appWide: appWideReducer,
 })
 
@@ -23,4 +25,3 @@ export type IRootState = ReturnType<typeof rootReducer>;
 export const store = configureStore({
   reducer: rootReducer
 });
-

@@ -204,7 +204,7 @@ function HomeDrawerNavigator(props: {organizations: Organization[]}) {
           listeners={{
             drawerItemPress: (e) => {
               const isDemo: boolean = demoData.hasOwnProperty(organization.id);
-              dispatch(organizationsActions.changeOrganization(organization));
+              dispatch(organizationsActions.setCurrentOrganization(organization));
               dispatch(eventActions.loadEvents(isDemo ? demoData[organization.id].events : []));
               dispatch(itemActions.loadItems(isDemo ? demoData[organization.id].items : []));
               dispatch(lendingActions.loadLendings(isDemo ? demoData[organization.id].lendings : []));
