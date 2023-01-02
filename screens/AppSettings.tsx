@@ -71,15 +71,6 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: 6,
   },
-  // picker: {
-  //   borderRadius: 20,
-  //   flex: 1,
-  // },
-  // pickerItem: {
-  //   // overflow: 'hidden',
-  //   // borderRadius: 10,
-  //   fontSize: 20
-  // },
 })
 
 const textStyles = StyleSheet.create({

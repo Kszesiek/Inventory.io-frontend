@@ -1,8 +1,9 @@
-import {Alert, FlatList, StyleSheet} from "react-native";
+import {Alert, ScrollView, StyleSheet, View as DefaultView} from "react-native";
 import {Text, useThemeColor, View} from "../../../components/Themed";
 import {LendingStackScreenProps} from "../../../types";
-import {useLayoutEffect, useState} from "react";
+import {useEffect, useLayoutEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
+import DropDownPicker from 'react-native-dropdown-picker';
 import {
   LendingForEvent,
   LendingPrivate,
@@ -16,6 +17,7 @@ import HighlightChooser from "../../../components/HighlightChooser";
 import ExpandableItemList from "../../../components/ExpandableItemList";
 import {writeOutArray} from "../../../utilities/enlist";
 import {IRootState} from "../../../store/store";
+import {Member} from "../../../store/members";
 
 export type ValidValuePair = {
   value: string
@@ -38,7 +40,8 @@ const lendingTypes = [
 
 export default function AddEditLending({ navigation, route }: LendingStackScreenProps<'AddEditLending'>) {
   const dispatch = useDispatch();
-  const userId = useSelector((state: IRootState) => state.appWide.userId);
+  const userId: string = useSelector((state: IRootState) => state.appWide.userId) || "ABC";
+  const members: Member[] = useSelector((state: IRootState) => state.members.members);
 
   const lending = route.params?.lending;
   const isEditing = !!lending;
@@ -46,7 +49,11 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
   const [lendingType, setLendingType] = useState(isEditing ? isLendingPrivate(lending) ? 'private' : 'event' : lendingTypes[0].key)
 
   const backgroundColor = useThemeColor({}, "background");
+  const cardColor = useThemeColor({}, "cardBackground");
   const cancelColor = useThemeColor({}, "delete");
+
+  const [isUsersDropdownOpen, setUsersDropdownOpen] = useState<boolean>(false);
+  const [chosenUserId, setChosenUserId] = useState<string>("");
 
   const [inputs, setInputs]: [inputValuesType, Function] = useState(
     {
@@ -77,6 +84,10 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
       isInvalid: false,
     },
   });
+
+  useEffect(() => {
+    console.log("Chosen user ID: " + chosenUserId);
+  }, [chosenUserId])
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -221,37 +232,68 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
 
   // ACTUAL FORM FIELDS
 
-  const lendingTypeComponent = !isEditing ? <>
-        <Text style={{fontSize: 16, marginBottom: 4}}>Typ wypożyczenia</Text>
-        <HighlightChooser
-            data={lendingTypes}
-            onPress={setLendingType}
-        />
-    </> : <></>
+  const lendingTypeComponent = !isEditing ? <View
+    style={{marginHorizontal: 5, marginBottom: 15,}}
+    key="lendingType"
+  >
+    <Text style={{fontSize: 16, marginBottom: 4}}>Typ wypożyczenia</Text>
+    <HighlightChooser
+        data={lendingTypes}
+        onPress={setLendingType}
+    />
+  </View> : undefined
 
-  const usernameComponent = lendingType === 'private' ? <Input
-      label="Nazwa użytkownika"
-      isInvalid={inputs.username.isInvalid}
-      textInputProps={{
-        placeholder: "nazwa użytkownika",
-        maxLength: 40,
-        onChangeText: inputChangedHandler.bind(null, "username"),
-        value: inputs.username.value,
+  const usernameComponent = lendingType === 'private' ?
+    <DefaultView
+      style={{
+        marginHorizontal: 4,
+        marginVertical: 8,
       }}
-  /> : <></>
+      key="username"
+    >
+      <Text numberOfLines={1} style={{
+        fontSize: 16,
+        marginBottom: 4,
+      }}>
+        Nazwa użytkownika
+      </Text>
+      <DropDownPicker
+        open={isUsersDropdownOpen}
+        value={chosenUserId}
+        items={members.map((member) => ({
+            label: member.username,
+            value: member.id,
+          }))}
+        searchable={true}
+        setOpen={setUsersDropdownOpen}
+        setValue={setChosenUserId}
+        placeholder="wybierz użytkownika..."
+        placeholderStyle={{color: "grey", fontSize: 16,}}
+        textStyle={{color: 'white'}}
+        closeOnBackPressed={true}
+        theme={backgroundColor === '#1E2E3D' ? 'DARK' : "LIGHT"}
+        style={{...styles.dropdown, backgroundColor: cardColor}}
+        dropDownContainerStyle={{...styles.dropdown, backgroundColor: cardColor}}
+        listMode="SCROLLVIEW"
+        mode="BADGE"
+        badgeDotColors={["#e76f51", "#00b4d8", "#e9c46a", "#e76f51", "#8ac926", "#00b4d8", "#e9c46a"]}
+      />
+    </DefaultView>
+    : undefined
 
   const eventNameComponent = lendingType === 'event' ? <Input
-      label="Nazwa wydarzenia"
-      isInvalid={inputs.eventName.isInvalid}
-      textInputProps={{
-        placeholder: "nazwa wydarzenia",
-        maxLength: 40,
-        onChangeText: inputChangedHandler.bind(null, "eventName"),
-        value: inputs.eventName.value,
-      }}
-  /> : <></>
+    key="eventName"
+    label="Nazwa wydarzenia"
+    isInvalid={inputs.eventName.isInvalid}
+    textInputProps={{
+      placeholder: "nazwa wydarzenia",
+      maxLength: 40,
+      onChangeText: inputChangedHandler.bind(null, "eventName"),
+      value: inputs.eventName.value,
+    }}
+  /> : undefined
 
-  const dateComponent = <View style={styles.dateRow}>
+  const dateComponent = <View style={styles.dateRow} key="date">
     <Input
       label="Data początku"
       isInvalid={inputs.startDate.isInvalid}
@@ -280,6 +322,7 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
   </View>
 
   const notesComponent = <Input
+    key="notes"
     label="Notatki"
     isInvalid={inputs.notes.isInvalid}
     // onErrorText="Please enter a description containing under 4000 characters"
@@ -293,6 +336,7 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
     }} />
 
   const itemsListComponent = <ExpandableItemList
+    key="itemsList"
     data={inputs.itemNames}
     onChangeText={inputChangedHandler.bind(null, "itemNames")}
     onAddItem={inputChangedHandler.bind(null, "itemNames", "", inputs.itemNames.length)}
@@ -309,7 +353,7 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
       })}}
     />
 
-  const buttonsComponent = <View style={styles.buttons}>
+  const buttonsComponent = <View key="buttons" style={styles.buttons}>
     <OpacityButton style={[styles.button, {backgroundColor: cancelColor}]} onPress={cancelPressed}>Anuluj</OpacityButton>
     <OpacityButton style={styles.button} onPress={submitPressed}>{!!lending ? "Zatwierdź" : "Utwórz"}</OpacityButton>
   </View>
@@ -324,22 +368,36 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
   ]
 
   return (
-    <FlatList
-      data={listElements}
-      renderItem={item => item.item}
-      keyExtractor={(item, index) => index.toString()}
-      contentContainerStyle={{backgroundColor, ...styles.container}}
-      ListFooterComponent={buttonsComponent}
-      ListFooterComponentStyle={{flexGrow: 1, justifyContent: 'flex-end'}}
-    />
+    <ScrollView
+      style={{
+        ...styles.container,
+        backgroundColor: backgroundColor,
+      }}
+      contentContainerStyle={{
+        flexGrow: 1,
+        paddingBottom: 20,
+      }}
+      nestedScrollEnabled={true}
+      scrollEnabled={!isUsersDropdownOpen}
+    >
+      {listElements}
+      <View key="buttonsFiller" style={{flex: 1}} />
+      {buttonsComponent}
+      {/*{<>*/}
+      {/*    <View key="date"    style={{paddingVertical: 100, backgroundColor: 'purple'}}/>*/}
+      {/*    <View key="notes"   style={{paddingVertical: 100, backgroundColor: 'green' }}/>*/}
+      {/*    <View key="items"   style={{paddingVertical: 100, backgroundColor: 'red'   }}/>*/}
+      {/*    <View key="buttons" style={{paddingVertical: 100, backgroundColor: 'pink'  }}/>*/}
+      {/*    <View key="last"    style={{paddingVertical: 100, backgroundColor: 'orange'}}/>*/}
+      {/*  </>}*/}
+    </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
     paddingVertical: 10,
-    paddingHorizontal: 15,
+    paddingHorizontal: 10,
   },
   dateRow: {
     flexDirection: 'row',
@@ -352,52 +410,60 @@ const styles = StyleSheet.create({
   button: {
     margin: 15,
   },
+  dropdown: {
+    borderWidth: 0,
+    elevation: 5,
+  },
   input: {
     flex: 1,
   }
 });
 
-// TAK, TO JEST JEDEN COMPONENT
-// <ModalSelector
-//   data={lendingTypes}
-//   initValue="dotknij, aby wybrać typ wypożyczenia..."
-//   disabled={isEditing}
-//   animationType="fade"
-//   backdropPressToClose={true}
-//   selectStyle={{
-//     backgroundColor: useThemeColor({}, 'cardBackground'),
-//     borderWidth: 0,
-//     marginHorizontal: 4,
-//     marginVertical: 8,
-//     shadowColor: 'black',
-//     shadowOpacity: 0.26,
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowRadius: 8,
-//     elevation: 5,
-//     paddingVertical: 8,
-//     paddingHorizontal: 10,
-//     borderRadius: 10,
-//   }}
-//   initValueTextStyle={{
-//     fontSize: 18,
-//     fontFamily: 'Source Sans',
-//     textAlign: 'left',
-//     color: getPlaceholderColor(),
-//   }}
-//   selectTextStyle={{
-//     fontSize: 18,
-//     fontFamily: 'Source Sans',
-//     textAlign: 'left',
-//     color: getPlaceholderColor(),
-//   }}
-//   cancelStyle={{backgroundColor: cancelColor}}
-//   cancelTextStyle={{color: useThemeColor({}, 'buttonText')}}
-//   cancelText="Anuluj"
-//   onChange={(option) => {setIsPrivate(option.key === "private"); setLendingType(option.label) }}
-// >
-//   <TextInput
-//     style={{borderWidth:1, borderColor:'#ccc', padding:10, height:30}}
-//     editable={false}
-//     placeholder="Wybierz typ wypożyczenia"
-//     value={lendingType} />
-// </ModalSelector>
+
+// <FlatList
+//   data={listElements}
+//   renderItem={item => item.item || <></>}
+//   keyExtractor={(item, index) => index.toString()}
+//   contentContainerStyle={{backgroundColor, zIndex: zIdx -= 1, ...styles.container}}
+//   nestedScrollEnabled={true}
+//   scrollEnabled={!isUsersDropdownOpen}
+//   // ListHeaderComponent={<DropDownPicker
+//   //   open={isUsersDropdownOpen}
+//   //   value={chosenUserId}
+//   //   items={users.map((user) => {
+//   //     return {
+//   //       label: user.username,
+//   //       value: user.userId,
+//   //     }})
+//   //   }
+//   //   searchable={true}
+//   //   setOpen={setUsersDropdownOpen}
+//   //   setValue={setChosenUserId}
+//   //   placeholder="wybierz użytkownika..."
+//   //   placeholderStyle={{color: "grey"}}
+//   //   textStyle={{color: 'white'}}
+//   //   closeOnBackPressed={true}
+//   //   theme={"DARK"}
+//   //   // zIndex={100}
+//   //   // setItems={setItems}
+//   //   style={{
+//   //     borderWidth: 0,
+//   //     elevation: 5,
+//   //     backgroundColor: '#273444',
+//   //     marginVertical: 5,
+//   //     // zIndex: 10000,
+//   //   }}
+//   //   dropDownContainerStyle={{
+//   //     borderWidth: 0,
+//   //     elevation: 5,
+//   //     backgroundColor: '#273444',
+//   //   }}
+//   //   // arrowIconStyle={{backgroundColor: 'green'}}
+//   //   // multiple={true}
+//   //   mode="BADGE"
+//   //   badgeDotColors={["#e76f51", "#00b4d8", "#e9c46a", "#e76f51", "#8ac926", "#00b4d8", "#e9c46a"]}
+//   // />}
+//   // ListHeaderComponentStyle={{ zIndex: 1000 }}
+//   ListFooterComponent={buttonsComponent}
+//   ListFooterComponentStyle={{flexGrow: 1, justifyContent: 'flex-end'}}
+// />
