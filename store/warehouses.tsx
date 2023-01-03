@@ -2,7 +2,8 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 
 export interface WarehouseTemplate {
   name: string
-  location: string
+  longitude: number
+  latitude: number
 }
 
 export interface Warehouse extends WarehouseTemplate {
@@ -15,7 +16,8 @@ export function isWarehouse(object: any): object is Warehouse {
     typeof object === 'object' &&
     typeof object['id'] === 'string' &&
     typeof object['name'] === 'string' &&
-    typeof object['location'] === 'string'
+    typeof object['longitude'] === 'number' &&
+    typeof object['latitude'] === 'number'
   );
 }
 

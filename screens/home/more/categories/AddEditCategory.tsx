@@ -35,7 +35,6 @@ export default function AddEditCategory({ navigation, route }: CategoriesStackSc
 
   const backgroundColor = useThemeColor({}, "background");
   const cancelColor = useThemeColor({}, "delete");
-  const errorColor = useThemeColor({}, "delete");
 
   const [inputs, setInputs]: [inputValuesType, Function] = useState(
     {
@@ -207,7 +206,7 @@ export default function AddEditCategory({ navigation, route }: CategoriesStackSc
   />
 
   const parentIdComponent = <View key="parent" style={styles.propertyContainer}>
-    <Text style={[styles.propertyLabel, inputs.short_name.isInvalid && {color: errorColor}]}>Kategoria nadrzędna</Text>
+    <Text style={[styles.propertyLabel, inputs.short_name.isInvalid && {color: cancelColor}]}>Kategoria nadrzędna</Text>
     <TouchableCard
       style={styles.card}
       onPress={parentPressed}

@@ -1,21 +1,25 @@
 import {Alert, ScrollView, StyleSheet} from "react-native";
-import {useThemeColor, View} from "../../../../components/Themed";
+import {Text, useThemeColor, View} from "../../../../components/Themed";
 import {WarehousesStackScreenProps} from "../../../../types";
-import {useLayoutEffect, useState} from "react";
+import {useEffect, useLayoutEffect, useState} from "react";
 import {useDispatch} from "react-redux";
 import Input from "../../../../components/Input";
 import {OpacityButton} from "../../../../components/Themed/OpacityButton";
 import {writeOutArray} from "../../../../utilities/enlist";
 import {Warehouse, warehousesActions} from "../../../../store/warehouses";
+import * as Location from 'expo-location';
+import * as React from "react";
+import Card from "../../../../components/Themed/Card";
 
-export type ValidValuePair = {
-  value: string
+export type ValidValuePair<ValueType> = {
+  value: ValueType
   isInvalid: boolean
 }
 
 type inputValuesType = {
-  name: ValidValuePair,
-  location: ValidValuePair,
+  name: ValidValuePair<string>,
+  latitude: ValidValuePair<number>,
+  longitude: ValidValuePair<number>,
 }
 
 export default function AddEditWarehouse({ navigation, route }: WarehousesStackScreenProps<'AddEditWarehouse'>) {
@@ -26,14 +30,30 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
   const backgroundColor = useThemeColor({}, "background");
   const cancelColor = useThemeColor({}, "delete");
 
+  const [location, setLocation] = useState<Location.LocationObject | null>(!!warehouse ?
+    {
+      coords: {
+        longitude: warehouse.longitude,
+        latitude: warehouse.latitude,
+      },
+      timestamp: Date.now(),
+    } as Location.LocationObject
+      :
+    null
+  );
+
   const [inputs, setInputs]: [inputValuesType, Function] = useState(
     {
       name: {
         value: !!warehouse ? warehouse.name : "",
         isInvalid: false,
       },
-      location: {
-        value: !!warehouse ? warehouse.location : "",
+      longitude: {
+        value: !!warehouse ? warehouse.longitude : 0.,
+        isInvalid: false,
+      },
+      latitude: {
+        value: !!warehouse ? warehouse.latitude : 0.,
         isInvalid: false,
       },
     });
@@ -49,9 +69,20 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
     navigation.goBack();
   }
 
+  useEffect(() => {
+    setInputs((currentInputValues: typeof inputs) => {
+      return {
+        ...currentInputValues,
+        longitude: {value: location?.coords.longitude || "", isInvalid: false},
+        latitude: {value: location?.coords.latitude || "", isInvalid: false},
+      }
+    })
+  }, [location])
+
   async function submitPressed() {
     const nameIsValid: boolean = inputs.name.value.trim().length > 0 && inputs.name.value.trim().length < 100;
-    const locationIsValid: boolean = true;
+    const longitudeIsValid: boolean = inputs.longitude.value >= -90 && inputs.longitude.value <= 90;
+    const latitudeIsValid: boolean = inputs.longitude.value >= -180 && inputs.longitude.value <= 180;
 
     setInputs((currentInputs: inputValuesType) => {
       return {
@@ -59,19 +90,25 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
           value: currentInputs.name.value,
           isInvalid: !nameIsValid,
         },
-        location: {
-          value: currentInputs.location.value,
-          isInvalid: !locationIsValid,
+        longitude: {
+          value: currentInputs.longitude.value,
+          isInvalid: !longitudeIsValid,
+        },
+        latitude: {
+          value: currentInputs.latitude.value,
+          isInvalid: !latitudeIsValid,
         },
       }
     });
 
-    if (!nameIsValid || !locationIsValid) {
+    if (!nameIsValid || !longitudeIsValid || !latitudeIsValid) {
       const wrongDataArray: string[] = []
       if (!nameIsValid)
         wrongDataArray.push("name")
-      if (!locationIsValid)
-        wrongDataArray.push("location")
+      if (!longitudeIsValid)
+        wrongDataArray.push("longitude")
+      if (!latitudeIsValid)
+        wrongDataArray.push("latitude")
       const wrongDataString: string = writeOutArray(wrongDataArray)
 
       Alert.alert("Invalid values", `Some data seems incorrect. Please check ${wrongDataString} and try again.`);
@@ -80,7 +117,8 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
 
     const warehouseData: Warehouse = {
       name: inputs.name.value,
-      location: inputs.location.value,
+      longitude: inputs.longitude.value,
+      latitude: inputs.latitude.value,
       id: !!warehouse ? warehouse.id : Math.random().toString(),
     }
 
@@ -122,17 +160,55 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
     }}
   />
 
-  const locationComponent = <Input
-    key="surname"
-    label="Lokalizacja"
-    isInvalid={inputs.location.isInvalid}
-    textInputProps={{
-      placeholder: "lokalizacja",
-      maxLength: 40,
-      onChangeText: inputChangedHandler.bind(null, "location"),
-      value: inputs.location.value,
+  const useCurrentLocationButton = <OpacityButton
+    style={styles.locationButton}
+    textStyle={{fontSize: 15}}
+    onPress={async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
     }}
-  />
+  >
+    Użyj bieżącej lokalizacji
+  </OpacityButton>
+
+  const locationComponent = !!location ? <View key="location">
+    <View style={styles.locationRow}>
+      <View style={{...styles.locationItem}}>
+        <Text numberOfLines={1} style={styles.propertyLabel}>
+          Długość geograficzna
+        </Text>
+        <Card style={styles.locationCard}>
+          <Text style={styles.locationText}>{location.coords.longitude}</Text>
+        </Card>
+      </View>
+      <View style={{width: 8}} />
+      <View style={styles.locationItem}>
+        <Text numberOfLines={1} style={styles.propertyLabel}>
+          Szerokość geograficzna
+        </Text>
+        <Card style={styles.locationCard}>
+          <Text style={styles.locationText}>{location.coords.latitude}</Text>
+        </Card>
+      </View>
+    </View>
+    {useCurrentLocationButton}
+  </View>
+    :
+  <View style={styles.locationItem} key="location">
+    <Text numberOfLines={1} style={styles.propertyLabel}>
+      Lokalizacja
+    </Text>
+    <Card style={{padding: 10, borderRadius: 10,}}>
+      <Text style={{fontStyle: "italic", textAlign: 'center', margin: 10,}}>Nie podano lokalizacji</Text>
+      {useCurrentLocationButton}
+    </Card>
+  </View>
 
   const buttonsComponent = <View key="buttons" style={styles.buttons}>
     <OpacityButton style={[styles.button, {backgroundColor: cancelColor}]} onPress={cancelPressed}>Anuluj</OpacityButton>
@@ -161,7 +237,7 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
 
 const styles = StyleSheet.create({
   container: {
-    // flexGrow: 1,
+    flexGrow: 1,
     paddingVertical: 10,
     paddingHorizontal: 10,
   },
@@ -177,5 +253,43 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     backgroundColor: 'transparent',
-  }
+  },
+  propertyContainer: {
+    marginHorizontal: 4,
+    marginVertical: 8,
+  },
+  propertyLabel: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  card: {
+    alignItems: 'flex-start',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 15,
+    fontSize: 18,
+  },
+  locationRow: {
+    flexDirection: 'row',
+  },
+  locationItem: {
+    marginHorizontal: 5,
+    marginVertical: 8,
+    flex: 1,
+  },
+  locationButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 5,
+    marginVertical: 10,
+    alignSelf: 'center',
+  },
+  locationText: {
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    fontSize: 20,
+  },
+  locationCard: {
+    borderRadius: 10,
+    alignItems: 'stretch',
+  },
 });

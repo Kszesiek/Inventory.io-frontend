@@ -46,10 +46,13 @@ export default function WarehouseDetails({ navigation, route }: WarehousesStackS
   return (
     <ScrollView contentContainerStyle={{backgroundColor, ...styles.container}}>
       <Detail name="Nazwa magazynu">
-        <Text style={[styles.text, property]}>{warehouse.name} {warehouse.name}</Text>
+        <Text style={[styles.text, property]}>{warehouse.name}</Text>
       </Detail>
-      <Detail name="Lokalizacja">
-        <Text style={[styles.text, property]}>{warehouse.location}</Text>
+      <Detail name="Długość geograficzna">
+        <Text style={[styles.text, property]}>{warehouse.longitude}</Text>
+      </Detail>
+      <Detail name="Szerokość geograficzna">
+        <Text style={[styles.text, property]}>{warehouse.latitude}</Text>
       </Detail>
 
       <View style={{flexGrow: 1}}/>

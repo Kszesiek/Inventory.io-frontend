@@ -27,7 +27,7 @@ export default function Warehouses({ navigation, route }: WarehousesStackScreenP
       return (
         <TouchableCard style={styles.card} onPress={() => navigation.navigate("WarehouseDetails", { warehouseId: warehouse.item.id })}>
           <Text style={boldedText}>{warehouse.item.name}</Text>
-          <Text style={{textAlign: 'center'}}>{warehouse.item.location}</Text>
+          <Text style={{textAlign: 'center'}}>{warehouse.item.longitude}, {warehouse.item.latitude}</Text>
         </TouchableCard>
       )
     }}
