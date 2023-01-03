@@ -76,10 +76,14 @@ export default function AddEditMember({ navigation, route }: MembersStackScreenP
       }
     });
 
-    if (!usernameIsValid) {
+    if (!usernameIsValid || !nameIsValid || !surnameIsValid) {
       const wrongDataArray: string[] = []
       if (!usernameIsValid)
         wrongDataArray.push("username")
+      if (!nameIsValid)
+        wrongDataArray.push("name")
+      if (!surnameIsValid)
+        wrongDataArray.push("surname")
       const wrongDataString: string = writeOutArray(wrongDataArray)
 
       Alert.alert("Invalid values", `Some data seems incorrect. Please check ${wrongDataString} and try again.`);
