@@ -67,7 +67,7 @@ export default function More({navigation, route}: MoreStackScreenProps<'More'>) 
         <Ionicons name='file-tray-stacked' size={22} style={{ color: textColor, marginRight: 10}} />
         <Text style={styles.cardText}>Zarządzanie kategoriami</Text>
       </TouchableCard>
-      <TouchableCard style={[styles.touchableCard, styles.listCard, styles.listCardBottom]}>
+      <TouchableCard style={[styles.touchableCard, styles.listCard, styles.listCardBottom]} onPress={() => navigation.navigate("WarehousesNavigator")}>
         <FontAwesome5 name='warehouse' size={20} style={{ color: textColor, marginRight: 10}} />
         <Text style={styles.cardText}>Magazyny</Text>
       </TouchableCard>

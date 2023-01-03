@@ -24,8 +24,8 @@ import {categoryActions} from "../../store/categories";
 
 export default function SignInScreen({ navigation, route }: LoginStackScreenProps<'SignIn'>) {
   const dispatch = useDispatch();
-  const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [username, setUsername] = useState<string>('johndoe');
+  const [password, setPassword] = useState<string>('secret');
   const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
 
   const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);

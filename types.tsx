@@ -12,6 +12,7 @@ import {Event} from "./store/events";
 import {Item} from "./store/items";
 import {Member} from "./store/members";
 import {Category} from "./store/categories";
+import {Warehouse} from "./store/warehouses";
 
 // declare global {
 //   namespace ReactNavigation {
@@ -167,6 +168,19 @@ export type CategoriesStackParamList = {
 
 export type CategoriesStackScreenProps<Screen extends keyof CategoriesStackParamList> = NativeStackScreenProps<
   CategoriesStackParamList,
+  Screen
+>;
+
+// WAREHOUSES STACK
+
+export type WarehousesStackParamList = {
+  Warehouses: undefined;
+  AddEditWarehouse: { warehouse: Warehouse } | undefined;
+  WarehouseDetails: { warehouseId: string };
+};
+
+export type WarehousesStackScreenProps<Screen extends keyof WarehousesStackParamList> = NativeStackScreenProps<
+  WarehousesStackParamList,
   Screen
 >;
 

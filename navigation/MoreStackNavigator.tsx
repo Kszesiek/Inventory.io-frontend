@@ -6,6 +6,7 @@ import {Ionicons} from "@expo/vector-icons";
 import More from "../screens/home/more/More";
 import MembersStackNavigator from "./MembersStackNavigator";
 import CategoriesStackNavigator from "./CategoriesStackNavigator";
+import WarehousesStackNavigator from "./WarehousesStackNavigator";
 import * as React from "react";
 import HenryStickmin from "../screens/HenryStickmin";
 
@@ -36,7 +37,6 @@ export default function MoreNavigator() {
           </TouchableOpacity>
         )
       })} />
-
       <MoreStack.Screen name="HenryStickmin" component={HenryStickmin} options={({ navigation }) => ({
         title: "Feel distracted yet?",
         headerLeft: () => (
@@ -45,7 +45,6 @@ export default function MoreNavigator() {
           </TouchableOpacity>
         )
       })} />
-
       <MoreStack.Screen
         name="MembersNavigator"
         component={MembersStackNavigator}
@@ -53,10 +52,16 @@ export default function MoreNavigator() {
           headerShown: false
         }}
       />
-
       <MoreStack.Screen
         name="CategoriesNavigator"
         component={CategoriesStackNavigator}
+        options={{
+          headerShown: false
+        }}
+      />
+      <MoreStack.Screen
+        name="WarehousesNavigator"
+        component={WarehousesStackNavigator}
         options={{
           headerShown: false
         }}
