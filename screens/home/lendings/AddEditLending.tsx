@@ -1,5 +1,5 @@
 import {Alert, ScrollView, StyleSheet, View as DefaultView} from "react-native";
-import {Text, useThemeColor, View} from "../../../components/Themed";
+import {getPlaceholderColor, Text, useThemeColor, View} from "../../../components/Themed";
 import {LendingStackScreenProps} from "../../../types";
 import {useEffect, useLayoutEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
@@ -18,6 +18,9 @@ import ExpandableItemList from "../../../components/ExpandableItemList";
 import {writeOutArray} from "../../../utilities/enlist";
 import {IRootState} from "../../../store/store";
 import {Member} from "../../../store/members";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import {TouchableCard} from "../../../components/Themed/TouchableCard";
+import {displayDate, displayTime} from "../../../utilities/date";
 
 export type ValidValuePair = {
   value: string
@@ -50,10 +53,19 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
 
   const backgroundColor = useThemeColor({}, "background");
   const cardColor = useThemeColor({}, "cardBackground");
+  const textColor = useThemeColor({}, 'text');
   const cancelColor = useThemeColor({}, "delete");
+  const placeholderTextColor = getPlaceholderColor(textColor, textColor);
 
   const [isUsersDropdownOpen, setUsersDropdownOpen] = useState<boolean>(false);
   const [chosenUserId, setChosenUserId] = useState<string>("");
+
+  const [startDate, setStartDate] = useState<Date | undefined>(!!lending ? new Date(lending.startDate) : undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(!!lending ? new Date(lending.endDate) : undefined);
+  const [showStartDateDialog, setShowStartDateDialog] = useState<boolean>(false);
+  const [showStartTimeDialog, setShowStartTimeDialog] = useState<boolean>(false);
+  const [showEndDateDialog, setShowEndDateDialog] = useState<boolean>(false);
+  const [showEndTimeDialog, setShowEndTimeDialog] = useState<boolean>(false);
 
   const [inputs, setInputs]: [inputValuesType, Function] = useState(
     {
@@ -86,8 +98,28 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
   });
 
   useEffect(() => {
-    console.log("Chosen user ID: " + chosenUserId);
-  }, [chosenUserId])
+    console.log("StartDate changed");
+    if (startDate === undefined)
+      return;
+    setInputs((currentInputValues: typeof inputs) => {
+      return {
+        ...currentInputValues,
+        startDate: {value: startDate.toISOString(), isInvalid: false},
+      }
+    })
+  }, [startDate]);
+
+  useEffect(() => {
+    console.log("EndDate changed");
+    if (endDate === undefined)
+      return;
+    setInputs((currentInputValues: typeof inputs) => {
+      return {
+        ...currentInputValues,
+        endDate: {value: endDate.toISOString(), isInvalid: false},
+      }
+    })
+  }, [endDate]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -293,32 +325,98 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
     }}
   /> : undefined
 
-  const dateComponent = <View style={styles.dateRow} key="date">
-    <Input
-      label="Data początku"
-      isInvalid={inputs.startDate.isInvalid}
-      style={styles.input}
-      // onErrorText="Please enter a date between 2000-01-01 and 2029-12-31 following template YYYY-MM-DD"
-      textInputProps={{
-        placeholder: "YYYY-MM-DD",
-        maxLength: 10,
-        onChangeText: inputChangedHandler.bind(null, "startDate"),
-        value: inputs.startDate.value,
-      }}
-    />
-    <View style={{width: 10}}/>
-    <Input
-      label="Data końca"
-      isInvalid={inputs.endDate.isInvalid}
-      style={styles.input}
-      // onErrorText="Please enter a date between 2000-01-01 and 2029-12-31 following template YYYY-MM-DD"
-      textInputProps={{
-        placeholder: "YYYY-MM-DD",
-        maxLength: 10,
-        onChangeText: inputChangedHandler.bind(null, "endDate"),
-        value: inputs.endDate.value,
-      }}
-    />
+  const startDateComponent = <View style={styles.dateRow} key="startDate">
+    <View style={{...styles.dateItem, flex: 5}}>
+      <Text numberOfLines={1} style={{
+        fontSize: 16,
+        marginBottom: 4,
+      }}>
+        Data rozpoczęcia
+      </Text>
+      <TouchableCard
+        style={[styles.dateTouchableCard, inputs.startDate.isInvalid && {backgroundColor: cancelColor}]}
+        onPress={() => {
+          setShowStartDateDialog(true);
+        }}
+      >
+        <Text numberOfLines={1} style={{
+          paddingVertical: 6,
+          paddingHorizontal: 10,
+          fontSize: 18,
+        }}>
+          {!!startDate ? displayDate(startDate) : <Text style={{fontStyle: "italic", fontSize: 14, color: placeholderTextColor}}>wybierz datę</Text>}
+        </Text>
+      </TouchableCard>
+    </View>
+    <View style={{flex: 4, ...styles.dateItem}}>
+      <Text style={{
+        fontSize: 16,
+        marginBottom: 4,
+      }}>
+        Godzina rozpoczęcia
+      </Text>
+      <TouchableCard
+        style={[styles.dateTouchableCard, inputs.startDate.isInvalid && {backgroundColor: cancelColor}]}
+        onPress={() => {
+          setShowStartTimeDialog(true);
+        }}
+      >
+        <Text style={{
+          paddingVertical: 6,
+          paddingHorizontal: 10,
+          fontSize: 18,
+        }}>
+          {!!startDate ? displayTime(startDate) : <Text style={{fontStyle: "italic", fontSize: 14, color: placeholderTextColor}}>wybierz godzinę</Text>}
+        </Text>
+      </TouchableCard>
+    </View>
+  </View>
+
+  const endDateComponent = <View style={styles.dateRow} key="endDate">
+    <View style={{flex: 5, ...styles.dateItem}}>
+      <Text numberOfLines={1} style={{
+        fontSize: 16,
+        marginBottom: 4,
+      }}>
+        Data zakończenia
+      </Text>
+      <TouchableCard
+        style={[styles.dateTouchableCard, inputs.endDate.isInvalid && {backgroundColor: cancelColor}]}
+        onPress={() => {
+          setShowEndDateDialog(true);
+        }}
+      >
+        <Text numberOfLines={1} style={{
+          paddingVertical: 6,
+          paddingHorizontal: 10,
+          fontSize: 18,
+        }}>
+          {!!endDate ? displayDate(endDate) : <Text style={{fontStyle: "italic", fontSize: 14, color: placeholderTextColor}}>wybierz datę</Text>}
+        </Text>
+      </TouchableCard>
+    </View>
+    <View style={{flex: 4, ...styles.dateItem}}>
+      <Text style={{
+        fontSize: 16,
+        marginBottom: 4,
+      }}>
+        Godzina zakończenia
+      </Text>
+      <TouchableCard
+        style={[styles.dateTouchableCard, inputs.endDate.isInvalid && {backgroundColor: cancelColor}]}
+        onPress={() => {
+          setShowEndTimeDialog(true);
+        }}
+      >
+        <Text style={{
+          paddingVertical: 6,
+          paddingHorizontal: 10,
+          fontSize: 18,
+        }}>
+          {!!endDate ? displayTime(endDate) : <Text style={{fontStyle: "italic", fontSize: 14, color: placeholderTextColor}}>wybierz godzinę</Text>}
+        </Text>
+      </TouchableCard>
+    </View>
   </View>
 
   const notesComponent = <Input
@@ -362,35 +460,92 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
     lendingTypeComponent,
     usernameComponent,
     eventNameComponent,
-    dateComponent,
+    startDateComponent,
+    endDateComponent,
     itemsListComponent,
     notesComponent,
   ]
 
   return (
-    <ScrollView
-      style={{
-        ...styles.container,
-        backgroundColor: backgroundColor,
-      }}
-      contentContainerStyle={{
-        flexGrow: 1,
-        paddingBottom: 20,
-      }}
-      nestedScrollEnabled={true}
-      scrollEnabled={!isUsersDropdownOpen}
-    >
-      {listElements}
-      <View key="buttonsFiller" style={{flex: 1}} />
-      {buttonsComponent}
-      {/*{<>*/}
-      {/*    <View key="date"    style={{paddingVertical: 100, backgroundColor: 'purple'}}/>*/}
-      {/*    <View key="notes"   style={{paddingVertical: 100, backgroundColor: 'green' }}/>*/}
-      {/*    <View key="items"   style={{paddingVertical: 100, backgroundColor: 'red'   }}/>*/}
-      {/*    <View key="buttons" style={{paddingVertical: 100, backgroundColor: 'pink'  }}/>*/}
-      {/*    <View key="last"    style={{paddingVertical: 100, backgroundColor: 'orange'}}/>*/}
-      {/*  </>}*/}
-    </ScrollView>
+    <>
+      <ScrollView
+        style={{
+          ...styles.container,
+          backgroundColor: backgroundColor,
+        }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingBottom: 20,
+        }}
+        nestedScrollEnabled={true}
+        scrollEnabled={!isUsersDropdownOpen}
+      >
+        {listElements}
+        <View key="buttonsFiller" style={{flex: 1}} />
+        {buttonsComponent}
+        {/*{<>*/}
+        {/*    <View key="date"    style={{paddingVertical: 100, backgroundColor: 'purple'}}/>*/}
+        {/*    <View key="notes"   style={{paddingVertical: 100, backgroundColor: 'green' }}/>*/}
+        {/*    <View key="items"   style={{paddingVertical: 100, backgroundColor: 'red'   }}/>*/}
+        {/*    <View key="buttons" style={{paddingVertical: 100, backgroundColor: 'pink'  }}/>*/}
+        {/*    <View key="last"    style={{paddingVertical: 100, backgroundColor: 'orange'}}/>*/}
+        {/*  </>}*/}
+      </ScrollView>
+      { showStartDateDialog && <DateTimePicker
+          mode={"date"}
+          firstDayOfWeek={1}
+          locale={"pl-PL"}
+          value={startDate|| new Date()}
+          is24Hour={true}
+          display="default"
+          maximumDate={!!endDate ? endDate : undefined}
+          onChange={(event, date) => {
+            setShowStartDateDialog(false);
+            date && date.setUTCSeconds(0, 0) && setStartDate(date);
+          }}
+      />}
+      { showStartTimeDialog && <DateTimePicker
+        // textColor={textColor}
+          mode={"time"}
+          firstDayOfWeek={1}
+          locale={"pl-PL"}
+          value={startDate|| new Date()}
+          is24Hour={true}
+        // display="spinner"
+          maximumDate={!!endDate ? endDate : undefined}
+          onChange={(event, date) => {
+            setShowStartTimeDialog(false);
+            date && date.setUTCSeconds(0, 0) && setStartDate(date);
+          }}
+      />}
+      { showEndDateDialog && <DateTimePicker
+          mode={"date"}
+          firstDayOfWeek={1}
+          locale={"pl-PL"}
+          value={endDate|| new Date()}
+          is24Hour={true}
+          display="default"
+          minimumDate={!!startDate ? startDate : undefined}
+          onChange={(event, date) => {
+            setShowEndDateDialog(false);
+            date && date.setUTCSeconds(0, 0) && setEndDate(date);
+          }}
+      />}
+      { showEndTimeDialog && <DateTimePicker
+        // textColor={textColor}
+          mode={"time"}
+          firstDayOfWeek={1}
+          locale={"pl-PL"}
+          value={endDate|| new Date()}
+          is24Hour={true}
+        // display="spinner"
+          minimumDate={!!startDate ? startDate : undefined}
+          onChange={(event, date) => {
+            setShowEndTimeDialog(false);
+            date && date.setUTCSeconds(0, 0) && setEndDate(date);
+          }}
+      />}
+    </>
   )
 }
 
@@ -416,7 +571,15 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-  }
+  },
+  dateTouchableCard: {
+    borderRadius: 10,
+    alignItems: 'stretch',
+  },
+  dateItem: {
+    marginHorizontal: 4,
+    marginVertical: 8,
+  },
 });
 
 
