@@ -37,7 +37,7 @@ export default function AppSettings() {
         </View>
       </TouchableOpacity>
       <View style={styles.cardView}>
-        <Text style={textStyles.optionName}>Demo mode</Text>
+        <Text style={textStyles.optionName}>Tryb demonstracyjny</Text>
         <Switch isEnabled={demoModeEnabled} setIsEnabled={setDemoMode} />
       </View>
     </ScrollView>

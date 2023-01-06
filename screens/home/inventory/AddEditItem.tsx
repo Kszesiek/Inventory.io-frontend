@@ -1,8 +1,8 @@
-import {Alert, FlatList, StyleSheet} from "react-native";
-import {useThemeColor, View} from "../../../components/Themed";
+import {Alert, Animated, FlatList, StyleSheet} from "react-native";
+import {Text, useThemeColor, View} from "../../../components/Themed";
 import {InventoryStackScreenProps} from "../../../types";
 import {useDispatch, useSelector} from "react-redux";
-import {useLayoutEffect, useState} from "react";
+import {useEffect, useLayoutEffect, useRef, useState} from "react";
 import {
   Item,
   isItem,
@@ -12,6 +12,11 @@ import {writeOutArray} from "../../../utilities/enlist";
 import Input from "../../../components/Input";
 import {OpacityButton} from "../../../components/Themed/OpacityButton";
 import {IRootState} from "../../../store/store";
+import {Category} from "../../../store/categories";
+import {Modalize} from "react-native-modalize";
+import {TouchableCard} from "../../../components/Themed/TouchableCard";
+import * as React from "react";
+import CategoriesChooser from "../../../components/CategoriesChooser";
 
 export type ValidValuePair = {
   value: string
@@ -20,7 +25,7 @@ export type ValidValuePair = {
 
 type inputValuesType = {
   name: ValidValuePair,
-  category: ValidValuePair,
+  category_id: ValidValuePair,
 }
 
 export default function AddEditItem({ navigation, route }: InventoryStackScreenProps<'AddEditItem'>) {
@@ -29,6 +34,10 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
 
   const item: Item | undefined = route.params?.item;
   const isEditing = !!item;
+
+  const [category, setCategory] = useState<Category | undefined>(!!item ? categories.find(
+    (_category: Category) => _category.id === item.categoryId) : undefined);
+  const categoriesModalizeRef = useRef<Modalize>(null);
 
   const backgroundColor = useThemeColor({}, "background");
   const cancelColor = useThemeColor({}, "delete");
@@ -39,8 +48,8 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
         value: !!item && isItem(item) ? item.name : "",
         isInvalid: false,
       },
-      category: {
-        value: !!item && isItem(item) ? categories.find(category => category.id === item.categoryId)?.name || "" : "",
+      category_id: {
+        value: !!item && isItem(item) ? item.categoryId : "",
         isInvalid: false,
       },
     });
@@ -51,6 +60,15 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
     });
   }, [navigation, isEditing])
 
+  useEffect(() => {
+    setInputs((currentInputValues: typeof inputs) => {
+      return {
+        ...currentInputValues,
+        category_id: {value: category?.id || "", isInvalid: false},
+      }
+    })
+  }, [category])
+
   function cancelPressed() {
     console.log("cancel button pressed");
     navigation.goBack();
@@ -58,7 +76,7 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
 
   async function submitPressed() {
     const nameIsValid: boolean = inputs.name.value.trim().length >= 0;
-    const categoryIsValid: boolean = categories.findIndex(category => category.name === inputs.category.value) !== -1;
+    const categoryIsValid: boolean = categories.findIndex(category => category.id === inputs.category_id.value) !== -1;
 
     setInputs((currentInputs: inputValuesType) => {
       return {
@@ -66,8 +84,8 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
           value: currentInputs.name.value,
           isInvalid: !nameIsValid,
         },
-        category: {
-          value: currentInputs.category.value,
+        category_id: {
+          value: currentInputs.category_id.value,
           isInvalid: !categoryIsValid,
         },
       }
@@ -90,13 +108,13 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
       {
         itemId: item.itemId,
         name: inputs.name.value,
-        categoryId: categories.find(category => category.name === inputs.category.value)!.id,
+        categoryId: inputs.category_id.value,
       }
-      :
+    :
       {
         itemId: Math.random().toString(),
         name: inputs.name.value,
-        categoryId: categories.find(category => category.name === inputs.category.value)!.id,
+        categoryId: inputs.category_id.value,
       }
 
     if (isEditing) {
@@ -123,6 +141,28 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
     })
   }
 
+  function Categories() {
+    return (
+      <Animated.View style={{flex: 1}}>
+        <CategoriesChooser
+          currentCategory={category}
+          setCurrentCategory={setCategory}
+        />
+        <OpacityButton
+          style={styles.bottomDrawerConfirmButton}
+          onPress={() => categoriesModalizeRef.current?.close()}
+        >
+          Potwierdź
+        </OpacityButton>
+      </Animated.View>
+    )
+  }
+
+  function parentPressed() {
+    console.log("parent pressed");
+    categoriesModalizeRef.current?.open();
+  }
+
   // ACTUAL FORM FIELDS
 
   const itemNameComponent = <Input
@@ -138,18 +178,18 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
       // autoCapitalize: 'sentences',  // default is sentences
     }} />
 
-  const categoryComponent = <Input
-    label="Kategoria"
-    isInvalid={inputs.category.isInvalid}
-    // onErrorText="Please enter a description containing under 4000 characters"
-    textInputProps={{
-      placeholder: "nazwa kategorii",
-      maxLength: 40,
-      onChangeText: inputChangedHandler.bind(null, "category"),
-      value: inputs.category.value,
-      // autoCorrect: false,  // default is true
-      // autoCapitalize: 'sentences',  // default is sentences
-    }} />
+  const categoryComponent = <View key="parent" style={styles.propertyContainer}>
+    <Text style={[styles.propertyLabel, inputs.category_id.isInvalid && {color: cancelColor}]}>Kategoria nadrzędna</Text>
+    <TouchableCard
+      style={[styles.card, inputs.category_id.isInvalid && {backgroundColor: cancelColor}]}
+      onPress={parentPressed}
+    >
+      {!!category ?
+        <Text style={{fontSize: 18, paddingVertical: 3}}>{category.name} ({category.short_name})</Text>
+        :
+        <Text style={{fontSize: 16, paddingVertical: 4, fontStyle: 'italic'}}>wybierz kategorię...</Text>}
+    </TouchableCard>
+  </View>
 
   const buttonsComponent = <View style={styles.buttons}>
     <OpacityButton style={[styles.button, {backgroundColor: cancelColor}]} onPress={cancelPressed}>Anuluj</OpacityButton>
@@ -161,7 +201,7 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
     categoryComponent,
   ]
 
-  return (
+  return <>
     <FlatList
       data={listElements}
       renderItem={item => item.item}
@@ -170,7 +210,12 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
       ListFooterComponent={buttonsComponent}
       ListFooterComponentStyle={{flexGrow: 1, justifyContent: 'flex-end'}}
     />
-  )
+    <Modalize
+      ref={categoriesModalizeRef}
+      modalStyle={{...styles.modalStyle, backgroundColor}}
+      customRenderer={Categories()}
+    />
+  </>
 }
 
 const styles = StyleSheet.create({
@@ -189,5 +234,32 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-  }
+  },
+  modalStyle: {
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    marginTop: 25,
+    flex: 1,
+  },
+  bottomDrawerConfirmButton: {
+    margin: 15,
+    paddingHorizontal: 40,
+    paddingVertical: 8,
+    alignSelf: 'center',
+  },
+  propertyLabel: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  propertyContainer: {
+    marginHorizontal: 4,
+    marginVertical: 8,
+  },
+  card: {
+    alignItems: 'flex-start',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 15,
+    fontSize: 18,
+  },
 });

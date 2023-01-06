@@ -206,7 +206,7 @@ export default function AddEditCategory({ navigation, route }: CategoriesStackSc
   />
 
   const parentIdComponent = <View key="parent" style={styles.propertyContainer}>
-    <Text style={[styles.propertyLabel, inputs.short_name.isInvalid && {color: cancelColor}]}>Kategoria nadrzędna</Text>
+    <Text style={[styles.propertyLabel, inputs.parent_category_id.isInvalid && {color: cancelColor}]}>Kategoria nadrzędna</Text>
     <TouchableCard
       style={styles.card}
       onPress={parentPressed}
@@ -247,10 +247,8 @@ export default function AddEditCategory({ navigation, route }: CategoriesStackSc
         modalStyle={{...styles.modalStyle, backgroundColor}}
         customRenderer={Categories()}
         onClose={() => {
-          console.log("Helooo?")
-          parentClosed()
+          parentClosed();
         }}
-
       />
     </>
 

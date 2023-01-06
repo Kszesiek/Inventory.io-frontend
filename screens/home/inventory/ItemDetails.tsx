@@ -47,7 +47,7 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
         <Text style={styles.text}>{item.name}</Text>
       </Detail>
       <Detail name="Kategoria">
-        <Text style={styles.text}>{category?.name || <Text style={{fontStyle: 'italic', fontSize: 13}}>nieznana kategoria</Text>}</Text>
+        <Text style={styles.text}>{!!category ? category.name + " (" + category.short_name + ")" : <Text style={{fontStyle: 'italic', fontSize: 13}}>nieznana kategoria</Text>}</Text>
       </Detail>
 
       <View style={{flexGrow: 1}}/>
