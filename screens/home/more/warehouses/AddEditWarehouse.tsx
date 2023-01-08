@@ -18,8 +18,13 @@ export type ValidValuePair<ValueType> = {
 
 type inputValuesType = {
   name: ValidValuePair<string>,
-  latitude: ValidValuePair<number>,
-  longitude: ValidValuePair<number>,
+  // latitude: ValidValuePair<number>,
+  // longitude: ValidValuePair<number>,
+  country: ValidValuePair<string>,
+  city: ValidValuePair<string>,
+  postalCode: ValidValuePair<string>,
+  street: ValidValuePair<string>,
+  streetNumber: ValidValuePair<string>,
 }
 
 export default function AddEditWarehouse({ navigation, route }: WarehousesStackScreenProps<'AddEditWarehouse'>) {
@@ -30,16 +35,17 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
   const backgroundColor = useThemeColor({}, "background");
   const cancelColor = useThemeColor({}, "delete");
 
-  const [location, setLocation] = useState<Location.LocationObject | null>(!!warehouse ?
-    {
-      coords: {
-        longitude: warehouse.longitude,
-        latitude: warehouse.latitude,
-      },
-      timestamp: Date.now(),
-    } as Location.LocationObject
-      :
-    null
+  const [location, setLocation] = useState<Location.LocationObject | null>(null
+    // !!warehouse ?
+    //   {
+    //     coords: {
+    //       longitude: warehouse.longitude,
+    //       latitude: warehouse.latitude,
+    //     },
+    //     timestamp: Date.now(),
+    //   } as Location.LocationObject
+    // :
+    //   null
   );
 
   const [inputs, setInputs]: [inputValuesType, Function] = useState(
@@ -48,12 +54,32 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
         value: !!warehouse ? warehouse.name : "",
         isInvalid: false,
       },
-      longitude: {
-        value: !!warehouse ? warehouse.longitude : 0.,
+      // longitude: {
+      //   value: !!warehouse ? warehouse.longitude : 0.,
+      //   isInvalid: false,
+      // },
+      // latitude: {
+      //   value: !!warehouse ? warehouse.latitude : 0.,
+      //   isInvalid: false,
+      // },
+      country: {
+        value: !!warehouse ? warehouse.country : "",
         isInvalid: false,
       },
-      latitude: {
-        value: !!warehouse ? warehouse.latitude : 0.,
+      city: {
+        value: !!warehouse ? warehouse.city : "",
+        isInvalid: false,
+      },
+      postalCode: {
+        value: !!warehouse ? warehouse.postalCode : "",
+        isInvalid: false,
+      },
+      street: {
+        value: !!warehouse ? warehouse.street : "",
+        isInvalid: false,
+      },
+      streetNumber: {
+        value: !!warehouse ? warehouse.streetNumber : "",
         isInvalid: false,
       },
     });
@@ -81,8 +107,13 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
 
   async function submitPressed() {
     const nameIsValid: boolean = inputs.name.value.trim().length > 0 && inputs.name.value.trim().length < 100;
-    const longitudeIsValid: boolean = inputs.longitude.value >= -90 && inputs.longitude.value <= 90;
-    const latitudeIsValid: boolean = inputs.longitude.value >= -180 && inputs.longitude.value <= 180;
+    // const longitudeIsValid: boolean = inputs.longitude.value >= -90 && inputs.longitude.value <= 90;
+    // const latitudeIsValid: boolean = inputs.longitude.value >= -180 && inputs.longitude.value <= 180;
+    const countryIsValid: boolean = inputs.country.value.trim().length > 0 && inputs.country.value.trim().length < 100;
+    const cityIsValid: boolean = inputs.city.value.trim().length > 0 && inputs.city.value.trim().length < 100;
+    const postalCodeIsValid: boolean = inputs.postalCode.value.trim().length > 0 && inputs.postalCode.value.trim().length < 100;
+    const streetIsValid: boolean = inputs.street.value.trim().length > 0 && inputs.street.value.trim().length < 100;
+    const streetNumberIsValid: boolean = inputs.streetNumber.value.trim().length > 0 && inputs.streetNumber.value.trim().length < 100;
 
     setInputs((currentInputs: inputValuesType) => {
       return {
@@ -90,25 +121,55 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
           value: currentInputs.name.value,
           isInvalid: !nameIsValid,
         },
-        longitude: {
-          value: currentInputs.longitude.value,
-          isInvalid: !longitudeIsValid,
+        // longitude: {
+        //   value: currentInputs.longitude.value,
+        //   isInvalid: !longitudeIsValid,
+        // },
+        // latitude: {
+        //   value: currentInputs.latitude.value,
+        //   isInvalid: !latitudeIsValid,
+        // },
+        country: {
+          value: currentInputs.country.value,
+          isInvalid: !countryIsValid,
         },
-        latitude: {
-          value: currentInputs.latitude.value,
-          isInvalid: !latitudeIsValid,
+        city: {
+          value: currentInputs.city.value,
+          isInvalid: !cityIsValid,
+        },
+        postalCode: {
+          value: currentInputs.postalCode.value,
+          isInvalid: !postalCodeIsValid,
+        },
+        street: {
+          value: currentInputs.street.value,
+          isInvalid: !streetIsValid,
+        },
+        streetNumber: {
+          value: currentInputs.streetNumber.value,
+          isInvalid: !streetNumberIsValid,
         },
       }
     });
 
-    if (!nameIsValid || !longitudeIsValid || !latitudeIsValid) {
+    if (!nameIsValid || /* !longitudeIsValid || !latitudeIsValid || */ !countryIsValid || !cityIsValid || !postalCodeIsValid || !streetIsValid || !streetNumberIsValid) {
       const wrongDataArray: string[] = []
       if (!nameIsValid)
         wrongDataArray.push("name")
-      if (!longitudeIsValid)
-        wrongDataArray.push("longitude")
-      if (!latitudeIsValid)
-        wrongDataArray.push("latitude")
+      // if (!longitudeIsValid)
+      //   wrongDataArray.push("longitude")
+      // if (!latitudeIsValid)
+      //   wrongDataArray.push("latitude")
+      if (!countryIsValid)
+        wrongDataArray.push("country")
+      if (!cityIsValid)
+        wrongDataArray.push("city")
+      if (!postalCodeIsValid)
+        wrongDataArray.push("postal code")
+      if (!streetIsValid)
+        wrongDataArray.push("street")
+      if (!streetNumberIsValid)
+        wrongDataArray.push("street number")
       const wrongDataString: string = writeOutArray(wrongDataArray)
 
       Alert.alert("Invalid values", `Some data seems incorrect. Please check ${wrongDataString} and try again.`);
@@ -117,9 +178,14 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
 
     const warehouseData: Warehouse = {
       name: inputs.name.value,
-      longitude: inputs.longitude.value,
-      latitude: inputs.latitude.value,
-      id: !!warehouse ? warehouse.id : Math.random().toString(),
+      // longitude: inputs.longitude.value,
+      // latitude: inputs.latitude.value,
+      city: inputs.city.value,
+      country: inputs.country.value,
+      postalCode: inputs.postalCode.value,
+      street: inputs.street.value,
+      streetNumber: inputs.streetNumber.value,
+      id: !!warehouse ? warehouse.id : Math.random().toString()
     }
 
     if (!!warehouse) {
@@ -166,12 +232,42 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
     onPress={async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-
         return;
       }
-
-      let location = await Location.getCurrentPositionAsync({});
+      Alert.alert("Odczytywanie lokalizacji urządzenia...", "Operacja może zająć kilka sekund...", [], {cancelable: true})
+      let location = await Location.getCurrentPositionAsync();
       setLocation(location);
+      Location.reverseGeocodeAsync(location.coords).then((address) => {
+        console.log(address)
+        Alert.alert(
+          "Odczytano lokalizację urządzenia",
+          `Lokalizacja urządzenia została odczytana jako:\n
+          (${location.coords.longitude}, ${location.coords.latitude})
+          ${address[0].street} ${address[0].streetNumber}
+          ${address[0].postalCode} ${address[0].city}, ${address[0].country}\n\nCzy chcesz nadać magazynowi tę lokalizację?`,
+          [
+            {
+              text: "Nie",
+              style: "cancel",
+            },
+            {
+              text: "Tak",
+              onPress: () => {
+                setInputs((currentInputValues: typeof inputs) => {
+                  return {
+                    ...currentInputValues,
+                    country: {value: address[0].country, isInvalid: false},
+                    city: {value: address[0].city, isInvalid: false},
+                    postalCode: {value: address[0].postalCode, isInvalid: false},
+                    street: {value: address[0].street, isInvalid: false},
+                    streetNumber: {value: address[0].streetNumber, isInvalid: false},
+                  }
+                })
+              },
+            }
+          ]
+        )
+      })
     }}
   >
     Użyj bieżącej lokalizacji
@@ -210,6 +306,66 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
     </Card>
   </View>
 
+  const countryComponent = <Input
+    key="country"
+    label="Kraj"
+    isInvalid={inputs.country.isInvalid}
+    textInputProps={{
+      placeholder: "kraj",
+      maxLength: 40,
+      onChangeText: inputChangedHandler.bind(null, "country"),
+      value: inputs.country.value,
+    }}
+  />
+
+  const cityComponent = <Input
+    key="city"
+    label="Miasto"
+    isInvalid={inputs.city.isInvalid}
+    textInputProps={{
+      placeholder: "miasto",
+      maxLength: 40,
+      onChangeText: inputChangedHandler.bind(null, "city"),
+      value: inputs.city.value,
+    }}
+  />
+
+  const postalCodeComponent = <Input
+    key="postalCode"
+    label="Kod pocztowy"
+    isInvalid={inputs.postalCode.isInvalid}
+    textInputProps={{
+      placeholder: "kod pocztowy",
+      maxLength: 40,
+      onChangeText: inputChangedHandler.bind(null, "postalCode"),
+      value: inputs.postalCode.value,
+    }}
+  />
+
+  const streetComponent = <Input
+    key="street"
+    label="Ulica"
+    isInvalid={inputs.street.isInvalid}
+    textInputProps={{
+      placeholder: "ulica",
+      maxLength: 40,
+      onChangeText: inputChangedHandler.bind(null, "street"),
+      value: inputs.street.value,
+    }}
+  />
+
+  const streetNumberComponent = <Input
+    key="streetNumber"
+    label="Numer budynku / mieszkania"
+    isInvalid={inputs.streetNumber.isInvalid}
+    textInputProps={{
+      placeholder: "numer budynku / mieszkania",
+      maxLength: 40,
+      onChangeText: inputChangedHandler.bind(null, "streetNumber"),
+      value: inputs.streetNumber.value,
+    }}
+  />
+
   const buttonsComponent = <View key="buttons" style={styles.buttons}>
     <OpacityButton style={[styles.button, {backgroundColor: cancelColor}]} onPress={cancelPressed}>Anuluj</OpacityButton>
     <OpacityButton style={styles.button} onPress={submitPressed}>{!!warehouse ? "Zatwierdź" : "Utwórz"}</OpacityButton>
@@ -217,7 +373,13 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
 
   const listElements = [
     nameComponent,
-    locationComponent,
+    // locationComponent,
+    useCurrentLocationButton,
+    countryComponent,
+    cityComponent,
+    postalCodeComponent,
+    streetComponent,
+    streetNumberComponent,
   ]
 
   return (

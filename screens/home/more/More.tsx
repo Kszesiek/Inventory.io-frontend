@@ -80,7 +80,7 @@ export default function More({navigation, route}: MoreStackScreenProps<'More'>) 
           {marginTop: 20, backgroundColor: deleteColor}
         ]}
         onPress={() => {
-          Alert.alert("Czy chcesz opuścić tą organizację?", "Czy jesteś pewien, że chcesz opuścić tą organizację? Ta operacja jest nieodwracalna.", [
+          Alert.alert("Czy chcesz opuścić tę organizację?", "Czy jesteś pewien, że chcesz opuścić tę organizację? Ta operacja jest nieodwracalna.", [
             {
               text: "Anuluj",
               style: "cancel",
@@ -105,7 +105,7 @@ export default function More({navigation, route}: MoreStackScreenProps<'More'>) 
       <TouchableCard
         style={[styles.touchableCard, styles.listCard, styles.listCardBottom, {backgroundColor: deleteColor}]}
         onPress={() => {
-          Alert.alert("Czy chcesz usunąć tą organizację?", "Czy jesteś pewien, że chcesz usunąć tą organizację? Ta operacja jest nieodwracalna.", [
+          Alert.alert("Czy chcesz usunąć tę organizację?", "Czy jesteś pewien, że chcesz usunąć tę organizację? Ta operacja jest nieodwracalna.", [
             {
               text: "Anuluj",
               style: "cancel",

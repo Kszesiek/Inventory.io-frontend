@@ -48,12 +48,28 @@ export default function WarehouseDetails({ navigation, route }: WarehousesStackS
       <Detail name="Nazwa magazynu">
         <Text style={[styles.text, property]}>{warehouse.name}</Text>
       </Detail>
-      <Detail name="Długość geograficzna">
-        <Text style={[styles.text, property]}>{warehouse.longitude}</Text>
+      <Detail name="Kraj">
+        <Text style={[styles.text, property]}>{warehouse.country}</Text>
       </Detail>
-      <Detail name="Szerokość geograficzna">
-        <Text style={[styles.text, property]}>{warehouse.latitude}</Text>
+      <Detail name="Miasto">
+        <Text style={[styles.text, property]}>{warehouse.city}</Text>
       </Detail>
+      <Detail name="Kod pocztowy">
+        <Text style={[styles.text, property]}>{warehouse.postalCode}</Text>
+      </Detail>
+      <Detail name="Ulica">
+      <Text style={[styles.text, property]}>{warehouse.street}</Text>
+    </Detail>
+      <Detail name="Numer budynku / mieszkania">
+        <Text style={[styles.text, property]}>{warehouse.streetNumber}</Text>
+      </Detail>
+
+      {/*<Detail name="Długość geograficzna">*/}
+      {/*  <Text style={[styles.text, property]}>{warehouse.longitude}</Text>*/}
+      {/*</Detail>*/}
+      {/*<Detail name="Szerokość geograficzna">*/}
+      {/*  <Text style={[styles.text, property]}>{warehouse.latitude}</Text>*/}
+      {/*</Detail>*/}
 
       <View style={{flexGrow: 1}}/>
       <View style={styles.editButtonContainer}>
