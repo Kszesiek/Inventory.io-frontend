@@ -5,6 +5,11 @@ export interface Event {
   name: string
   startDate: string
   endDate: string
+  country?: string
+  city?: string
+  postalCode?: string
+  street?: string
+  streetNumber?: string
 }
 
 export function isEvent(object: any): object is Event {
@@ -14,7 +19,20 @@ export function isEvent(object: any): object is Event {
     typeof object['eventId'] === 'string' &&
     typeof object['name'] === 'string' &&
     typeof object['startDate'] === 'string' &&
-    typeof object['endDate'] === 'string'
+    typeof object['endDate'] === 'string' &&
+    (
+      typeof object['country'] === 'string' &&
+      typeof object['city'] === 'string' &&
+      typeof object['postalCode'] === 'string' &&
+      typeof object['street'] === 'string' &&
+      typeof object['streetNumber'] === 'string'
+    ) || (
+      typeof object['country'] === undefined &&
+      typeof object['city'] === undefined &&
+      typeof object['postalCode'] === undefined &&
+      typeof object['street'] === undefined &&
+      typeof object['streetNumber'] === undefined
+    )
   );
 }
 

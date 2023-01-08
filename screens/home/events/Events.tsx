@@ -31,6 +31,12 @@ export default function Events({ navigation, route }: EventStackScreenProps<'Eve
           <TouchableCard style={styles.card} onPress={() => navigation.navigate("EventDetails", { eventId: event.item.eventId })}>
             <Text style={[{textAlign: 'center'}, boldedText]}>{event.item.name}</Text>
             <Text style={styles.dateLabel}>{displayDateTimePeriod(new Date(event.item.startDate), new Date(event.item.endDate))}</Text>
+            {event.item.country && event.item.city && event.item.postalCode && event.item.street && event.item.streetNumber &&
+              <View style={styles.addressView}>
+                <Text style={{textAlign: 'center'}}>{event.item.street} {event.item.streetNumber}</Text>
+                <Text style={{textAlign: 'center'}}>{event.item.postalCode} {event.item.city}, {event.item.country}</Text>
+              </View>}
+
           </TouchableCard>
         )
       }}
@@ -67,5 +73,9 @@ const styles = StyleSheet.create({
   dateLabel: {
     textAlign: 'center',
     marginTop: 5,
+  },
+  addressView: {
+    paddingTop: 5,
+    backgroundColor: 'transparent',
   },
 })

@@ -14,6 +14,9 @@ import Input from "../../../components/Input";
 import {OpacityButton} from "../../../components/Themed/OpacityButton";
 import {TouchableCard} from "../../../components/Themed/TouchableCard";
 import {displayDate, displayTime} from "../../../utilities/date";
+import * as Location from "expo-location";
+import * as React from "react";
+import {LocationButton} from "../../../components/LocationButton";
 
 export type ValidValuePair = {
   value: string
@@ -24,6 +27,11 @@ type inputValuesType = {
   name: ValidValuePair,
   startDate: ValidValuePair,
   endDate: ValidValuePair,
+  country: ValidValuePair,
+  city: ValidValuePair,
+  postalCode: ValidValuePair,
+  street: ValidValuePair,
+  streetNumber: ValidValuePair,
 }
 
 export default function AddEditEvent({ navigation, route }: EventStackScreenProps<'AddEditEvent'>) {
@@ -44,6 +52,7 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
   const [showEndDateDialog, setShowEndDateDialog] = useState<boolean>(false);
   const [showEndTimeDialog, setShowEndTimeDialog] = useState<boolean>(false);
 
+  // const [location, setLocation] = useState<Location.LocationObject | null>(null);
 
   const [inputs, setInputs]: [inputValuesType, Function] = useState(
   {
@@ -57,6 +66,26 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
     },
     endDate: {
       value: !!event && isEvent(event) ? event.endDate.slice(0, 10) : "",
+      isInvalid: false,
+    },
+    country: {
+      value: !!event && isEvent(event) ? event.country || "" : "",
+      isInvalid: false,
+    },
+    city: {
+      value: !!event && isEvent(event) ? event.city || ""  : "",
+      isInvalid: false,
+    },
+    postalCode: {
+      value: !!event && isEvent(event) ? event.postalCode || ""  : "",
+      isInvalid: false,
+    },
+    street: {
+      value: !!event && isEvent(event) ? event.street || ""  : "",
+      isInvalid: false,
+    },
+    streetNumber: {
+      value: !!event && isEvent(event) ? event.streetNumber || ""  : "",
       isInvalid: false,
     },
   });
@@ -101,6 +130,11 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
     const endDateIsValid: boolean = new Date(inputs.endDate.value).toString() !== "Invalid Date";
     const nameIsValid: boolean = inputs.name.value.trim().length > 0;
     const startEndTimeIsValid: boolean = !startDateIsValid || !endDateIsValid || new Date(inputs.endDate.value) >= new Date(inputs.startDate.value);
+    const countryIsValid: boolean = inputs.country.value.trim().length > 0 && inputs.country.value.trim().length < 100;
+    const cityIsValid: boolean = inputs.city.value.trim().length > 0 && inputs.city.value.trim().length < 100;
+    const postalCodeIsValid: boolean = inputs.postalCode.value.trim().length > 0 && inputs.postalCode.value.trim().length < 100;
+    const streetIsValid: boolean = inputs.street.value.trim().length > 0 && inputs.street.value.trim().length < 100;
+    const streetNumberIsValid: boolean = inputs.streetNumber.value.trim().length > 0 && inputs.streetNumber.value.trim().length < 100;
 
     setInputs((currentInputs: inputValuesType) => {
       return {
@@ -116,10 +150,30 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
           value: currentInputs.endDate.value,
           isInvalid: !endDateIsValid || !startEndTimeIsValid,
         },
+        country: {
+          value: currentInputs.country.value,
+          isInvalid: !countryIsValid,
+        },
+        city: {
+          value: currentInputs.city.value,
+          isInvalid: !cityIsValid,
+        },
+        postalCode: {
+          value: currentInputs.postalCode.value,
+          isInvalid: !postalCodeIsValid,
+        },
+        street: {
+          value: currentInputs.street.value,
+          isInvalid: !streetIsValid,
+        },
+        streetNumber: {
+          value: currentInputs.streetNumber.value,
+          isInvalid: !streetNumberIsValid,
+        },
       }
     });
 
-    if (!nameIsValid || !startDateIsValid || !endDateIsValid || !startEndTimeIsValid) {
+    if (!nameIsValid || !startDateIsValid || !endDateIsValid || !startEndTimeIsValid || !countryIsValid || !cityIsValid || !postalCodeIsValid || !streetIsValid || !streetNumberIsValid) {
       const wrongDataArray: string[] = []
       if (!startDateIsValid)
         wrongDataArray.push("start date")
@@ -128,7 +182,17 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
       if (!nameIsValid)
         wrongDataArray.push("event name")
       if (!startEndTimeIsValid)
-        wrongDataArray.push("start and end time od date")
+        wrongDataArray.push("start and end time of date")
+      if (!countryIsValid)
+        wrongDataArray.push("country")
+      if (!cityIsValid)
+        wrongDataArray.push("city")
+      if (!postalCodeIsValid)
+        wrongDataArray.push("postal code")
+      if (!streetIsValid)
+        wrongDataArray.push("street")
+      if (!streetNumberIsValid)
+        wrongDataArray.push("street number")
 
       const wrongDataString: string = writeOutArray(wrongDataArray)
 
@@ -142,6 +206,11 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
         name: inputs.name.value,
         startDate: inputs.startDate.value,
         endDate: inputs.endDate.value,
+        city: inputs.city.value,
+        country: inputs.country.value,
+        postalCode: inputs.postalCode.value,
+        street: inputs.street.value,
+        streetNumber: inputs.streetNumber.value,
       }
       :
       {
@@ -149,6 +218,11 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
         name: inputs.name.value,
         startDate: inputs.startDate.value,
         endDate: inputs.endDate.value,
+        city: inputs.city.value,
+        country: inputs.country.value,
+        postalCode: inputs.postalCode.value,
+        street: inputs.street.value,
+        streetNumber: inputs.streetNumber.value,
       }
 
     if (isEditing) {
@@ -284,6 +358,79 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
     </View>
   </View>
 
+  const useCurrentLocationButton = <LocationButton
+    onConfirmLocation={(address: Location.LocationGeocodedAddress) => {
+      setInputs((currentInputValues: typeof inputs) => { return {
+        ...currentInputValues,
+        country: {value: address.country, isInvalid: false},
+        city: {value: address.city, isInvalid: false},
+        postalCode: {value: address.postalCode, isInvalid: false},
+        street: {value: address.street, isInvalid: false},
+        streetNumber: {value: address.streetNumber, isInvalid: false},
+      }})
+    }}
+  />
+
+  const countryComponent = <Input
+    key="country"
+    label="Kraj"
+    isInvalid={inputs.country.isInvalid}
+    textInputProps={{
+      placeholder: "kraj",
+      maxLength: 40,
+      onChangeText: inputChangedHandler.bind(null, "country"),
+      value: inputs.country.value,
+    }}
+  />
+
+  const cityComponent = <Input
+    key="city"
+    label="Miasto"
+    isInvalid={inputs.city.isInvalid}
+    textInputProps={{
+      placeholder: "miasto",
+      maxLength: 40,
+      onChangeText: inputChangedHandler.bind(null, "city"),
+      value: inputs.city.value,
+    }}
+  />
+
+  const postalCodeComponent = <Input
+    key="postalCode"
+    label="Kod pocztowy"
+    isInvalid={inputs.postalCode.isInvalid}
+    textInputProps={{
+      placeholder: "kod pocztowy",
+      maxLength: 40,
+      onChangeText: inputChangedHandler.bind(null, "postalCode"),
+      value: inputs.postalCode.value,
+    }}
+  />
+
+  const streetComponent = <Input
+    key="street"
+    label="Ulica"
+    isInvalid={inputs.street.isInvalid}
+    textInputProps={{
+      placeholder: "ulica",
+      maxLength: 40,
+      onChangeText: inputChangedHandler.bind(null, "street"),
+      value: inputs.street.value,
+    }}
+  />
+
+  const streetNumberComponent = <Input
+    key="streetNumber"
+    label="Numer budynku / mieszkania"
+    isInvalid={inputs.streetNumber.isInvalid}
+    textInputProps={{
+      placeholder: "numer budynku / mieszkania",
+      maxLength: 40,
+      onChangeText: inputChangedHandler.bind(null, "streetNumber"),
+      value: inputs.streetNumber.value,
+    }}
+  />
+
   const buttonsComponent = <View style={styles.buttons}>
     <OpacityButton style={[styles.button, {backgroundColor: cancelColor}]} onPress={cancelPressed}>Anuluj</OpacityButton>
     <OpacityButton style={styles.button} onPress={submitPressed}>{!!event ? "Zatwierdź" : "Utwórz"}</OpacityButton>
@@ -293,6 +440,12 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
     eventNameComponent,
     startDateComponent,
     endDateComponent,
+    useCurrentLocationButton,
+    countryComponent,
+    cityComponent,
+    postalCodeComponent,
+    streetComponent,
+    streetNumberComponent,
   ]
 
   return (
@@ -383,9 +536,6 @@ const styles = StyleSheet.create({
   },
   button: {
     margin: 15,
-  },
-  input: {
-    flex: 1,
   },
   dateTouchableCard: {
     // shadowColor: 'black',

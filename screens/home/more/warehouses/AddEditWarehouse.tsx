@@ -1,7 +1,7 @@
 import {Alert, ScrollView, StyleSheet} from "react-native";
-import {Text, useThemeColor, View} from "../../../../components/Themed";
+import {useThemeColor, View} from "../../../../components/Themed";
 import {WarehousesStackScreenProps} from "../../../../types";
-import {useEffect, useLayoutEffect, useState} from "react";
+import {useLayoutEffect, useState} from "react";
 import {useDispatch} from "react-redux";
 import Input from "../../../../components/Input";
 import {OpacityButton} from "../../../../components/Themed/OpacityButton";
@@ -9,7 +9,7 @@ import {writeOutArray} from "../../../../utilities/enlist";
 import {Warehouse, warehousesActions} from "../../../../store/warehouses";
 import * as Location from 'expo-location';
 import * as React from "react";
-import Card from "../../../../components/Themed/Card";
+import {LocationButton} from "../../../../components/LocationButton";
 
 export type ValidValuePair<ValueType> = {
   value: ValueType
@@ -35,7 +35,7 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
   const backgroundColor = useThemeColor({}, "background");
   const cancelColor = useThemeColor({}, "delete");
 
-  const [location, setLocation] = useState<Location.LocationObject | null>(null
+    // const [location, setLocation] = useState<Location.LocationObject | null>(null
     // !!warehouse ?
     //   {
     //     coords: {
@@ -46,7 +46,7 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
     //   } as Location.LocationObject
     // :
     //   null
-  );
+    // );
 
   const [inputs, setInputs]: [inputValuesType, Function] = useState(
     {
@@ -95,15 +95,15 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
     navigation.goBack();
   }
 
-  useEffect(() => {
-    setInputs((currentInputValues: typeof inputs) => {
-      return {
-        ...currentInputValues,
-        longitude: {value: location?.coords.longitude || "", isInvalid: false},
-        latitude: {value: location?.coords.latitude || "", isInvalid: false},
-      }
-    })
-  }, [location])
+  // useEffect(() => {
+  //   setInputs((currentInputValues: typeof inputs) => {
+  //     return {
+  //       ...currentInputValues,
+  //       longitude: {value: location?.coords.longitude || "", isInvalid: false},
+  //       latitude: {value: location?.coords.latitude || "", isInvalid: false},
+  //     }
+  //   })
+  // }, [location])
 
   async function submitPressed() {
     const nameIsValid: boolean = inputs.name.value.trim().length > 0 && inputs.name.value.trim().length < 100;
@@ -226,85 +226,51 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
     }}
   />
 
-  const useCurrentLocationButton = <OpacityButton
-    style={styles.locationButton}
-    textStyle={{fontSize: 15}}
-    onPress={async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        return;
-      }
-      Alert.alert("Odczytywanie lokalizacji urządzenia...", "Operacja może zająć kilka sekund...", [], {cancelable: true})
-      let location = await Location.getCurrentPositionAsync();
-      setLocation(location);
-      Location.reverseGeocodeAsync(location.coords).then((address) => {
-        console.log(address)
-        Alert.alert(
-          "Odczytano lokalizację urządzenia",
-          `Lokalizacja urządzenia została odczytana jako:\n
-          (${location.coords.longitude}, ${location.coords.latitude})
-          ${address[0].street} ${address[0].streetNumber}
-          ${address[0].postalCode} ${address[0].city}, ${address[0].country}\n\nCzy chcesz nadać magazynowi tę lokalizację?`,
-          [
-            {
-              text: "Nie",
-              style: "cancel",
-            },
-            {
-              text: "Tak",
-              onPress: () => {
-                setInputs((currentInputValues: typeof inputs) => {
-                  return {
-                    ...currentInputValues,
-                    country: {value: address[0].country, isInvalid: false},
-                    city: {value: address[0].city, isInvalid: false},
-                    postalCode: {value: address[0].postalCode, isInvalid: false},
-                    street: {value: address[0].street, isInvalid: false},
-                    streetNumber: {value: address[0].streetNumber, isInvalid: false},
-                  }
-                })
-              },
-            }
-          ]
-        )
-      })
+  const useCurrentLocationButton = <LocationButton
+    onConfirmLocation={(address: Location.LocationGeocodedAddress) => {
+      setInputs((currentInputValues: typeof inputs) => { return {
+        ...currentInputValues,
+        country: {value: address.country, isInvalid: false},
+        city: {value: address.city, isInvalid: false},
+        postalCode: {value: address.postalCode, isInvalid: false},
+        street: {value: address.street, isInvalid: false},
+        streetNumber: {value: address.streetNumber, isInvalid: false},
+      }})
     }}
-  >
-    Użyj bieżącej lokalizacji
-  </OpacityButton>
+  />
 
-  const locationComponent = !!location ? <View key="location">
-    <View style={styles.locationRow}>
-      <View style={{...styles.locationItem}}>
-        <Text numberOfLines={1} style={styles.propertyLabel}>
-          Długość geograficzna
-        </Text>
-        <Card style={styles.locationCard}>
-          <Text style={styles.locationText}>{location.coords.longitude}</Text>
-        </Card>
-      </View>
-      <View style={{width: 8}} />
-      <View style={styles.locationItem}>
-        <Text numberOfLines={1} style={styles.propertyLabel}>
-          Szerokość geograficzna
-        </Text>
-        <Card style={styles.locationCard}>
-          <Text style={styles.locationText}>{location.coords.latitude}</Text>
-        </Card>
-      </View>
-    </View>
-    {useCurrentLocationButton}
-  </View>
-    :
-  <View style={styles.locationItem} key="location">
-    <Text numberOfLines={1} style={styles.propertyLabel}>
-      Lokalizacja
-    </Text>
-    <Card style={{padding: 10, borderRadius: 10,}}>
-      <Text style={{fontStyle: "italic", textAlign: 'center', margin: 10,}}>Nie podano lokalizacji</Text>
-      {useCurrentLocationButton}
-    </Card>
-  </View>
+  // const locationComponent = !!location ? <View key="location">
+  //   <View style={styles.locationRow}>
+  //     <View style={{...styles.locationItem}}>
+  //       <Text numberOfLines={1} style={styles.propertyLabel}>
+  //         Długość geograficzna
+  //       </Text>
+  //       <Card style={styles.locationCard}>
+  //         <Text style={styles.locationText}>{location.coords.longitude}</Text>
+  //       </Card>
+  //     </View>
+  //     <View style={{width: 8}} />
+  //     <View style={styles.locationItem}>
+  //       <Text numberOfLines={1} style={styles.propertyLabel}>
+  //         Szerokość geograficzna
+  //       </Text>
+  //       <Card style={styles.locationCard}>
+  //         <Text style={styles.locationText}>{location.coords.latitude}</Text>
+  //       </Card>
+  //     </View>
+  //   </View>
+  //   {useCurrentLocationButton}
+  // </View>
+  //   :
+  // <View style={styles.locationItem} key="location">
+  //   <Text numberOfLines={1} style={styles.propertyLabel}>
+  //     Lokalizacja
+  //   </Text>
+  //   <Card style={{padding: 10, borderRadius: 10,}}>
+  //     <Text style={{fontStyle: "italic", textAlign: 'center', margin: 10,}}>Nie podano lokalizacji</Text>
+  //     {useCurrentLocationButton}
+  //   </Card>
+  // </View>
 
   const countryComponent = <Input
     key="country"
@@ -388,7 +354,7 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
         ...styles.container,
         backgroundColor: backgroundColor,
       }}
-      contentContainerStyle={{ flexGrow: 1 }}
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, }}
       nestedScrollEnabled={true}
     >
       {listElements}
