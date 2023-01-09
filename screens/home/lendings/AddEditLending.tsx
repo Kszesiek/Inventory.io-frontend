@@ -306,6 +306,9 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
         theme={backgroundColor === '#1E2E3D' ? 'DARK' : "LIGHT"}
         style={{...styles.dropdown, backgroundColor: cardColor}}
         dropDownContainerStyle={{...styles.dropdown, backgroundColor: cardColor}}
+        scrollViewProps={{
+          nestedScrollEnabled: false,
+        }}
         listMode="SCROLLVIEW"
         mode="BADGE"
         badgeDotColors={["#e76f51", "#00b4d8", "#e9c46a", "#e76f51", "#8ac926", "#00b4d8", "#e9c46a"]}
@@ -477,7 +480,6 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
           flexGrow: 1,
           paddingBottom: 20,
         }}
-        nestedScrollEnabled={true}
         scrollEnabled={!isUsersDropdownOpen}
       >
         {listElements}
