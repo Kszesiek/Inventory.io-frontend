@@ -29,7 +29,7 @@ export default function Warehouses({ navigation, route }: WarehousesStackScreenP
           <Text style={boldedText}>{warehouse.item.name}</Text>
           {/*<Text style={{textAlign: 'center'}}>{warehouse.item.longitude}, {warehouse.item.latitude}</Text>*/}
           <Text style={{textAlign: 'center'}}>{warehouse.item.street} {warehouse.item.streetNumber}</Text>
-          <Text style={{textAlign: 'center'}}>{warehouse.item.postalCode} {warehouse.item.city}, {warehouse.item.country}</Text>
+          <Text style={{textAlign: 'center'}}>{`${warehouse.item.postalCode && `${warehouse.item.postalCode} `}${warehouse.item.city}${warehouse.item.country && `, ${warehouse.item.country}`}`}</Text>
         </TouchableCard>
       )
     }}

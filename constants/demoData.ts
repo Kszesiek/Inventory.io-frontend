@@ -4,6 +4,7 @@ import {LendingForEvent, LendingPrivate} from "../store/lendings";
 import {Item} from "../store/items";
 import {Category} from "../store/categories";
 import {Member} from "../store/members";
+import {Warehouse} from "../store/warehouses";
 
 export const demoOrganizations: Organization[] = [
   {
@@ -32,6 +33,7 @@ type demoBatch = {
   events: Array<Event>,
   items: Array<Item>,
   categories: Array<Category>,
+  warehouses: Array<Warehouse>,
 }
 
 export const demoData: Record<typeof demoOrganizations[number]["id"], demoBatch> = {
@@ -199,26 +201,31 @@ export const demoData: Record<typeof demoOrganizations[number]["id"], demoBatch>
         itemId: "c7e3af12-7f15-45bb-8c3f-385fc365da62",
         name: "statyw 'Athletic'",
         categoryId: "f096f654-2bd6-4fe2-a635-0346083acdca",
+        warehouseId: "a9558a15-a373-4585-8a37-8e92dab7b4b6",
       },
       {
         itemId: "3db9ddee-7b21-41d9-82ce-f20c663588da",
         name: "kula dyskotekowa",
         categoryId: "b64e44ac-7447-4922-859e-1df0a273db43",
+        warehouseId: "5e3b05db-f0d9-45b8-8c8a-a94eef858b05",
       },
       {
         itemId: "78256661-1189-45cb-9d4d-6253c654a652",
         name: "rozdzielnica",
         categoryId: "7a776a11-de96-4702-b4df-b4157a07780d",
+        warehouseId: "a9558a15-a373-4585-8a37-8e92dab7b4b6",
       },
       {
         itemId: "3e9f4923-8530-4d14-ae31-c4a7b9733374",
         name: "kabel trójfazowy 10m",
         categoryId: "0887400d-8a7c-4aec-a162-82a510d3a148",
+        warehouseId: "a9558a15-a373-4585-8a37-8e92dab7b4b6",
       },
       {
         itemId: "79a9d7a6-8e0b-4162-87a5-fa200afeabbd",
         name: "drabina",
         categoryId: "8b10c898-7617-4226-91d3-5b9b2edb45ae",
+        warehouseId: "5e3b05db-f0d9-45b8-8c8a-a94eef858b05",
       },
       {
         itemId: "39aa06e5-a718-43a8-9e20-bd91e33bc7d8",
@@ -229,21 +236,55 @@ export const demoData: Record<typeof demoOrganizations[number]["id"], demoBatch>
         itemId: "c43a0a80-757f-4442-98f8-8e8a69201ff6",
         name: "zmiotka",
         categoryId: "8b10c898-7617-4226-91d3-5b9b2edb45ae",
+        warehouseId: "5e3b05db-f0d9-45b8-8c8a-a94eef858b05",
       },
       {
         itemId: "405b2f73-81af-444e-8f2b-5f944feffdca",
         name: "lutownica",
         categoryId: "f7b1dc41-6cb8-4bad-836d-d48667e61507",
+        warehouseId: "5e3b05db-f0d9-45b8-8c8a-a94eef858b05",
       },
       {
         itemId: "3befe3ce-d9e4-4809-9c79-cdfc416cd90a",
         name: "subwoofer HK",
         categoryId: "31eed529-b22a-4b40-aa72-67b6dc14a725",
+        warehouseId: "a9558a15-a373-4585-8a37-8e92dab7b4b6",
+      },
+      {
+        itemId: "65959144-e4f2-4264-9f70-7032f4eb597c",
+        name: "subwoofer HK",
+        categoryId: "31eed529-b22a-4b40-aa72-67b6dc14a725",
+        warehouseId: "a9558a15-a373-4585-8a37-8e92dab7b4b6",
+      },
+      {
+        itemId: "e1574b83-8153-4acb-b292-f737c589faa4",
+        name: "subwoofer HK",
+        categoryId: "31eed529-b22a-4b40-aa72-67b6dc14a725",
+        warehouseId: "a9558a15-a373-4585-8a37-8e92dab7b4b6",
+      },
+      {
+        itemId: "ce9f74b1-0388-4675-b462-b607a7ffd698",
+        name: "subwoofer HK",
+        categoryId: "31eed529-b22a-4b40-aa72-67b6dc14a725",
+        warehouseId: "a9558a15-a373-4585-8a37-8e92dab7b4b6",
+      },
+      {
+        itemId: "acc59901-d7a6-40d9-8992-e5b3b50efe51",
+        name: "kolumna HK",
+        categoryId: "31eed529-b22a-4b40-aa72-67b6dc14a725",
+        warehouseId: "a9558a15-a373-4585-8a37-8e92dab7b4b6",
+      },
+      {
+        itemId: "de186fa7-1242-46ef-af0e-447758eda249",
+        name: "kolumna HK",
+        categoryId: "31eed529-b22a-4b40-aa72-67b6dc14a725",
+        warehouseId: "a9558a15-a373-4585-8a37-8e92dab7b4b6",
       },
       {
         itemId: "6022b27e-7dfd-46e3-b8b3-c1e92cfcd4a1",
         name: "tweeter",
         categoryId: "6c620a38-9f44-4648-9202-fa7fc9ca1f43",
+        warehouseId: "a9558a15-a373-4585-8a37-8e92dab7b4b6",
       },
       {
         itemId: "4dfddab4-5bbd-4563-9411-e4f0e5435e74",
@@ -254,11 +295,13 @@ export const demoData: Record<typeof demoOrganizations[number]["id"], demoBatch>
         itemId: "5ecc0d86-d8e8-4589-8986-e835fadc36e8",
         name: "mikrofon strojeniowy Shure",
         categoryId: "480fa84c-b559-48fe-8cf1-d4a22b322ea5",
+        warehouseId: "5e3b05db-f0d9-45b8-8c8a-a94eef858b05",
       },
       {
         itemId: "185525b4-127c-45d2-a4e0-6f4789a43f23",
         name: "SI Impact",
         categoryId: "8ce76808-6d36-420b-89bd-3baf3f972153",
+        warehouseId: "a9558a15-a373-4585-8a37-8e92dab7b4b6",
       },
       {
         itemId: "3b88939c-6316-4dfb-ad28-9b91bb44a671",
@@ -471,6 +514,35 @@ export const demoData: Record<typeof demoOrganizations[number]["id"], demoBatch>
         // filters: [],
       },
     ),
+    warehouses: new Array<Warehouse>(
+      {
+        id: "a9558a15-a373-4585-8a37-8e92dab7b4b6",
+        name: "Ciemnia",
+        country: "Polska",
+        city: "Warszawa",
+        postalCode: "00-665",
+        street: "Nowowiejska",
+        streetNumber: "15/19",
+      },
+      {
+        id: "5e3b05db-f0d9-45b8-8c8a-a94eef858b05",
+        name: "Sala klubowa",
+        country: "Polska",
+        city: "Warszawa",
+        postalCode: "00-665",
+        street: "Nowowiejska",
+        streetNumber: "15/19",
+      },
+      {
+        id: "27b5b5a6-9c1b-4b41-8d3b-bfd5a9d7414b",
+        name: "Magazyn na scenę",
+        country: "Polska",
+        city: "Warszawa",
+        postalCode: "00-614",
+        street: "Rektorska",
+        streetNumber: "2",
+      },
+    ),
   },
   "e9391d5f-3b6b-48b3-bcb0-1022369dceb1": { // Antykwariat
     users: new Array<Member>(
@@ -595,6 +667,26 @@ export const demoData: Record<typeof demoOrganizations[number]["id"], demoBatch>
         //   },
         // ],
       },
+    ),
+    warehouses: new Array<Warehouse>(
+      {
+        id: "af10d737-0f73-47b3-aa38-0e419e72b429",
+        name: "Zaplecze",
+        country: "Polska",
+        city: "Warszawa",
+        postalCode: "00-234",
+        street: "Rydygiera",
+        streetNumber: "23/4",
+      },
+      {
+        id: "bab85f6e-fe42-4170-a108-3d25bd206f29",
+        name: "Magazyn pod Warszawą",
+        country: "Polska",
+        city: "Pruszków",
+        postalCode: "05-800",
+        street: "3 maja",
+        streetNumber: "8",
+      },
     )
   },
   "a787df42-7513-4f4a-a94a-e5ae6eb4b4eb": { // "The Engineers Basement"
@@ -603,5 +695,6 @@ export const demoData: Record<typeof demoOrganizations[number]["id"], demoBatch>
     events: [],
     items: [],
     categories: [],
+    warehouses: [],
   },
 }

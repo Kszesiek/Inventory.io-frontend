@@ -54,6 +54,7 @@ import {Organization, organizationsActions} from "../store/organizations";
 import Logo from "../assets/images/inventory.png";
 import {TouchableCard} from "../components/Themed/TouchableCard";
 import {membersActions} from "../store/members";
+import {warehousesActions} from "../store/warehouses";
 // import LinkingConfiguration from './LinkingConfiguration';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
@@ -179,6 +180,8 @@ function HomeDrawerNavigator(props: {organizations: Organization[]}) {
         dispatch(userActions.loadUsers(demoData[props.organizations[0].id].users)),
         dispatch(membersActions.loadMembers(demoData[props.organizations[0].id].users)), // going to change that most likely
         dispatch(categoryActions.loadCategories(demoData[props.organizations[0].id].categories)),
+        dispatch(warehousesActions.loadWarehouses(demoData[props.organizations[0].id].warehouses)),
+
       ])
     }
     loadData()
@@ -214,6 +217,7 @@ function HomeDrawerNavigator(props: {organizations: Organization[]}) {
                 dispatch(userActions.loadUsers(isDemo ? demoData[organization.id].users : [])),
                 dispatch(membersActions.loadMembers(isDemo ? demoData[organization.id].users : [])), // going to change that most likely
                 dispatch(categoryActions.loadCategories(isDemo ? demoData[organization.id].categories : [])),
+                dispatch(warehousesActions.loadWarehouses(isDemo ? demoData[organization.id].warehouses : [])),
               ])
             }
           }}

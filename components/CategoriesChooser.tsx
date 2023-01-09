@@ -132,8 +132,8 @@ export default function CategoriesChooser({currentCategory, setCurrentCategory}:
   }
 
   return (
-    <View style={{flexGrow: 1}}>
-      <View style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 10, }}>
+    <View style={{flexGrow: 1, backgroundColor: 'transparent'}}>
+      <View style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 10, backgroundColor: 'transparent'}}>
         <TouchableOpacity
           style={{height: !currentCategory ? 0 : undefined, }} // trick to make it invisible (changing opacity makes a fading animation)
           disabled={!currentCategory}

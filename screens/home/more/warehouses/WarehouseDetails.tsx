@@ -9,12 +9,15 @@ import {useEffect} from "react";
 import {Feather} from "@expo/vector-icons";
 import * as React from "react";
 import {Warehouse, warehousesActions} from "../../../../store/warehouses";
+import {Item} from "../../../../store/items";
 
 export default function WarehouseDetails({ navigation, route }: WarehousesStackScreenProps<'WarehouseDetails'>) {
   const dispatch = useDispatch();
   const textColor = useThemeColor({}, 'text');
   const warehouse: Warehouse = useSelector((state: IRootState) =>
-    state.warehouses.warehouses.find((item: Warehouse) => item.id === route.params.warehouseId)!)
+    state.warehouses.warehouses.find((item: Warehouse) => item.id === route.params.warehouseId)!);
+  const itemsInWarehouse: Item[] = useSelector((state: IRootState) =>
+    state.items.items.filter((item) => item.warehouseId === warehouse.id));
 
   useEffect(() => {
     navigation.setOptions({
@@ -45,13 +48,22 @@ export default function WarehouseDetails({ navigation, route }: WarehousesStackS
 
   return (
     <ScrollView contentContainerStyle={{backgroundColor, ...styles.container}}>
-      <Detail name="Nazwa magazynu">
+      <Detail name="Nazwa magazynu" key="name">
         <Text style={[styles.text, property]}>{warehouse.name}</Text>
       </Detail>
-      {warehouse.country && warehouse.city && warehouse.postalCode && warehouse.street && warehouse.streetNumber && <Detail name="Lokalizacja">
+      {warehouse.city && warehouse.street && warehouse.streetNumber && <Detail name="Lokalizacja" key="location">
           <Text style={styles.text}>{`${warehouse.street} ${warehouse.streetNumber}`}</Text>
-          <Text style={styles.text}>{`${warehouse.postalCode} ${warehouse.city}, ${warehouse.country}`}</Text>
+          <Text style={styles.text}>{`${warehouse.postalCode && `${warehouse.postalCode} `}${warehouse.city}${warehouse.country && `, ${warehouse.country}`}`}</Text>
       </Detail>}
+      <Detail name="Przedmioty w magazynie" key="items">
+        {itemsInWarehouse.length === 0 ?
+          <Text style={{fontStyle: "italic"}}>Brak przedmiotów w tym magazynie</Text>
+        :
+          itemsInWarehouse.map((item: Item, index: number) => (
+            <Text key={item.itemId}>{index + 1}. {item.name}</Text>
+          ))
+        }
+      </Detail>
 
       {/*<Detail name="Długość geograficzna">*/}
       {/*  <Text style={[styles.text, property]}>{warehouse.longitude}</Text>*/}
@@ -60,8 +72,8 @@ export default function WarehouseDetails({ navigation, route }: WarehousesStackS
       {/*  <Text style={[styles.text, property]}>{warehouse.latitude}</Text>*/}
       {/*</Detail>*/}
 
-      <View style={{flexGrow: 1}}/>
-      <View style={styles.editButtonContainer}>
+      <View style={{flexGrow: 1}} key="spacer" />
+      <View style={styles.editButtonContainer} key="bottomButtons">
         <OpacityButton style={[styles.editButton, {backgroundColor: useThemeColor({}, "delete")}]} onPress={deletePressed}>Usuń</OpacityButton>
         <OpacityButton style={styles.editButton} onPress={editPressed}>Edytuj</OpacityButton>
       </View>
@@ -82,9 +94,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     backgroundColor: 'transparent',
-    // elevation: 10,
-    // borderTopLeftRadius: 10,
-    // borderTopRightRadius: 10,
   },
   editButton: {
     margin: 15,
