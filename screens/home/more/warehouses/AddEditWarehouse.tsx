@@ -227,6 +227,7 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
   />
 
   const useCurrentLocationButton = <LocationButton
+    key="locationButton"
     onConfirmLocation={(address: Location.LocationGeocodedAddress) => {
       setInputs((currentInputValues: typeof inputs) => { return {
         ...currentInputValues,
