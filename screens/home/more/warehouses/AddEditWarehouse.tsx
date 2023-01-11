@@ -20,9 +20,9 @@ type inputValuesType = {
   name: ValidValuePair<string>,
   // latitude: ValidValuePair<number>,
   // longitude: ValidValuePair<number>,
-  country: ValidValuePair<string>,
+  country: ValidValuePair<string | undefined>,
   city: ValidValuePair<string>,
-  postalCode: ValidValuePair<string>,
+  postalCode: ValidValuePair<string | undefined>,
   street: ValidValuePair<string>,
   streetNumber: ValidValuePair<string>,
 }
@@ -63,7 +63,7 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
       //   isInvalid: false,
       // },
       country: {
-        value: !!warehouse ? warehouse.country : "",
+        value: !!warehouse ? warehouse.country || "" : "",
         isInvalid: false,
       },
       city: {
@@ -71,7 +71,7 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
         isInvalid: false,
       },
       postalCode: {
-        value: !!warehouse ? warehouse.postalCode : "",
+        value: !!warehouse ? warehouse.postalCode || "" : "",
         isInvalid: false,
       },
       street: {
@@ -109,9 +109,9 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
     const nameIsValid: boolean = inputs.name.value.trim().length > 0 && inputs.name.value.trim().length < 100;
     // const longitudeIsValid: boolean = inputs.longitude.value >= -90 && inputs.longitude.value <= 90;
     // const latitudeIsValid: boolean = inputs.longitude.value >= -180 && inputs.longitude.value <= 180;
-    const countryIsValid: boolean = inputs.country.value.trim().length > 0 && inputs.country.value.trim().length < 100;
+    const countryIsValid: boolean = inputs.country.value === undefined || inputs.country.value.trim().length < 100;
     const cityIsValid: boolean = inputs.city.value.trim().length > 0 && inputs.city.value.trim().length < 100;
-    const postalCodeIsValid: boolean = inputs.postalCode.value.trim().length > 0 && inputs.postalCode.value.trim().length < 100;
+    const postalCodeIsValid: boolean = inputs.postalCode.value === undefined || inputs.postalCode.value.trim().length < 100;
     const streetIsValid: boolean = inputs.street.value.trim().length > 0 && inputs.street.value.trim().length < 100;
     const streetNumberIsValid: boolean = inputs.streetNumber.value.trim().length > 0 && inputs.streetNumber.value.trim().length < 100;
 
@@ -130,7 +130,7 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
         //   isInvalid: !latitudeIsValid,
         // },
         country: {
-          value: currentInputs.country.value,
+          value: !!currentInputs.country.value && currentInputs.country.value.length > 0 ? currentInputs.country.value : undefined,
           isInvalid: !countryIsValid,
         },
         city: {
@@ -138,7 +138,7 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
           isInvalid: !cityIsValid,
         },
         postalCode: {
-          value: currentInputs.postalCode.value,
+          value: !!currentInputs.postalCode.value && currentInputs.postalCode.value.length > 0 ? currentInputs.postalCode.value : undefined,
           isInvalid: !postalCodeIsValid,
         },
         street: {
@@ -180,9 +180,9 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
       name: inputs.name.value,
       // longitude: inputs.longitude.value,
       // latitude: inputs.latitude.value,
+      country: !!inputs.country.value && inputs.country.value.length > 0 ? inputs.country.value : undefined,
       city: inputs.city.value,
-      country: inputs.country.value,
-      postalCode: inputs.postalCode.value,
+      postalCode: !!inputs.postalCode.value && inputs.postalCode.value.length > 0 ? inputs.postalCode.value : undefined,
       street: inputs.street.value,
       streetNumber: inputs.streetNumber.value,
       id: !!warehouse ? warehouse.id : Math.random().toString()

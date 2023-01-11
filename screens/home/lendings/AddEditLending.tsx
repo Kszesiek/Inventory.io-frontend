@@ -28,7 +28,7 @@ export type ValidValuePair = {
 }
 
 type inputValuesType = {
-  username: ValidValuePair,
+  // username: ValidValuePair,
   eventName: ValidValuePair,
   itemNames: ValidValuePair[],
   startDate: ValidValuePair,
@@ -43,7 +43,7 @@ const lendingTypes = [
 
 export default function AddEditLending({ navigation, route }: LendingStackScreenProps<'AddEditLending'>) {
   const dispatch = useDispatch();
-  const userId: string = useSelector((state: IRootState) => state.appWide.userId) || "ABC";
+  // const userId: string = useSelector((state: IRootState) => state.appWide.userId) || "ABC";
   const members: Member[] = useSelector((state: IRootState) => state.members.members);
 
   const lending = route.params?.lending;
@@ -58,10 +58,10 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
   const placeholderTextColor = getPlaceholderColor(textColor, textColor);
 
   const [isUsersDropdownOpen, setUsersDropdownOpen] = useState<boolean>(false);
-  const [chosenUserId, setChosenUserId] = useState<string>("");
+  const [chosenUserId, setChosenUserId] = useState<string>(isLendingPrivate(lending) ? lending.userId : "");
 
-  const [startDate, setStartDate] = useState<Date | undefined>(!!lending ? new Date(lending.startDate) : undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(!!lending ? new Date(lending.endDate) : undefined);
+  const [startDate, setStartDate] = useState<Date>(!!lending ? new Date(lending.startDate) : new Date());
+  const [endDate, setEndDate] = useState<Date>(!!lending ? new Date(lending.endDate) : new Date());
   const [showStartDateDialog, setShowStartDateDialog] = useState<boolean>(false);
   const [showStartTimeDialog, setShowStartTimeDialog] = useState<boolean>(false);
   const [showEndDateDialog, setShowEndDateDialog] = useState<boolean>(false);
@@ -77,10 +77,6 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
         [] as ValidValuePair[],
     eventName: {
       value: !!lending && isLendingForEvent(lending) ? lending.eventName : "",
-      isInvalid: false,
-    },
-    username: {
-      value: !!lending && isLendingPrivate(lending) ? lending.username : "",
       isInvalid: false,
     },
     startDate: {
@@ -99,8 +95,10 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
 
   useEffect(() => {
     console.log("StartDate changed");
-    if (startDate === undefined)
+    if (startDate === undefined) {
+      console.warn("Start date undefined!");
       return;
+    }
     setInputs((currentInputValues: typeof inputs) => {
       return {
         ...currentInputValues,
@@ -111,8 +109,10 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
 
   useEffect(() => {
     console.log("EndDate changed");
-    if (endDate === undefined)
+    if (endDate === undefined) {
+      console.warn("Start date undefined!");
       return;
+    }
     setInputs((currentInputValues: typeof inputs) => {
       return {
         ...currentInputValues,
@@ -133,12 +133,19 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
   }
 
   async function submitPressed() {
-    const dateRegex = /^20(0[0-9]|1[0-9]|2[0-9])-(0[1-9]|1[0-2])-(0[1-9]|1\d|2\d|3[01])$/;
-    const startDateIsValid: boolean = !isLendingForEvent(lending) ? (dateRegex.test(inputs.startDate.value) && new Date(inputs.startDate.value).toString() !== "Invalid Date") : true;
-    const endDateIsValid: boolean = !isLendingForEvent(lending) ? (dateRegex.test(inputs.endDate.value) && new Date(inputs.endDate.value).toString() !== "Invalid Date") : true;
+    if (inputs.startDate.value.length === 0) {
+      console.warn("startDate value is empty!");
+    }
+    if (inputs.endDate.value.length === 0) {
+      console.warn("endDate value is empty!");
+    }
+
+    const startDateIsValid: boolean = isLendingPrivate(lending) ? (new Date(inputs.startDate.value).toString() !== "Invalid Date") : true;
+    const endDateIsValid: boolean = isLendingPrivate(lending) ? (new Date(inputs.endDate.value).toString() !== "Invalid Date") : true;
+    const startEndTimeIsValid: boolean = isLendingPrivate(lending) ? !startDateIsValid || !endDateIsValid || new Date(inputs.endDate.value) >= new Date(inputs.startDate.value) : true;
+    const userIdIsValid: boolean = isLendingPrivate(lending) ? chosenUserId.length > 0 : true;
     const notesIsValid: boolean = inputs.notes.value.trim().length >= 0;
     const itemsAreValid: boolean[] = inputs.itemNames.map((item) => item.value.trim().length > 0 && item.value.trim().length < 100);
-    const usernameIsValid: boolean = isLendingPrivate(lending) ? (inputs.username.value.trim().length > 0 && inputs.username.value.trim().length < 100) : true;
     const eventNameIsValid: boolean = isLendingForEvent(lending) ? (inputs.eventName.value.trim().length > 0 && inputs.eventName.value.trim().length < 100) : true;
 
     setInputs((currentInputs: inputValuesType) => {
@@ -156,9 +163,9 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
           value: currentInputs.eventName.value,
           isInvalid: !eventNameIsValid,
         },
-        username: {
-          value: currentInputs.username.value,
-          isInvalid: !usernameIsValid,
+        userId: {
+          value: chosenUserId,
+          isInvalid: !userIdIsValid,
         },
         startDate: {
           value: currentInputs.startDate.value,
@@ -175,20 +182,22 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
       }
     });
 
-    if (!notesIsValid || !startDateIsValid || !endDateIsValid || !usernameIsValid || !eventNameIsValid || itemsAreValid.length === 0 || itemsAreValid.some(item => !item)) {
+    if (!notesIsValid || !startDateIsValid || !endDateIsValid || !startEndTimeIsValid || !userIdIsValid || !eventNameIsValid || itemsAreValid.length === 0 || itemsAreValid.some(item => !item)) {
       const wrongDataArray: string[] = []
       if (!startDateIsValid)
         wrongDataArray.push("start date")
       if (!endDateIsValid)
         wrongDataArray.push("end date")
+      if (!startEndTimeIsValid)
+        wrongDataArray.push("start and end time of date")
       if (!notesIsValid)
         wrongDataArray.push("notes")
       if (itemsAreValid.some(item => !item))
         wrongDataArray.push("some list items")
       if (itemsAreValid.length === 0)
         wrongDataArray.push("list of items")
-      if (!usernameIsValid)
-        wrongDataArray.push("username")
+      if (!userIdIsValid)
+        wrongDataArray.push("user")
       if (!eventNameIsValid)
         wrongDataArray.push("event name")
       const wrongDataString: string = writeOutArray(wrongDataArray)
@@ -201,8 +210,8 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
       {
         lendingId: lending.lendingId,
         items: inputs.itemNames.map(item => {return {itemId: Math.random().toString(), name: item.value}}),
-        userId: userId!,
-        username: inputs.username.value,
+        userId: chosenUserId,
+        // username: inputs.username.value,
         startDate: inputs.startDate.value,
         endDate: inputs.endDate.value,
         notes: inputs.notes.value,
@@ -221,8 +230,8 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
         {
           lendingId: Math.random().toString(),
           items: inputs.itemNames.map(item => {return {itemId: Math.random().toString(), name: item.value}}),
-          userId: userId!,
-          username: "GenericUsername",
+          userId: chosenUserId,
+          // username: "GenericUsername",
           startDate: inputs.startDate.value,
           endDate: inputs.endDate.value,
           notes: inputs.notes.value,
@@ -497,7 +506,7 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
           mode={"date"}
           firstDayOfWeek={1}
           locale={"pl-PL"}
-          value={startDate|| new Date()}
+          value={startDate}
           is24Hour={true}
           display="default"
           maximumDate={!!endDate ? endDate : undefined}
@@ -511,7 +520,7 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
           mode={"time"}
           firstDayOfWeek={1}
           locale={"pl-PL"}
-          value={startDate|| new Date()}
+          value={startDate}
           is24Hour={true}
         // display="spinner"
           maximumDate={!!endDate ? endDate : undefined}
@@ -524,7 +533,7 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
           mode={"date"}
           firstDayOfWeek={1}
           locale={"pl-PL"}
-          value={endDate|| new Date()}
+          value={endDate}
           is24Hour={true}
           display="default"
           minimumDate={!!startDate ? startDate : undefined}
@@ -538,7 +547,7 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
           mode={"time"}
           firstDayOfWeek={1}
           locale={"pl-PL"}
-          value={endDate|| new Date()}
+          value={endDate}
           is24Hour={true}
         // display="spinner"
           minimumDate={!!startDate ? startDate : undefined}

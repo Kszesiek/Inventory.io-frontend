@@ -5,9 +5,9 @@ export interface Event {
   name: string
   startDate: string
   endDate: string
-  country?: string
+  country?: string | undefined
   city?: string
-  postalCode?: string
+  postalCode?: string | undefined
   street?: string
   streetNumber?: string
 }
@@ -21,9 +21,9 @@ export function isEvent(object: any): object is Event {
     typeof object['startDate'] === 'string' &&
     typeof object['endDate'] === 'string' &&
     (
-      typeof object['country'] === 'string' &&
+      ( typeof object['country'] === undefined || typeof object['country'] === 'string' ) &&
       typeof object['city'] === 'string' &&
-      typeof object['postalCode'] === 'string' &&
+      ( typeof object['postalCode'] === undefined || typeof object['postalCode'] === 'string' ) &&
       typeof object['street'] === 'string' &&
       typeof object['streetNumber'] === 'string'
     ) || (

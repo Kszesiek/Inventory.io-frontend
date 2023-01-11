@@ -67,7 +67,7 @@ export default function AddEditCategory({ navigation, route }: CategoriesStackSc
     setInputs((currentInputValues: typeof inputs) => {
       return {
         ...currentInputValues,
-        parent_category_id: {value: parentCategory?.id || "", isInvalid: false},
+        parent_category_id: {value: parentCategory?.id || undefined, isInvalid: false},
       }
     })
   }, [parentCategory])
@@ -75,7 +75,7 @@ export default function AddEditCategory({ navigation, route }: CategoriesStackSc
   async function submitPressed() {
     const nameIsValid: boolean = inputs.name.value.trim().length > 0 && inputs.name.value.trim().length < 100;
     const shortNameIsValid: boolean = inputs.short_name.value.trim().length > 0 && inputs.short_name.value.trim().length < 100;
-    const parentIsValid: boolean = inputs.parent_category_id.value.trim().length > 0 && inputs.parent_category_id.value.trim().length < 100;
+    const parentIsValid: boolean = inputs.parent_category_id.value === undefined || categories.findIndex((item) => item.id === inputs.parent_category_id.value) >= 0;
 
     setInputs((currentInputs: inputValuesType) => {
       return {

@@ -53,7 +53,7 @@ export default function WarehouseDetails({ navigation, route }: WarehousesStackS
       </Detail>
       {warehouse.city && warehouse.street && warehouse.streetNumber && <Detail name="Lokalizacja" key="location">
           <Text style={styles.text}>{`${warehouse.street} ${warehouse.streetNumber}`}</Text>
-          <Text style={styles.text}>{`${warehouse.postalCode && `${warehouse.postalCode} `}${warehouse.city}${warehouse.country && `, ${warehouse.country}`}`}</Text>
+          <Text style={styles.text}>{`${warehouse.postalCode ? `${warehouse.postalCode} ` : ''}${warehouse.city}${warehouse.country ? `, ${warehouse.country}` : ''}`}</Text>
       </Detail>}
       <Detail name="Przedmioty w magazynie" key="items">
         {itemsInWarehouse.length === 0 ?

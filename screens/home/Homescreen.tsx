@@ -14,11 +14,15 @@ import {HomescreenStackScreenProps} from "../../types";
 import {useCallback, useState} from "react";
 import {useFocusEffect} from "@react-navigation/native";
 
+import {Member} from "../../store/members";
+
 export default function Homescreen({ navigation, route }: HomescreenStackScreenProps<'Homescreen'>) {
   const events: Array<Event> = useSelector((state: IRootState) => state.events.events)
   const lendings: Array<LendingForEvent | LendingPrivate> = useSelector((state: IRootState) => state.lendings.lendings);
+  const members: Member[] = useSelector((store: IRootState) => store.members.members);
 
   const backgroundColor = useThemeColor({}, 'background');
+  const tintColor = useThemeColor({}, "tint");
 
   const [textToSearch, setTextToSearch] = useState<string>('');
 
@@ -49,7 +53,7 @@ export default function Homescreen({ navigation, route }: HomescreenStackScreenP
 
   const boldedText: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans Bold',
-    color: useThemeColor({}, "tint"),
+    color: tintColor,
   }
 
   function showMoreEventsPressed() {
@@ -127,6 +131,7 @@ export default function Homescreen({ navigation, route }: HomescreenStackScreenP
         <View style={styles.list}>
           {lendings.length > 0 ? lendings.slice(0, 3).map((lending: LendingForEvent | LendingPrivate) => {
             const itemsListed: string = enlistItems(lending.items.map(item => item.name));
+            const username: string | undefined = isLendingPrivate(lending) ? members.find((member) => member.id === lending.userId)?.username || undefined : undefined;
 
             return (<View key={lending.lendingId} style={{backgroundColor: 'transparent', marginTop: 8}}>
               {isLendingForEvent(lending) ?
@@ -134,7 +139,7 @@ export default function Homescreen({ navigation, route }: HomescreenStackScreenP
                 wydarzenie <Text style={boldedText}>{lending.eventName}</Text></Text>
               : isLendingPrivate(lending) ?
                 <Text style={{textAlign: 'center'}}>Użytkownik <Text
-                  style={boldedText}>{lending.username}</Text> wypożyczył <Text
+                  style={boldedText}>{username}</Text> wypożyczył <Text
                   style={boldedText}>{itemsListed}</Text></Text>
               : <Text>ERROR</Text>
               }

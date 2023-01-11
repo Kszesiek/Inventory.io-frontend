@@ -18,20 +18,20 @@ import * as Location from "expo-location";
 import * as React from "react";
 import {LocationButton} from "../../../components/LocationButton";
 
-export type ValidValuePair = {
-  value: string
+export type ValidValuePair<Type> = {
+  value: Type
   isInvalid: boolean
 }
 
 type inputValuesType = {
-  name: ValidValuePair,
-  startDate: ValidValuePair,
-  endDate: ValidValuePair,
-  country: ValidValuePair,
-  city: ValidValuePair,
-  postalCode: ValidValuePair,
-  street: ValidValuePair,
-  streetNumber: ValidValuePair,
+  name: ValidValuePair<string>,
+  startDate: ValidValuePair<string>,
+  endDate: ValidValuePair<string>,
+  country: ValidValuePair<string | undefined>,
+  city: ValidValuePair<string>,
+  postalCode: ValidValuePair<string | undefined>,
+  street: ValidValuePair<string>,
+  streetNumber: ValidValuePair<string>,
 }
 
 export default function AddEditEvent({ navigation, route }: EventStackScreenProps<'AddEditEvent'>) {
@@ -45,8 +45,8 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
   const cancelColor = useThemeColor({}, "delete");
   const placeholderTextColor = getPlaceholderColor(textColor, textColor);
 
-  const [startDate, setStartDate] = useState<Date | undefined>(!!event && isEvent(event) ? new Date(event.startDate) : undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(!!event && isEvent(event) ? new Date(event.endDate) : undefined);
+  const [startDate, setStartDate] = useState<Date>(!!event && isEvent(event) ? new Date(event.startDate) : new Date());
+  const [endDate, setEndDate] = useState<Date>(!!event && isEvent(event) ? new Date(event.endDate) : new Date());
   const [showStartDateDialog, setShowStartDateDialog] = useState<boolean>(false);
   const [showStartTimeDialog, setShowStartTimeDialog] = useState<boolean>(false);
   const [showEndDateDialog, setShowEndDateDialog] = useState<boolean>(false);
@@ -92,8 +92,10 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
 
   useEffect(() => {
     console.log("StartDate changed");
-    if (startDate === undefined)
+    if (startDate === undefined) {
+      console.warn("Start date undefined!");
       return;
+    }
     setInputs((currentInputValues: typeof inputs) => {
       return {
         ...currentInputValues,
@@ -104,8 +106,10 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
 
   useEffect(() => {
     console.log("EndDate changed");
-    if (endDate === undefined)
+    if (endDate === undefined) {
+      console.warn("End date undefined!");
       return;
+    }
     setInputs((currentInputValues: typeof inputs) => {
       return {
         ...currentInputValues,
@@ -130,9 +134,9 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
     const endDateIsValid: boolean = new Date(inputs.endDate.value).toString() !== "Invalid Date";
     const nameIsValid: boolean = inputs.name.value.trim().length > 0;
     const startEndTimeIsValid: boolean = !startDateIsValid || !endDateIsValid || new Date(inputs.endDate.value) >= new Date(inputs.startDate.value);
-    const countryIsValid: boolean = inputs.country.value.trim().length > 0 && inputs.country.value.trim().length < 100;
+    const countryIsValid: boolean = inputs.country.value === undefined || inputs.country.value.trim().length < 100;
     const cityIsValid: boolean = inputs.city.value.trim().length > 0 && inputs.city.value.trim().length < 100;
-    const postalCodeIsValid: boolean = inputs.postalCode.value.trim().length > 0 && inputs.postalCode.value.trim().length < 100;
+    const postalCodeIsValid: boolean = inputs.postalCode.value === undefined || inputs.postalCode.value.trim().length < 100;
     const streetIsValid: boolean = inputs.street.value.trim().length > 0 && inputs.street.value.trim().length < 100;
     const streetNumberIsValid: boolean = inputs.streetNumber.value.trim().length > 0 && inputs.streetNumber.value.trim().length < 100;
 
@@ -144,14 +148,14 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
         },
         startDate: {
           value: currentInputs.startDate.value,
-          isInvalid: !startDateIsValid || !startEndTimeIsValid,
+          isInvalid: !startDateIsValid,
         },
         endDate: {
           value: currentInputs.endDate.value,
-          isInvalid: !endDateIsValid || !startEndTimeIsValid,
+          isInvalid: !endDateIsValid,
         },
         country: {
-          value: currentInputs.country.value,
+          value: !!currentInputs.country.value && currentInputs.country.value.length > 0 ? currentInputs.country.value : undefined,
           isInvalid: !countryIsValid,
         },
         city: {
@@ -159,7 +163,7 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
           isInvalid: !cityIsValid,
         },
         postalCode: {
-          value: currentInputs.postalCode.value,
+          value: !!currentInputs.postalCode.value && currentInputs.postalCode.value.length > 0 ? currentInputs.postalCode.value : undefined,
           isInvalid: !postalCodeIsValid,
         },
         street: {
@@ -200,15 +204,15 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
       return;
     }
 
-    const eventData: Event = isEvent(event) ?
+    const eventData: Event = !!event && isEvent(event) ?
       {
         eventId: event.eventId,
         name: inputs.name.value,
         startDate: inputs.startDate.value,
         endDate: inputs.endDate.value,
+        country: !!inputs.country.value && inputs.country.value.length > 0 ? inputs.country.value : undefined,
         city: inputs.city.value,
-        country: inputs.country.value,
-        postalCode: inputs.postalCode.value,
+        postalCode: !!inputs.postalCode.value && inputs.postalCode.value.length > 0 ? inputs.postalCode.value : undefined,
         street: inputs.street.value,
         streetNumber: inputs.streetNumber.value,
       }
@@ -218,9 +222,9 @@ export default function AddEditEvent({ navigation, route }: EventStackScreenProp
         name: inputs.name.value,
         startDate: inputs.startDate.value,
         endDate: inputs.endDate.value,
+        country: !!inputs.country.value && inputs.country.value.length > 0 ? inputs.country.value : undefined,
         city: inputs.city.value,
-        country: inputs.country.value,
-        postalCode: inputs.postalCode.value,
+        postalCode: !!inputs.postalCode.value && inputs.postalCode.value.length > 0 ? inputs.postalCode.value : undefined,
         street: inputs.street.value,
         streetNumber: inputs.streetNumber.value,
       }

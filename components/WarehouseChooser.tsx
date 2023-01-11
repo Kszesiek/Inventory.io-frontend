@@ -7,11 +7,11 @@ import {IRootState} from "../store/store";
 import {TouchableCard} from "./Themed/TouchableCard";
 
 type propsType = {
-  selectedWarehouseId: string | undefined
-  setSelectedWarehouseId: React.Dispatch<React.SetStateAction<string | undefined>>
+  selectedWarehouse: Warehouse | undefined
+  setSelectedWarehouse: React.Dispatch<React.SetStateAction<Warehouse | undefined>>
 }
 
-export default function WarehouseChooser({selectedWarehouseId, setSelectedWarehouseId}: propsType) {
+export default function WarehouseChooser({selectedWarehouse, setSelectedWarehouse}: propsType) {
   const warehouses: Warehouse[] = useSelector((state: IRootState) => state.warehouses.warehouses);
   const tintColor = useThemeColor({}, 'tint');
   const textColor = useThemeColor({}, 'text');
@@ -37,12 +37,13 @@ export default function WarehouseChooser({selectedWarehouseId, setSelectedWareho
           <TouchableCard
             style={[
               styles.card,
-              item.id === selectedWarehouseId && {backgroundColor: tintColor}
+              item.id === selectedWarehouse?.id && {backgroundColor: tintColor}
             ]}
-            onPress={() => setSelectedWarehouseId((prevState) => {return prevState === item.id ? undefined : item.id})}>
-            <Text style={[boldedText, item.id === selectedWarehouseId && {color: textColor}]}>{item.name}</Text>
+            onPress={() => setSelectedWarehouse((prevWarehouse) => {return prevWarehouse?.id === item.id ? undefined : item})}
+          >
+            <Text style={[boldedText, item.id === selectedWarehouse?.id && {color: textColor}]}>{item.name}</Text>
             <Text style={{textAlign: 'center'}}>{item.street} {item.streetNumber}</Text>
-            <Text style={{textAlign: 'center'}}>{`${item.postalCode && `${item.postalCode} `}${item.city} ${item.country && `, ${item.country}`}`}</Text>
+            <Text style={{textAlign: 'center'}}>{`${item.postalCode ? `${item.postalCode} ` : ''}${item.city}${item.country ? `, ${item.country}` : ''}`}</Text>
 
           </TouchableCard>
         )

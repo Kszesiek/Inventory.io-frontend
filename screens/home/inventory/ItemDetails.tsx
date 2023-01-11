@@ -29,7 +29,7 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
     state.warehouses.warehouses.find(item_ => item_.id === item.warehouseId));
 
   const warehouseModalizeRef = useRef<Modalize>(null);
-  const [selectedWarehouseId, setSelectedWarehouseId] = useState<string | undefined>(item?.warehouseId || undefined);
+  const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | undefined>(warehouse);
 
   useEffect(() => {
     navigation.setOptions({
@@ -65,7 +65,7 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
         <Text style={{fontFamily: 'Source Sans Bold', paddingBottom: 5,}}>{warehouse.name}</Text>
         {warehouse.city && warehouse.street && warehouse.streetNumber && <>
           <Text style={styles.text}>{`${warehouse.street} ${warehouse.streetNumber}`}</Text>
-          <Text style={styles.text}>{`${warehouse.postalCode && `${warehouse.postalCode} `}${warehouse.city} ${warehouse.country && `, ${warehouse.country}`}`}</Text>
+          <Text style={styles.text}>{`${warehouse.postalCode ? `${warehouse.postalCode} ` : ''}${warehouse.city}${warehouse.country ? `, ${warehouse.country}` : ''}`}</Text>
         </>}
       </>
     );
@@ -76,8 +76,8 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
       <Animated.View style={{flex: 1, marginTop: 10,}}>
         <Text style={[styles.warehouseDrawerTitle, {color: tintColor}]}>Wybierz magazyn</Text>
         <WarehouseChooser
-          selectedWarehouseId={selectedWarehouseId}
-          setSelectedWarehouseId={setSelectedWarehouseId}
+          selectedWarehouse={selectedWarehouse}
+          setSelectedWarehouse={setSelectedWarehouse}
         />
         <View style={{flexDirection: 'row', justifyContent: 'center'}}>
           <OpacityButton
@@ -89,7 +89,7 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
           <OpacityButton
             style={styles.warehouseDrawerButton}
             onPress={async () => {
-              await dispatch(itemActions.modifyItem({item: {...item, warehouseId: selectedWarehouseId}}))
+              await dispatch(itemActions.modifyItem({item: {...item, warehouseId: selectedWarehouse?.id || undefined}}))
               warehouseModalizeRef.current?.close();
             }}
           >

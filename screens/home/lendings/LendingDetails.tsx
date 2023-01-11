@@ -22,6 +22,8 @@ export default function LendingDetails({ navigation, route }: LendingStackScreen
   const textColor = useThemeColor({}, 'text');
   const lending: LendingForEvent | LendingPrivate = useSelector((state: IRootState) =>
     state.lendings.lendings.find((item: LendingForEvent | LendingPrivate) => item.lendingId === route.params.lendingId)!)
+  const username: string | undefined = isLendingPrivate(lending) ? useSelector((state: IRootState) =>
+      state.members.members.find((user) => user.id === lending.userId)?.username) : undefined;
 
   useEffect(() => {
     navigation.setOptions({
@@ -58,7 +60,7 @@ export default function LendingDetails({ navigation, route }: LendingStackScreen
         </Detail>
       : isLendingPrivate(lending) ?
         <Detail name="Użytkownik">
-          <Text style={[styles.text, property]}>{lending.username}</Text>
+          <Text style={[styles.text, property]}>{username}</Text>
         </Detail>
       : <Text>ERROR</Text>
       }

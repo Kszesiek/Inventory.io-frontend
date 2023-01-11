@@ -26,7 +26,6 @@ export function isLending(object: any): object is Lending {
 }
 
 export interface LendingPrivate extends Lending {
-  username: string;
   userId: string;
 }
 
@@ -34,7 +33,6 @@ export function isLendingPrivate(object: any): object is LendingPrivate {
   return (
     object &&
     typeof object === 'object' &&
-    typeof object['username'] === 'string' &&
     typeof object['userId'] === 'string' &&
     isLending(object)
   );

@@ -48,9 +48,9 @@ export default function EventDetails({ navigation, route }: EventStackScreenProp
       <Detail name="Termin">
         <Text style={styles.text}>{displayDateTimePeriod(new Date(event.startDate), new Date(event.endDate))}</Text>
       </Detail>
-      {event.country && event.city && event.postalCode && event.street && event.streetNumber && <Detail name="Lokalizacja">
+      {event.city && event.street && event.streetNumber && <Detail name="Lokalizacja">
         <Text style={styles.text}>{`${event.street} ${event.streetNumber}`}</Text>
-        <Text style={styles.text}>{`${event.postalCode} ${event.city}, ${event.country}`}</Text>
+          <Text style={styles.text}>{`${event.postalCode ? `${event.postalCode} ` : ''}${event.city}${event.country ? `, ${event.country}` : ''}`}</Text>
       </Detail>}
 
 

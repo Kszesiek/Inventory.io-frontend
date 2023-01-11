@@ -4,9 +4,9 @@ export interface WarehouseTemplate {
   name: string
   // longitude: number
   // latitude: number
-  country: string
+  country?: string | undefined
   city: string
-  postalCode: string
+  postalCode?: string | undefined
   street: string
   streetNumber: string
 }

@@ -17,20 +17,24 @@ import {Modalize} from "react-native-modalize";
 import {TouchableCard} from "../../../components/Themed/TouchableCard";
 import * as React from "react";
 import CategoriesChooser from "../../../components/CategoriesChooser";
+import {Warehouse} from "../../../store/warehouses";
+import WarehouseChooser from "../../../components/WarehouseChooser";
 
-export type ValidValuePair = {
-  value: string
+export type ValidValuePair<Type> = {
+  value: Type
   isInvalid: boolean
 }
 
 type inputValuesType = {
-  name: ValidValuePair,
-  category_id: ValidValuePair,
+  name: ValidValuePair<string>,
+  category_id: ValidValuePair<string>,
+  warehouse_id: ValidValuePair<string | undefined>,
 }
 
 export default function AddEditItem({ navigation, route }: InventoryStackScreenProps<'AddEditItem'>) {
   const dispatch = useDispatch();
-  const categories = useSelector((state: IRootState) => state.categories.categories)
+  const categories = useSelector((state: IRootState) => state.categories.categories);
+  const warehouses = useSelector((state: IRootState) => state.warehouses.warehouses);
 
   const item: Item | undefined = route.params?.item;
   const isEditing = !!item;
@@ -39,8 +43,13 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
     (_category: Category) => _category.id === item.categoryId) : undefined);
   const categoriesModalizeRef = useRef<Modalize>(null);
 
+  const [warehouse, setWarehouse] = useState<Warehouse | undefined>(!!item ? warehouses.find(
+    (_warehouse: Warehouse) => _warehouse.id === item.warehouseId) : undefined);
+  const warehousesModalizeRef = useRef<Modalize>(null);
+
   const backgroundColor = useThemeColor({}, "background");
   const cancelColor = useThemeColor({}, "delete");
+  const tintColor = useThemeColor({}, "tint");
 
   const [inputs, setInputs]: [inputValuesType, Function] = useState(
     {
@@ -50,6 +59,10 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
       },
       category_id: {
         value: !!item && isItem(item) ? item.categoryId : "",
+        isInvalid: false,
+      },
+      warehouse_id: {
+        value: !!item && isItem(item) ? item.warehouseId : undefined,
         isInvalid: false,
       },
     });
@@ -69,6 +82,15 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
     })
   }, [category])
 
+  useEffect(() => {
+    setInputs((currentInputValues: typeof inputs) => {
+      return {
+        ...currentInputValues,
+        warehouse_id: {value: warehouse?.id || undefined, isInvalid: false},
+      }
+    })
+  }, [warehouse])
+
   function cancelPressed() {
     console.log("cancel button pressed");
     navigation.goBack();
@@ -77,6 +99,7 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
   async function submitPressed() {
     const nameIsValid: boolean = inputs.name.value.trim().length >= 0;
     const categoryIsValid: boolean = categories.findIndex(category => category.id === inputs.category_id.value) !== -1;
+    const warehouseIsValid: boolean = inputs.warehouse_id.value === undefined || warehouses.findIndex(warehouse => warehouse.id === inputs.warehouse_id.value) !== -1;
 
     setInputs((currentInputs: inputValuesType) => {
       return {
@@ -88,15 +111,21 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
           value: currentInputs.category_id.value,
           isInvalid: !categoryIsValid,
         },
+        warehouse_id: {
+          value: currentInputs.warehouse_id.value,
+          isInvalid: !warehouseIsValid,
+        }
       }
     });
 
-    if (!nameIsValid || !categoryIsValid) {
+    if (!nameIsValid || !categoryIsValid || !warehouseIsValid) {
       const wrongDataArray: string[] = []
       if (!categoryIsValid)
         wrongDataArray.push("category")
       if (!nameIsValid)
         wrongDataArray.push("item name")
+      if (!warehouseIsValid)
+        wrongDataArray.push("warehouse")
 
       const wrongDataString: string = writeOutArray(wrongDataArray)
 
@@ -109,12 +138,14 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
         itemId: item.itemId,
         name: inputs.name.value,
         categoryId: inputs.category_id.value,
+        warehouseId: inputs.warehouse_id.value,
       }
     :
       {
         itemId: Math.random().toString(),
         name: inputs.name.value,
         categoryId: inputs.category_id.value,
+        warehouseId: inputs.warehouse_id.value,
       }
 
     if (isEditing) {
@@ -158,9 +189,36 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
     )
   }
 
-  function parentPressed() {
-    console.log("parent pressed");
+  function categoryPressed() {
+    console.log("category pressed");
     categoriesModalizeRef.current?.open();
+  }
+
+  function chooseWarehouse() {
+    return (
+      <Animated.View style={{flex: 1, marginTop: 10,}}>
+        <Text style={[styles.warehouseDrawerTitle, {color: tintColor}]}>Wybierz magazyn</Text>
+        <WarehouseChooser
+          selectedWarehouse={warehouse}
+          setSelectedWarehouse={setWarehouse}
+        />
+        <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+          <OpacityButton
+            style={styles.warehouseDrawerButton}
+            onPress={async () => {
+              warehousesModalizeRef.current?.close();
+            }}
+          >
+            Potwierdź
+          </OpacityButton>
+        </View>
+      </Animated.View>
+    )
+  }
+
+  function warehousePressed() {
+    console.log("warehouse pressed");
+    warehousesModalizeRef.current?.open();
   }
 
   // ACTUAL FORM FIELDS
@@ -178,16 +236,33 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
       // autoCapitalize: 'sentences',  // default is sentences
     }} />
 
-  const categoryComponent = <View key="parent" style={styles.propertyContainer}>
-    <Text style={[styles.propertyLabel, inputs.category_id.isInvalid && {color: cancelColor}]}>Kategoria nadrzędna</Text>
+  const categoryComponent = <View key="category" style={styles.propertyContainer}>
+    <Text style={[styles.propertyLabel, inputs.category_id.isInvalid && {color: cancelColor}]}>Kategoria</Text>
     <TouchableCard
       style={[styles.card, inputs.category_id.isInvalid && {backgroundColor: cancelColor}]}
-      onPress={parentPressed}
+      onPress={categoryPressed}
     >
       {!!category ?
         <Text style={{fontSize: 18, paddingVertical: 3}}>{category.name} ({category.short_name})</Text>
         :
         <Text style={{fontSize: 16, paddingVertical: 4, fontStyle: 'italic'}}>wybierz kategorię...</Text>}
+    </TouchableCard>
+  </View>
+
+  const warehouseComponent = <View key="warehouse" style={styles.propertyContainer}>
+    <Text style={[styles.propertyLabel, inputs.warehouse_id.isInvalid && {color: cancelColor}]}>Magazyn</Text>
+    <TouchableCard
+      style={[styles.card, inputs.warehouse_id.isInvalid && {backgroundColor: cancelColor}]}
+      onPress={warehousePressed}
+    >
+      {!!warehouse ?
+        <>
+          <Text style={{fontFamily: 'Source Sans Bold', paddingBottom: 5, fontSize: 16, color: tintColor}}>{warehouse.name}</Text>
+          <Text style={{fontSize: 16}}>{`${warehouse.street} ${warehouse.streetNumber}`}</Text>
+          <Text style={{fontSize: 16}}>{`${warehouse.postalCode ? `${warehouse.postalCode} ` : ''}${warehouse.city}${warehouse.country ? `, ${warehouse.country}` : ''}`}</Text>
+        </>
+        :
+        <Text style={{fontSize: 16, paddingVertical: 4, fontStyle: 'italic'}}>wybierz magazyn...</Text>}
     </TouchableCard>
   </View>
 
@@ -199,6 +274,7 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
   const listElements = [
     itemNameComponent,
     categoryComponent,
+    warehouseComponent,
   ]
 
   return <>
@@ -214,6 +290,11 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
       ref={categoriesModalizeRef}
       modalStyle={{...styles.modalStyle, backgroundColor}}
       customRenderer={Categories()}
+    />
+    <Modalize
+      ref={warehousesModalizeRef}
+      modalStyle={{...styles.modalStyle, backgroundColor}}
+      customRenderer={chooseWarehouse()}
     />
   </>
 }
@@ -261,5 +342,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 15,
     fontSize: 18,
+  },
+  warehouseDrawerTitle: {
+    fontSize: 22,
+    marginVertical: 5,
+    marginHorizontal: 20,
+    textAlign: 'center',
+  },
+  warehouseDrawerButton: {
+    margin: 15,
+    paddingVertical: 8,
   },
 });
