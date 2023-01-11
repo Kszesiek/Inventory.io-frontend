@@ -309,12 +309,13 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
         setOpen={setUsersDropdownOpen}
         setValue={setChosenUserId}
         placeholder="wybierz użytkownika..."
-        placeholderStyle={{color: "grey", fontSize: 16,}}
-        textStyle={{color: 'white'}}
+        searchPlaceholder="Wyszukaj użytkownika..."
+        textStyle={{color: textColor}}
         closeOnBackPressed={true}
-        theme={backgroundColor === '#1E2E3D' ? 'DARK' : "LIGHT"}
+        theme={backgroundColor === '#1e2e3d' ? 'DARK' : "LIGHT"}
         style={{...styles.dropdown, backgroundColor: cardColor}}
         dropDownContainerStyle={{...styles.dropdown, backgroundColor: cardColor}}
+        searchTextInputStyle={{borderColor: backgroundColor, elevation: 5, backgroundColor: cardColor}}
         scrollViewProps={{
           nestedScrollEnabled: false,
         }}
