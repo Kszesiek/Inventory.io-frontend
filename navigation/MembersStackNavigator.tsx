@@ -28,7 +28,7 @@ export default function MembersNavigator() {
       })}
     >
       <MembersStack.Screen name="Members" component={Members} options={({ navigation }) => ({
-        title: "Człowkowie organizacji",
+        title: "Członkowie organizacji",
         headerRight: () => (
           <TouchableOpacity onPress={() => navigation.navigate("AddEditMember")}>
             <Ionicons name='add' size={36} style={{ color: textColor}}  />
