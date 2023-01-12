@@ -20,7 +20,7 @@ export default function ExpandableItemList ({data, onChangeText, onAddItem, onDe
     <View style={styles.container}>
       <Text style={[styles.label, data.some(item => item.isInvalid) && {color: errorColor}]}>Przedmioty</Text>
       {data?.length > 0 ? <FlatList
-        style={styles.innerContainer}
+        contentContainerStyle={styles.flatList}
         data={data}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({item, index}) =>
@@ -57,9 +57,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     marginVertical: 8,
   },
-  innerContainer: {
-    // paddingVertical: 6,
-    // paddingHorizontal: 10,
+  flatList: {
+    paddingBottom: 5,
   },
   label: {
     fontSize: 16,
@@ -97,6 +96,7 @@ const styles = StyleSheet.create({
   },
   itemView: {
     borderRadius: 10,
+    backgroundColor: 'transparent',
     flexDirection: 'row',
     alignItems: 'center',
   },
