@@ -1,8 +1,15 @@
 import {TextInput, useThemeColor, View, Text} from "../../../components/Themed";
 import {TouchableCard} from "../../../components/Themed/TouchableCard";
 import {FontAwesome} from "@expo/vector-icons";
-import {Animated, FlatList, ListRenderItemInfo, StyleProp, StyleSheet, TextStyle} from "react-native";
-import {useSelector} from "react-redux";
+import {
+  ActivityIndicator,
+  Animated,
+  FlatList,
+  StyleProp,
+  StyleSheet,
+  TextStyle
+} from "react-native";
+import {useDispatch, useSelector} from "react-redux";
 import {IRootState} from "../../../store/store";
 import {Item} from "../../../store/items";
 import {InventoryStackScreenProps} from "../../../types";
@@ -12,16 +19,23 @@ import * as React from "react";
 import {Modalize} from "react-native-modalize";
 import {Category} from "../../../store/categories";
 import CategoriesChooser from "../../../components/CategoriesChooser";
+import {getAllItems, getFilteredItems} from "../../../endpoints/items";
+import {getAllCategories} from "../../../endpoints/categories";
 
 export default function Inventory({ navigation, route }: InventoryStackScreenProps<'Inventory'>) {
+  const dispatch = useDispatch();
+
   const backgroundColor = useThemeColor({}, 'background');
   const cardBackgroundColor = useThemeColor({}, 'cardBackground');
   const tintColor = useThemeColor({}, 'tint');
 
   const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
-  const items = useSelector((state: IRootState) => state.items.items);
+
+  const [areItemsLoaded, setAreItemsLoaded] = useState<boolean | undefined>(undefined);
+  const [areCategoriesLoaded, setAreCategoriesLoaded] = useState<boolean | undefined>(undefined);
+
   const categories = useSelector((state: IRootState) => state.categories.categories);
-  const [itemsToDisplay, setItemsToDisplay] = useState<Item[]>(items);
+  const [itemsToDisplay, setItemsToDisplay] = useState<Item[]>();
 
   // changed instantly
   const [selectedCategory, setSelectedCategory] = useState<Category | undefined>(undefined);
@@ -35,6 +49,21 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
 
   const categoriesModalizeRef = useRef<Modalize>(null);
   const filtersModalizeRef = useRef<Modalize>(null);
+
+  async function fetchItems() {
+    const loadedItems = await getAllItems(dispatch, demoMode);
+    setAreItemsLoaded(!!loadedItems);
+    if(!!loadedItems)
+      setItemsToDisplay(loadedItems);
+  }
+  async function fetchCategories() {
+    setAreCategoriesLoaded(await getAllCategories(dispatch, demoMode));
+  }
+
+  useEffect(() => {
+    fetchItems();
+    fetchCategories();
+  }, [])
 
   const itemTitle: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans Bold',
@@ -54,8 +83,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
 
   // for every change in categories, filters or phrase to search
   useEffect(() => {
-    console.log("useEffect triggered");
-    getMatchingItems();
+    demoMode && getMatchingItems();
   }, [chosenText, chosenCategory, chosenFilters])
 
   function searchButtonPressed() {
@@ -65,9 +93,9 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
     setChosenFilters(selectedFilters);
   }
 
-  function cardPressed(itemId: string) {
+  function cardPressed(item: Item) {
     console.log("Item pressed");
-    navigation.navigate("ItemDetails", { itemId: itemId });
+    navigation.navigate("ItemDetails", { item: item });
   }
 
   function Categories() {
@@ -111,38 +139,29 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
     filtersModalizeRef.current?.open();
   }
 
-  function getMatchingItems() {
-    if (demoMode) {
-      const itemsCategorized: Item[] = items.filter((item) => {
-        if (chosenCategory === undefined) {
-          return true;
-        } else {
-          return checkCategoryAffiliation(item.categoryId, chosenCategory.id);
-        }
-      });
+  async function getMatchingItems() {
+    setAreItemsLoaded(undefined);
 
-      const itemsFiltered: Item[] = itemsCategorized;
+    const loadedItems = await getFilteredItems(dispatch, chosenText, chosenCategory?.id, demoMode);
 
-      const itemsSearched: Item[] = itemsFiltered.filter((item) => {
-        return item.name.toLowerCase().includes(chosenText.toLowerCase());
-      });
-      setItemsToDisplay(itemsSearched);
-    } else {
-      setItemsToDisplay([]); // TODO: ADD SEARCHING ON SERVER SIDE
-    }
+    setAreItemsLoaded(!!loadedItems);
+
+    if(!!loadedItems)
+      setItemsToDisplay(loadedItems);
   }
 
-  function checkCategoryAffiliation<CategoryId extends typeof categories[number]["id"]>(itemCategoryId: CategoryId, chosenCategoryId: CategoryId): boolean {
-    let currentCategory: Category | undefined = categories.find((category: Category) => category.id === itemCategoryId);
+  if (areItemsLoaded === undefined) {
+    return <View style={styles.noContentContainer}>
+      <ActivityIndicator color={tintColor} size="large" />
+      <Text style={styles.noContentText}>Ładowanie danych z serewra...</Text>
+    </View>
+  }
 
-    while (currentCategory !== undefined) {
-      if (currentCategory.id === chosenCategoryId) {
-        return true;
-      }
-
-      currentCategory = categories.find((category: Category) => category.id === currentCategory!.parent_category_id);
-    }
-    return false;
+  if (!areItemsLoaded) {
+    return <View style={styles.noContentContainer}>
+      <Text style={[styles.noContentText, {fontSize: 16}]}>Nie udało się załadować wydarzeń.</Text>
+      <Text style={styles.noContentText}>Podczas połączenia z serwerem wystąpił problem.</Text>
+    </View>
   }
 
   return (
@@ -173,7 +192,7 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
                 borderTopLeftRadius: 0,
                 borderBottomLeftRadius: 0,
                 paddingRight: 2,
-                backgroundColor: useThemeColor({}, 'tint'),
+                backgroundColor: tintColor,
               }]}
               onPress={searchButtonPressed}
             >
@@ -187,11 +206,11 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
           <Text style={[styles.noContentText, {fontSize: 16}]}>Brak przedmiotów do wyświetlenia{!!chosenCategory && " w tej kategorii"}.</Text>
           <Text style={styles.noContentText}>Aby dodać przedmiot, użyj przycisku u góry ekranu.</Text>
         </View>}
-      renderItem={(item: ListRenderItemInfo<Item>) => {
+      renderItem={({item}) => {
         return (
-          <TouchableCard key={item.item.itemId} style={styles.card} onPress={() => cardPressed(item.item.itemId)}>
-            <Text style={[styles.cardText, itemTitle]}>{item.item.name}</Text>
-            <Text style={styles.cardText}>Kategoria: {categories.find(category => category.id === item.item.categoryId)?.name || <Text style={{fontStyle: 'italic', fontSize: 13}}>nieznana kategoria</Text>}</Text>
+          <TouchableCard key={item.itemId} style={styles.card} onPress={() => cardPressed(item)}>
+            <Text style={[styles.cardText, itemTitle]}>{item.name}</Text>
+            {<Text style={styles.cardText}>Kategoria: {categories.find(category => category.id === item.categoryId)?.name || <Text style={{fontStyle: 'italic', fontSize: 13}}>{!areCategoriesLoaded ? "pobieranie danych..." : "nieznana kategoria"}</Text>}</Text>}
           </TouchableCard>
         )
       }}

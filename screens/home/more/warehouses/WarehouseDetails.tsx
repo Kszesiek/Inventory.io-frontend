@@ -14,8 +14,7 @@ import {Item} from "../../../../store/items";
 export default function WarehouseDetails({ navigation, route }: WarehousesStackScreenProps<'WarehouseDetails'>) {
   const dispatch = useDispatch();
   const textColor = useThemeColor({}, 'text');
-  const warehouse: Warehouse = useSelector((state: IRootState) =>
-    state.warehouses.warehouses.find((item: Warehouse) => item.id === route.params.warehouseId)!);
+  const warehouse: Warehouse = route.params.warehouse;
   const itemsInWarehouse: Item[] = useSelector((state: IRootState) =>
     state.items.items.filter((item) => item.warehouseId === warehouse.id));
 

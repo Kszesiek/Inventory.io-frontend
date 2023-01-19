@@ -4,6 +4,7 @@ export interface MemberTemplate {
   username: string
   name: string
   surname: string
+  email: string
 }
 
 export interface Member extends MemberTemplate {
@@ -17,7 +18,8 @@ export function isMember(object: any): object is Member {
     typeof object['id'] === 'string' &&
     typeof object['username'] === 'string' &&
     typeof object['name'] === 'string' &&
-    typeof object['surname'] === 'string'
+    typeof object['surname'] === 'string' &&
+    typeof object['email'] === 'string'
   );
 }
 

@@ -1,24 +1,53 @@
-import {FlatList, ListRenderItemInfo, StyleProp, StyleSheet, TextStyle} from "react-native";
+import {ActivityIndicator, FlatList, ListRenderItemInfo, StyleProp, StyleSheet, TextStyle} from "react-native";
 import {Text, useThemeColor, View} from "../../../components/Themed";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {IRootState} from "../../../store/store";
 import {Event} from "../../../store/events";
 
 import {TouchableCard} from "../../../components/Themed/TouchableCard";
 import {displayDateTimePeriod} from "../../../utilities/date";
 import {EventStackScreenProps} from "../../../types";
+import {useEffect, useState} from "react";
+import {getAllEvents} from "../../../endpoints/events";
 
 export default function Events({ navigation, route }: EventStackScreenProps<'Events'>) {
-  const events: Array<Event> = useSelector((state: IRootState) => state.events.events)
+  const dispatch = useDispatch();
+  const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
+  const events: Array<Event> | null = useSelector((state: IRootState) => state.events.events);
+  const [isDataLoaded, setIsDataLoaded] = useState<boolean | undefined>(undefined);
+
+  const tintColor = useThemeColor({}, 'tint');
+  const backgroundColor = useThemeColor({}, 'background');
+
+  useEffect(() => {
+    async function getEvents() {
+      setIsDataLoaded(await getAllEvents(dispatch, demoMode));
+    }
+    getEvents();
+  }, []);
 
   const boldedText: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans Bold',
     color: useThemeColor({}, "tint"),
   }
 
+  if (isDataLoaded === undefined) {
+    return <View style={styles.noContentContainer}>
+      <ActivityIndicator color={tintColor} size="large" />
+      <Text style={styles.noContentText}>Ładowanie danych z serewra...</Text>
+    </View>
+  }
+
+  if (!isDataLoaded) {
+    return <View style={styles.noContentContainer}>
+      <Text style={[styles.noContentText, {fontSize: 16}]}>Nie udało się załadować wydarzeń.</Text>
+      <Text style={styles.noContentText}>Podczas połączenia z serwerem wystąpił problem.</Text>
+    </View>
+  }
+
   return (
     <FlatList
-      style={{...styles.flatList, backgroundColor: useThemeColor({}, 'background')}}
+      style={{...styles.flatList, backgroundColor}}
       contentContainerStyle={{flexGrow: 1}}
       data={events.slice(0, 20)}
       ListEmptyComponent={
@@ -28,7 +57,7 @@ export default function Events({ navigation, route }: EventStackScreenProps<'Eve
         </View>}
       renderItem={(event: ListRenderItemInfo<Event>) => {
         return (
-          <TouchableCard style={styles.card} onPress={() => navigation.navigate("EventDetails", { eventId: event.item.eventId })}>
+          <TouchableCard style={styles.card} onPress={() => navigation.navigate("EventDetails", { event: event.item })}>
             <Text style={[{textAlign: 'center'}, boldedText]}>{event.item.name}</Text>
             <Text style={styles.dateLabel}>{displayDateTimePeriod(new Date(event.item.startDate), new Date(event.item.endDate))}</Text>
             {event.item.city && event.item.street && event.item.streetNumber &&

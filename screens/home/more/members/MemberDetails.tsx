@@ -3,8 +3,7 @@ import {OpacityButton} from "../../../../components/Themed/OpacityButton";
 import {ScrollView, StyleProp, StyleSheet, TextStyle, TouchableOpacity} from "react-native";
 import {MembersStackScreenProps} from "../../../../types";
 import Detail from "../../../../components/Detail";
-import {useDispatch, useSelector} from "react-redux";
-import {IRootState} from "../../../../store/store";
+import {useDispatch} from "react-redux";
 import {useEffect} from "react";
 import {Feather} from "@expo/vector-icons";
 import * as React from "react";
@@ -13,8 +12,9 @@ import {Member, membersActions} from "../../../../store/members";
 export default function MemberDetails({ navigation, route }: MembersStackScreenProps<'MemberDetails'>) {
   const dispatch = useDispatch();
   const textColor = useThemeColor({}, 'text');
-  const member: Member = useSelector((state: IRootState) =>
-    state.members.members.find((item: Member) => item.id === route.params.memberId)!)
+  const member: Member = route.params.member;
+
+  const deleteColor = useThemeColor({}, "delete");
 
   useEffect(() => {
     navigation.setOptions({
@@ -51,13 +51,16 @@ export default function MemberDetails({ navigation, route }: MembersStackScreenP
       <Detail name="Imię i nazwisko">
         <Text style={[styles.text, property]}>{member.name} {member.surname}</Text>
       </Detail>
+      <Detail name="adres e-mail">
+        <Text style={[styles.text, property]}>{member.email}</Text>
+      </Detail>
       <Detail name="ID użytkownika">
         <Text style={[styles.text, property]}>{member.id}</Text>
       </Detail>
 
       <View style={{flexGrow: 1}}/>
       <View style={styles.editButtonContainer}>
-        <OpacityButton style={[styles.editButton, {backgroundColor: useThemeColor({}, "delete")}]} onPress={deletePressed}>Usuń</OpacityButton>
+        <OpacityButton style={[styles.editButton, {backgroundColor: deleteColor}]} onPress={deletePressed}>Usuń</OpacityButton>
         <OpacityButton style={styles.editButton} onPress={editPressed}>Edytuj</OpacityButton>
       </View>
     </ScrollView>

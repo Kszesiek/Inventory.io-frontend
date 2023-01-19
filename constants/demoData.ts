@@ -44,22 +44,26 @@ export const demoData: Record<typeof demoOrganizations[number]["id"], demoBatch>
         username: "itsmejohndoe",
         name: "John",
         surname: "Doe",
+        email: "johndoe@amplitron.pw",
       },
       {
         id: "b517ed77-5ce5-4457-ba1e-b8a1fba4d376",
         username: "JustClarence",
         name: "Clarence",
         surname: "Walter",
+        email: "justclarence@amplitron.pw",
       },{
         id: "f141ec5f-3d2b-4e71-a4ba-1a72f872c4ab",
         username: "YourGuyRoy",
         name: "Roy",
         surname: "Whitings",
+        email: "yourguyroy@amplitron.pw",
       },{
         id: "7f7feb57-d63d-4fc4-b60c-8281c5c8109c",
         username: "TheRealGlobetrotterGrover",
         name: "Grover",
         surname: "Globetrotter",
+        email: "globetrotter.grover@amplitron.pw",
       },
     ),
     lendings: new Array<LendingPrivate | LendingForEvent>(
@@ -547,17 +551,20 @@ export const demoData: Record<typeof demoOrganizations[number]["id"], demoBatch>
         username: "itsmejohndoe",
         name: "John",
         surname: "Doe",
+        email: "johndoe@onet.pl",
       },
       {
         id: "e429468d-6f08-4b46-9682-0a70be6983fb",
         username: "EmployerOfTheMonth",
         name: "Harry",
         surname: "Grease",
+        email: "henry.g@wp.pl",
       },{
         id: "2bbd2eda-6b62-40de-b122-e6c036bef7b3",
         username: "TheNewGirl",
         name: "Hannah",
         surname: "Hendry",
+        email: "hannah_h@gmail.com",
       },
     ),
     lendings: new Array<LendingPrivate | LendingForEvent>(

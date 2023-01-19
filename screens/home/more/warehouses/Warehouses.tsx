@@ -1,23 +1,52 @@
-import {FlatList, ListRenderItemInfo, StyleProp, StyleSheet, TextStyle} from "react-native";
+import {ActivityIndicator, FlatList, ListRenderItemInfo, StyleProp, StyleSheet, TextStyle} from "react-native";
 import {Text, useThemeColor, View} from "../../../../components/Themed";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {IRootState} from "../../../../store/store";
 import {TouchableCard} from "../../../../components/Themed/TouchableCard";
 import {WarehousesStackScreenProps} from "../../../../types";
 import {Warehouse} from "../../../../store/warehouses";
+import {useEffect, useState} from "react";
+import {getAllWarehouses} from "../../../../endpoints/warehouses";
 
 export default function Warehouses({ navigation, route }: WarehousesStackScreenProps<'Warehouses'>) {
-  const members: Array<Warehouse> = useSelector((state: IRootState) => state.warehouses.warehouses)
+  const dispatch = useDispatch();
+  const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
+  const warehouses: Array<Warehouse> | null = useSelector((state: IRootState) => state.warehouses.warehouses);
+  const [isDataLoaded, setIsDataLoaded] = useState<boolean | undefined>(undefined);
+
+  const tintColor = useThemeColor({}, 'tint');
+  const backgroundColor = useThemeColor({}, 'background');
+
+  useEffect(() => {
+    async function getWarehouses() {
+      setIsDataLoaded(await getAllWarehouses(dispatch, demoMode));
+    }
+    getWarehouses();
+  }, []);
 
   const boldedText: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans Bold',
-    color: useThemeColor({}, "tint"),
+    color: tintColor,
+  }
+
+  if (isDataLoaded === undefined) {
+    return <View style={styles.noContentContainer}>
+      <ActivityIndicator color={tintColor} size="large" />
+      <Text style={styles.noContentText}>Ładowanie danych z serewra...</Text>
+    </View>
+  }
+
+  if (!isDataLoaded) {
+    return <View style={styles.noContentContainer}>
+      <Text style={[styles.noContentText, {fontSize: 16}]}>Nie udało się załadować magazynów.</Text>
+      <Text style={styles.noContentText}>Podczas połączenia z serwerem wystąpił problem.</Text>
+    </View>
   }
 
   return <FlatList
-    style={{...styles.flatList, backgroundColor: useThemeColor({}, 'background')}}
+    style={{...styles.flatList, backgroundColor}}
     contentContainerStyle={{flexGrow: 1}}
-    data={members.slice(0, 20)}
+    data={warehouses}
     ListEmptyComponent={
       <View style={styles.noContentContainer}>
         <Text style={[styles.noContentText, {fontSize: 16}]}>Brak magazynów do wyświetlenia.</Text>
@@ -25,7 +54,7 @@ export default function Warehouses({ navigation, route }: WarehousesStackScreenP
       </View>}
     renderItem={(warehouse: ListRenderItemInfo<Warehouse>) => {
       return (
-        <TouchableCard style={styles.card} onPress={() => navigation.navigate("WarehouseDetails", { warehouseId: warehouse.item.id })}>
+        <TouchableCard style={styles.card} onPress={() => navigation.navigate("WarehouseDetails", { warehouse: warehouse.item })}>
           <Text style={boldedText}>{warehouse.item.name}</Text>
           {/*<Text style={{textAlign: 'center'}}>{warehouse.item.longitude}, {warehouse.item.latitude}</Text>*/}
           <Text style={{textAlign: 'center'}}>{warehouse.item.street} {warehouse.item.streetNumber}</Text>

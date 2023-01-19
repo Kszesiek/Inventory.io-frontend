@@ -4,11 +4,15 @@ import {Organization, organizationsActions, OrganizationTemplate} from "../store
 import {Dispatch} from "react";
 import {Category, CategoryTemplate} from "../store/categories";
 import {AnyAction} from "@reduxjs/toolkit";
+import {demoOrganizations} from "../constants/demoData";
 
 const url: string = serverAddress + "organizations/";
 
-export async function getOrganizations(dispatch: Dispatch<any>): Promise<boolean> {
-  try {
+export async function getOrganizations(dispatch: Dispatch<any>, demoMode: boolean = false): Promise<boolean> {
+  if (demoMode) {
+    await dispatch(organizationsActions.setOrganizations(demoOrganizations));
+    return true;
+  } else try {
     const response = await axios.get(url, { validateStatus: (status) => status >= 200 && status < 300 || status === 404 });
 
     console.log("--- GET ORGANIZATIONS RESPONSE ---");

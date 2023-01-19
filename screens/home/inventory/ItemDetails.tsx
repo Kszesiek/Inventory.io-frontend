@@ -13,20 +13,26 @@ import {Category} from "../../../store/categories";
 import {Warehouse} from "../../../store/warehouses";
 import {Modalize} from "react-native-modalize";
 import WarehouseChooser from "../../../components/WarehouseChooser";
+import {getAllWarehouses} from "../../../endpoints/warehouses";
+import {getAllCategories} from "../../../endpoints/categories";
 
 export default function ItemDetails({ navigation, route }: InventoryStackScreenProps<'ItemDetails'>) {
   const dispatch = useDispatch();
+  const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
+
   const backgroundColor = useThemeColor({}, "background");
   const textColor = useThemeColor({}, "text");
   const cancelColor = useThemeColor({}, "delete");
   const tintColor = useThemeColor({}, "tint");
 
-  const item: Item = useSelector((state: IRootState) =>
-    state.items.items.find((item: Item) => item.itemId === route.params.itemId)!);
-  const category: Category | undefined = useSelector((state: IRootState) =>
-    state.categories.categories.find(item_ => item_.id === item.categoryId));
-  const warehouse: Warehouse | undefined = useSelector((state: IRootState) =>
-    state.warehouses.warehouses.find(item_ => item_.id === item.warehouseId));
+  const item: Item = route.params.item;
+
+  const categories: Category[]  = useSelector((state: IRootState) => state.categories.categories);
+  const warehouses: Warehouse[] = useSelector((state: IRootState) => state.warehouses.warehouses);
+  const category:  Category  | undefined = categories.find(item_ => item_.id === item.categoryId);
+  const warehouse: Warehouse | undefined = warehouses.find(item_ => item_.id === item.warehouseId);
+  const [isWarehouseLoaded, setIsWarehouseLoaded] = useState<boolean | undefined>(warehouse === undefined ? undefined : true);
+  const [isCategoryLoaded,  setIsCategoryLoaded]  = useState<boolean | undefined>(category === undefined ? undefined : true);
 
   const warehouseModalizeRef = useRef<Modalize>(null);
   const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | undefined>(warehouse);
@@ -40,6 +46,23 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
       ) : undefined,
     })
   }, [item])
+
+  useEffect(() => {
+    async function getItemWarehouse() {
+      // setIsWarehouseLoaded(await getWarehouse(dispatch, item.warehouseId, demoMode));
+      setIsWarehouseLoaded(await getAllWarehouses(dispatch, demoMode));
+    }
+    async function getItemCategory() {
+      // setIsWarehouseLoaded(await getCategory(dispatch, item.categoryId, demoMode));
+      setIsCategoryLoaded(await getAllCategories(dispatch, demoMode));
+    }
+    if (category === undefined) {
+      getItemWarehouse();
+    }
+    if (warehouse === undefined) {
+      getItemCategory();
+    }
+  }, []);
 
   async function deletePressed() {
     console.log("delete button pressed");
@@ -56,11 +79,19 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
   }
 
   function warehouseDescription(): JSX.Element {
-    if (item.warehouseId === undefined) return (
+    if (isWarehouseLoaded === false) return (
+      <Text style={{fontStyle: 'italic', fontSize: 13}}>błąd połączenia z serwerem</Text>
+    );
+    else if (isWarehouseLoaded === undefined) return (
+      <Text style={{fontStyle: 'italic', fontSize: 13}}>ładowanie danych...</Text>
+    );
+    else if (item.warehouseId === undefined) return (
       <Text style={{fontStyle: 'italic', fontSize: 13}}>nie przyporządkowano do magazynu</Text>
-    ); else if (warehouse === undefined) return (
+    );
+    else if (warehouse === undefined) return (
       <Text style={{fontStyle: 'italic', fontSize: 13}}>nieznany magazyn</Text>
-    ); else return (
+    );
+    else return (
       <>
         <Text style={{fontFamily: 'Source Sans Bold', paddingBottom: 5,}}>{warehouse.name}</Text>
         {warehouse.city && warehouse.street && warehouse.streetNumber && <>
@@ -107,17 +138,17 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
           <Text style={styles.text}>{item.name}</Text>
         </Detail>
         <Detail name="Kategoria">
-          <Text style={styles.text}>{!!category ? category.name + " (" + category.short_name + ")" : <Text style={{fontStyle: 'italic', fontSize: 13}}>nieznana kategoria</Text>}</Text>
+          <Text style={styles.text}>{!!category ? category.name + " (" + category.short_name + ")" : <Text style={{fontStyle: 'italic', fontSize: 13}}>{isCategoryLoaded ? "nieznana kategoria" : "wczytywanie danych..."}</Text>}</Text>
         </Detail>
         <Detail name="Magazyn">
           {warehouseDescription()}
-          <OpacityButton
+          {isWarehouseLoaded && <OpacityButton
             style={styles.warehouseButton}
             textStyle={{fontSize: 15}}
             onPress={changeWarehousePressed}
           >
             Zmień magazyn
-          </OpacityButton>
+          </OpacityButton>}
         </Detail>
 
         <View style={{flexGrow: 1}}/>

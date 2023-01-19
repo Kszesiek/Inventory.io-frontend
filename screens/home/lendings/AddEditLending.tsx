@@ -21,6 +21,8 @@ import {Member} from "../../../store/members";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import {TouchableCard} from "../../../components/Themed/TouchableCard";
 import {displayDate, displayTime} from "../../../utilities/date";
+import colors from "../../../constants/Colors";
+import {getAllMembers} from "../../../endpoints/members";
 
 export type ValidValuePair = {
   value: string
@@ -28,7 +30,6 @@ export type ValidValuePair = {
 }
 
 type inputValuesType = {
-  // username: ValidValuePair,
   eventName: ValidValuePair,
   itemNames: ValidValuePair[],
   startDate: ValidValuePair,
@@ -43,8 +44,7 @@ const lendingTypes = [
 
 export default function AddEditLending({ navigation, route }: LendingStackScreenProps<'AddEditLending'>) {
   const dispatch = useDispatch();
-  // const userId: string = useSelector((state: IRootState) => state.appWide.userId) || "ABC";
-  const members: Member[] = useSelector((state: IRootState) => state.members.members);
+  const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
 
   const lending = route.params?.lending;
   const isEditing = !!lending;
@@ -60,12 +60,25 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
   const [isUsersDropdownOpen, setUsersDropdownOpen] = useState<boolean>(false);
   const [chosenUserId, setChosenUserId] = useState<string>(isLendingPrivate(lending) ? lending.userId : "");
 
+  const members: Member[] = useSelector((state: IRootState) => state.members.members);
+  const member: Member | undefined = isLendingPrivate(lending) ? members.find(item_ => item_.id === lending.userId) : undefined;
+  const [isMemberLoaded, setIsMemberLoaded] = useState<boolean | undefined>(member === undefined ? undefined : true);
+
   const [startDate, setStartDate] = useState<Date>(!!lending ? new Date(lending.startDate) : new Date());
   const [endDate, setEndDate] = useState<Date>(!!lending ? new Date(lending.endDate) : new Date());
   const [showStartDateDialog, setShowStartDateDialog] = useState<boolean>(false);
   const [showStartTimeDialog, setShowStartTimeDialog] = useState<boolean>(false);
   const [showEndDateDialog, setShowEndDateDialog] = useState<boolean>(false);
   const [showEndTimeDialog, setShowEndTimeDialog] = useState<boolean>(false);
+
+  useEffect(() => {
+    async function getMember() {
+      setIsMemberLoaded(await getAllMembers(dispatch, demoMode));
+    }
+
+    if (isLendingPrivate(lending) && member === undefined)
+      getMember();
+  }, []);
 
   const [inputs, setInputs]: [inputValuesType, Function] = useState(
     {
@@ -308,11 +321,12 @@ export default function AddEditLending({ navigation, route }: LendingStackScreen
         searchable={true}
         setOpen={setUsersDropdownOpen}
         setValue={setChosenUserId}
+        disabled={!isMemberLoaded}
         placeholder="wybierz użytkownika..."
         searchPlaceholder="Wyszukaj użytkownika..."
         textStyle={{color: textColor}}
         closeOnBackPressed={true}
-        theme={backgroundColor === '#1e2e3d' ? 'DARK' : "LIGHT"}
+        theme={backgroundColor === colors.dark.background ? 'DARK' : "LIGHT"}
         style={{...styles.dropdown, backgroundColor: cardColor}}
         dropDownContainerStyle={{...styles.dropdown, backgroundColor: cardColor}}
         searchTextInputStyle={{borderColor: backgroundColor, elevation: 5, backgroundColor: cardColor}}

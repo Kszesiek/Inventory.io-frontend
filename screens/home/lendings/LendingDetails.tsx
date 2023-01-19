@@ -12,18 +12,36 @@ import {ScrollView, StyleProp, StyleSheet, TextStyle, TouchableOpacity} from "re
 import {LendingStackScreenProps} from "../../../types";
 import Detail from "../../../components/Detail";
 import {useDispatch, useSelector} from "react-redux";
-import {IRootState} from "../../../store/store";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {Feather} from "@expo/vector-icons";
 import * as React from "react";
+import {IRootState} from "../../../store/store";
+import {Member} from "../../../store/members";
+import {getAllMembers} from "../../../endpoints/members";
 
 export default function LendingDetails({ navigation, route }: LendingStackScreenProps<'LendingDetails'>) {
   const dispatch = useDispatch();
+  const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
+
   const textColor = useThemeColor({}, 'text');
-  const lending: LendingForEvent | LendingPrivate = useSelector((state: IRootState) =>
-    state.lendings.lendings.find((item: LendingForEvent | LendingPrivate) => item.lendingId === route.params.lendingId)!)
+
+  const lending: LendingForEvent | LendingPrivate = route.params.lending;
   const username: string | undefined = isLendingPrivate(lending) ? useSelector((state: IRootState) =>
       state.members.members.find((user) => user.id === lending.userId)?.username) : undefined;
+
+  const members: Member[] = useSelector((state: IRootState) => state.members.members);
+
+  const user: Member | undefined = isLendingPrivate(lending) ? members.find(item_ => item_.id === lending.userId) : undefined;
+  const [isUserLoaded, setIsUserLoaded] = useState<boolean | undefined>(user === undefined ? undefined : true);
+
+  useEffect(() => {
+    async function getItemUser() {
+      // setIsUserLoaded(await getMember(dispatch, lending.userId, demoMode));
+      setIsUserLoaded(await getAllMembers(dispatch, demoMode));
+    }
+    if (user === undefined)
+      getItemUser();
+  }, [])
 
   useEffect(() => {
     navigation.setOptions({
@@ -60,7 +78,7 @@ export default function LendingDetails({ navigation, route }: LendingStackScreen
         </Detail>
       : isLendingPrivate(lending) ?
         <Detail name="Użytkownik">
-          <Text style={[styles.text, property]}>{username}</Text>
+          <Text style={[styles.text, property]}>{isUserLoaded ? username : <Text style={{fontStyle: 'italic'}}>wczytywanie danych...</Text>}</Text>
         </Detail>
       : <Text>ERROR</Text>
       }

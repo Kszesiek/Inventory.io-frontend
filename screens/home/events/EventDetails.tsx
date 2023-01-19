@@ -1,10 +1,9 @@
 import {ScrollView, StyleSheet, TouchableOpacity} from "react-native";
 import {Text, useThemeColor, View} from "../../../components/Themed";
 import {eventActions} from "../../../store/events";
-import {useDispatch, useSelector} from "react-redux";
+import {useDispatch} from "react-redux";
 import {EventStackScreenProps} from "../../../types";
 import {Event} from "../../../store/events";
-import {IRootState} from "../../../store/store";
 import Detail from "../../../components/Detail";
 import {displayDateTimePeriod} from "../../../utilities/date";
 import {OpacityButton} from "../../../components/Themed/OpacityButton";
@@ -14,11 +13,12 @@ import {useEffect} from "react";
 
 export default function EventDetails({ navigation, route }: EventStackScreenProps<'EventDetails'>) {
   const dispatch = useDispatch();
+
   const backgroundColor = useThemeColor({}, "background");
+  const deleteColor = useThemeColor({}, "delete");
   const textColor = useThemeColor({}, "text");
 
-  const event: Event = useSelector((state: IRootState) =>
-    state.events.events.find((item: Event) => item.eventId === route.params.eventId)!)
+  const event: Event = route.params.event;
 
   useEffect(() => {
     navigation.setOptions({
@@ -57,7 +57,7 @@ export default function EventDetails({ navigation, route }: EventStackScreenProp
       <View style={{flexGrow: 1}}/>
       <View style={styles.editButtonContainer}>
         <OpacityButton
-          style={[styles.editButton, {backgroundColor: useThemeColor({}, "delete")}]}
+          style={[styles.editButton, {backgroundColor: deleteColor}]}
           onPress={deletePressed}
         >
           Usuń

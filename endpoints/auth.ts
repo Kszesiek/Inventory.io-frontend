@@ -2,6 +2,8 @@ import axios from "axios";
 import { serverAddress } from "./global";
 import {appWideActions} from "../store/appWide";
 import {Dispatch} from "react";
+import jwt_decode from 'jwt-decode';
+import {getOrganizations} from "./organizations";
 
 const url: string = serverAddress + "auth/";
 
@@ -29,40 +31,49 @@ export async function createUser(dispatch: Dispatch<any>, username: string, pass
   }
 }
 
-export async function logIn(dispatch: Dispatch<any>, username: string, password: string): Promise<boolean> {
-  try {
-    const response = await axios.post(url + "sign-in", {
-        username: username,
-        password: password,
-      },
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
+export async function logIn(dispatch: Dispatch<any>, username: string, password: string, demoMode: boolean = false): Promise<boolean> {
+  if (!demoMode) try {
+      const response = await axios.post(url + "sign-in", {
+          username: username,
+          password: password,
         },
-      })
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
 
-    console.log("--- SIGN-IN RESPONSE ---");
-    console.log("STATUS: " + response.status);
-    console.log(response.data);
-
-    if (response.status === 200) {
-      axios.interceptors.request.use(
-        async config => {
-          config.headers!.Authorization = "Bearer " + response.data.access_token;  // TODO: check if this explodes
-          return config;
-        },
-        error => {
-          return Promise.reject(error);
-        }
-      );
+      console.log("--- SIGN-IN RESPONSE ---");
+      console.log("STATUS: " + response.status);
+      console.log(jwt_decode(response.data.access_token));
+      // console.log(JSON.parse(Buffer.from(response.data["access_token"].split('.')[1], 'base64').toString()));
 
       // const { payload, protectedHeader } = await jose.jwtVerify(response.data, Uint8Array.from('82403236322455368420703290157370899678555475376348799155608462394495384644410'.split('').map(letter => letter.charCodeAt(0))))
       // console.log(protectedHeader);
       // console.log(payload);
-      return true;
-    } else
+
+      if (response.status !== 200)
+        return false;
+
+      axios.interceptors.request.use(async config => {
+          config.headers!.Authorization = "Bearer " + response.data.access_token;
+          return config;
+        },
+        error => Promise.reject(error)
+      );
+    } catch (error) {
       return false;
-  } catch (error) {
+    }
+
+  const getOrganizationsOutcome = await getOrganizations(dispatch, demoMode);
+  if (!getOrganizationsOutcome)
     return false;
-  }
+
+  await dispatch(appWideActions.signIn({  // TODO: Change this to real data
+    username: 'itsmejohndoe',
+    name: 'John',
+    surname: 'Doe',
+    email: 'johndoe@example.com',
+  }));
+  return true;
 }

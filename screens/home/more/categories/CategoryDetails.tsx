@@ -13,8 +13,7 @@ import {Category, categoryActions} from "../../../../store/categories";
 export default function CategoryDetails({ navigation, route }: CategoriesStackScreenProps<'CategoryDetails'>) {
   const dispatch = useDispatch();
   const textColor = useThemeColor({}, 'text');
-  const category: Category = useSelector((state: IRootState) =>
-    state.categories.categories.find((item: Category) => item.id === route.params.categoryId)!)
+  const category: Category = route.params.category;
   const parentCategory: Category | undefined = useSelector((state: IRootState) =>
     state.categories.categories.find((item: Category) => item.id === category.parent_category_id)!)
 

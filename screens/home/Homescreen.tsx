@@ -1,4 +1,4 @@
-import {Alert, BackHandler, ScrollView, StyleProp, StyleSheet, TextStyle} from "react-native";
+import {Alert, BackHandler, ScrollView, StyleProp, StyleSheet, TextStyle, ActivityIndicator} from "react-native";
 import {Text, TextInput, useThemeColor, View} from "../../components/Themed";
 import Card from "../../components/Themed/Card";
 import {TouchableCard} from "../../components/Themed/TouchableCard";
@@ -11,20 +11,36 @@ import {displayDateTimePeriod} from "../../utilities/date";
 import {FontAwesome, MaterialCommunityIcons} from "@expo/vector-icons";
 import {enlistItems} from "../../utilities/enlist";
 import {HomescreenStackScreenProps} from "../../types";
-import {useCallback, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {useFocusEffect} from "@react-navigation/native";
 
 import {Member} from "../../store/members";
+import {getLatestEvents} from "../../endpoints/events";
+import {getLatestLendings} from "../../endpoints/lendings";
 
 export default function Homescreen({ navigation, route }: HomescreenStackScreenProps<'Homescreen'>) {
-  const events: Array<Event> = useSelector((state: IRootState) => state.events.events)
-  const lendings: Array<LendingForEvent | LendingPrivate> = useSelector((state: IRootState) => state.lendings.lendings);
+  const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
+
+  const [nearestEvents, setNearestEvents] = useState<Array<Event> | null>(null);
+  const [nearestLendings, setNearestLendings] = useState<Array<LendingForEvent | LendingPrivate> | null>(null);
+
   const members: Member[] = useSelector((store: IRootState) => store.members.members);
 
   const backgroundColor = useThemeColor({}, 'background');
   const tintColor = useThemeColor({}, "tint");
 
   const [textToSearch, setTextToSearch] = useState<string>('');
+
+  useEffect(() => {
+    async function getNearestEvents() {
+      setNearestEvents(await getLatestEvents(demoMode));
+    }
+    async function getNearestLendings() {
+      setNearestLendings(await getLatestLendings(demoMode));
+    }
+    getNearestEvents();
+    getNearestLendings();
+  }, [])
 
   useFocusEffect(
     useCallback(() => {
@@ -115,43 +131,60 @@ export default function Homescreen({ navigation, route }: HomescreenStackScreenP
       </View>
       <Card key="events" style={styles.menuCard}>
         <Text style={{fontSize: 18, fontWeight: 'bold', marginTop: 10}}>Nadchodzące wydarzenia</Text>
-        <View style={styles.list}>
-        {events.length > 0 ? events.slice(0, 3).map((event: Event) => (
-            <View key={event.eventId} style={{backgroundColor: 'transparent', marginTop: 8}}>
-              <Text style={[boldedText, {textAlign: 'center'}]}>{event.name}</Text>
-              <Text style={{textAlign: 'center'}}>{displayDateTimePeriod(new Date(event.startDate), new Date(event.endDate))}</Text>
+        {
+          nearestEvents !== null ?
+            <>
+              <View style={styles.list}>
+              {nearestEvents.length > 0 ? nearestEvents.slice(0, 3).map((event: Event) => (
+                  <View key={event.eventId} style={{backgroundColor: 'transparent', marginTop: 8}}>
+                    <Text style={[boldedText, {textAlign: 'center'}]}>{event.name}</Text>
+                    <Text style={{textAlign: 'center'}}>{displayDateTimePeriod(new Date(event.startDate), new Date(event.endDate))}</Text>
+                  </View>
+                )) :
+                <Text style={styles.noContentText}>Brak wydarzeń do wyświetlenia</Text>}
             </View>
-          )) :
-          <Text style={styles.noContentText}>Brak wydarzeń do wyświetlenia</Text>}
-        </View>
-        {events.length > 3 && <OpacityButton onPress={showMoreEventsPressed} textStyle={{fontSize: 15}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>}
+            {nearestEvents.length > 3 && <OpacityButton onPress={showMoreEventsPressed} textStyle={{fontSize: 15}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>}
+          </>
+          :
+          <View style={styles.spinnerView}>
+            <ActivityIndicator color={tintColor} size="large" />
+          </View>
+        }
       </Card>
       <Card key="lendings" style={styles.menuCard}>
         <Text style={{fontSize: 18, fontWeight: 'bold', marginTop: 10}}>Ostatnie wypożyczenia</Text>
-        <View style={styles.list}>
-          {lendings.length > 0 ? lendings.slice(0, 3).map((lending: LendingForEvent | LendingPrivate) => {
-            const itemsListed: string = enlistItems(lending.items.map(item => item.name));
-            const username: string | undefined = isLendingPrivate(lending) ? members.find((member) => member.id === lending.userId)?.username || undefined : undefined;
-
-            return (<View key={lending.lendingId} style={{backgroundColor: 'transparent', marginTop: 8}}>
-              {isLendingForEvent(lending) ?
-                <Text style={{textAlign: 'center'}}>Wypożyczono <Text style={boldedText}>{itemsListed}</Text> na
-                wydarzenie <Text style={boldedText}>{lending.eventName}</Text></Text>
-              : isLendingPrivate(lending) ?
-                <Text style={{textAlign: 'center'}}>Użytkownik <Text
-                  style={boldedText}>{username}</Text> wypożyczył <Text
-                  style={boldedText}>{itemsListed}</Text></Text>
-              : <Text>ERROR</Text>
+        {
+          nearestLendings !== null ?
+          <>
+            <View style={styles.list}>
+              {nearestLendings.length > 0 ? nearestLendings.slice(0, 3).map((lending: LendingForEvent | LendingPrivate) => {
+                const itemsListed: string = enlistItems(lending.items.map(item => item.name));
+                const username: string | undefined = isLendingPrivate(lending) ? members.find((member) => member.id === lending.userId)?.username || undefined : undefined;
+                return (<View key={lending.lendingId} style={{backgroundColor: 'transparent', marginTop: 8}}>
+                  {isLendingForEvent(lending) ?
+                    <Text style={{textAlign: 'center'}}>Wypożyczono <Text style={boldedText}>{itemsListed}</Text> na
+                    wydarzenie <Text style={boldedText}>{lending.eventName}</Text></Text>
+                  : isLendingPrivate(lending) ?
+                    <Text style={{textAlign: 'center'}}>Użytkownik <Text
+                      style={boldedText}>{username}</Text> wypożyczył <Text
+                      style={boldedText}>{itemsListed}</Text></Text>
+                  : <Text>ERROR</Text>
+                  }
+                  <Text
+                    style={{textAlign: 'center'}}>{displayDateTimePeriod(new Date(lending.startDate), new Date(lending.endDate))}</Text>
+                  </View>
+                  )
+              }) :
+                <Text style={styles.noContentText}>Brak wypożyczeń do wyświetlenia</Text>
               }
-              <Text
-                style={{textAlign: 'center'}}>{displayDateTimePeriod(new Date(lending.startDate), new Date(lending.endDate))}</Text>
-              </View>
-              )
-          }) :
-            <Text style={styles.noContentText}>Brak wypożyczeń do wyświetlenia</Text>
-          }
-        </View>
-        {lendings.length > 3 && <OpacityButton onPress={showMoreLendingsPressed} textStyle={{fontSize: 15}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>}
+            </View>
+            {nearestLendings.length > 3 && <OpacityButton onPress={showMoreLendingsPressed} textStyle={{fontSize: 15}} style={styles.showMoreButton}>Pokaż więcej</OpacityButton>}
+          </>
+          :
+            <View style={styles.spinnerView}>
+              <ActivityIndicator color={tintColor} size="large" />
+            </View>
+        }
       </Card>
     </ScrollView>
   )

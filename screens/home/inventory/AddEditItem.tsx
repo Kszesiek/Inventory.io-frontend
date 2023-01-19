@@ -19,6 +19,8 @@ import * as React from "react";
 import CategoriesChooser from "../../../components/CategoriesChooser";
 import {Warehouse} from "../../../store/warehouses";
 import WarehouseChooser from "../../../components/WarehouseChooser";
+import {getAllWarehouses} from "../../../endpoints/warehouses";
+import {getAllCategories} from "../../../endpoints/categories";
 
 export type ValidValuePair<Type> = {
   value: Type
@@ -33,8 +35,11 @@ type inputValuesType = {
 
 export default function AddEditItem({ navigation, route }: InventoryStackScreenProps<'AddEditItem'>) {
   const dispatch = useDispatch();
-  const categories = useSelector((state: IRootState) => state.categories.categories);
-  const warehouses = useSelector((state: IRootState) => state.warehouses.warehouses);
+  const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
+  const categories : Category[]  = useSelector((state: IRootState) => state.categories.categories);
+  const warehouses : Warehouse[] = useSelector((state: IRootState) => state.warehouses.warehouses);
+  const [areCategoriesLoaded, setAreCategoriesLoaded] = useState<boolean | undefined>(categories.length === 0 ? undefined : true);
+  const [areWarehousesLoaded, setAreWarehousesLoaded] = useState<boolean | undefined>(warehouses.length === 0 ? undefined : true);
 
   const item: Item | undefined = route.params?.item;
   const isEditing = !!item;
@@ -50,6 +55,21 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
   const backgroundColor = useThemeColor({}, "background");
   const cancelColor = useThemeColor({}, "delete");
   const tintColor = useThemeColor({}, "tint");
+
+  useEffect(() => {
+    async function getWarehouses() {
+      setAreWarehousesLoaded(await getAllWarehouses(dispatch, demoMode));
+    }
+    async function getCategories() {
+      setAreCategoriesLoaded(await getAllCategories(dispatch, demoMode));
+    }
+    if (warehouses.length === 0) {
+      getWarehouses();
+    }
+    if (categories.length === 0) {
+      getCategories();
+    }
+  }, []);
 
   const [inputs, setInputs]: [inputValuesType, Function] = useState(
     {
@@ -239,21 +259,23 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
   const categoryComponent = <View key="category" style={styles.propertyContainer}>
     <Text style={[styles.propertyLabel, inputs.category_id.isInvalid && {color: cancelColor}]}>Kategoria</Text>
     <TouchableCard
-      style={[styles.card, inputs.category_id.isInvalid && {backgroundColor: cancelColor}]}
+      style={[styles.card, inputs.category_id.isInvalid && {backgroundColor: cancelColor}, !areCategoriesLoaded && {opacity: 0.6}]}
       onPress={categoryPressed}
+      props={{disabled: !areCategoriesLoaded}}
     >
       {!!category ?
         <Text style={{fontSize: 18, paddingVertical: 3}}>{category.name} ({category.short_name})</Text>
         :
-        <Text style={{fontSize: 16, paddingVertical: 4, fontStyle: 'italic'}}>wybierz kategorię...</Text>}
+        <Text style={{fontSize: 16, paddingVertical: 4, fontStyle: 'italic'}}>{areCategoriesLoaded ? "wybierz kategorię..." : "wczytywanie kategorii..."}</Text>}
     </TouchableCard>
   </View>
 
   const warehouseComponent = <View key="warehouse" style={styles.propertyContainer}>
     <Text style={[styles.propertyLabel, inputs.warehouse_id.isInvalid && {color: cancelColor}]}>Magazyn</Text>
     <TouchableCard
-      style={[styles.card, inputs.warehouse_id.isInvalid && {backgroundColor: cancelColor}]}
+      style={[styles.card, inputs.warehouse_id.isInvalid && {backgroundColor: cancelColor}, !areWarehousesLoaded && {opacity: 0.6}]}
       onPress={warehousePressed}
+      props={{disabled: !areWarehousesLoaded}}
     >
       {!!warehouse ?
         <>
@@ -262,7 +284,7 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
           <Text style={{fontSize: 16}}>{`${warehouse.postalCode ? `${warehouse.postalCode} ` : ''}${warehouse.city}${warehouse.country ? `, ${warehouse.country}` : ''}`}</Text>
         </>
         :
-        <Text style={{fontSize: 16, paddingVertical: 4, fontStyle: 'italic'}}>wybierz magazyn...</Text>}
+        <Text style={{fontSize: 16, paddingVertical: 4, fontStyle: 'italic'}}>{areWarehousesLoaded ? "wybierz magazyn..." : "wczytywanie magazynów..."}</Text>}
     </TouchableCard>
   </View>
 

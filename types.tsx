@@ -95,8 +95,8 @@ export type HomescreenStackScreenProps<Screen extends keyof HomescreenStackParam
 
 export type InventoryStackParamList = {
   Inventory: { searchPhrase: string } | undefined;
+  ItemDetails: { item: Item };
   AddEditItem: { item: Item } | undefined;
-  ItemDetails: { itemId: string };
 };
 
 export type InventoryStackScreenProps<Screen extends keyof InventoryStackParamList> = NativeStackScreenProps<
@@ -108,8 +108,8 @@ export type InventoryStackScreenProps<Screen extends keyof InventoryStackParamLi
 
 export type LendingStackParamList = {
   Lendings: undefined;
+  LendingDetails: { lending: LendingPrivate | LendingForEvent };
   AddEditLending: { lending: LendingPrivate | LendingForEvent } | undefined;
-  LendingDetails: { lendingId: string };
 };
 
 export type LendingStackScreenProps<Screen extends keyof LendingStackParamList> = NativeStackScreenProps<
@@ -121,8 +121,8 @@ export type LendingStackScreenProps<Screen extends keyof LendingStackParamList> 
 
 export type EventStackParamList = {
   Events: undefined;
+  EventDetails: { event: Event };
   AddEditEvent: { event: Event } | undefined;
-  EventDetails: { eventId: string };
 };
 
 export type EventStackScreenProps<Screen extends keyof EventStackParamList> = NativeStackScreenProps<
@@ -134,10 +134,10 @@ export type EventStackScreenProps<Screen extends keyof EventStackParamList> = Na
 
 export type MoreStackParamList = {
   More: undefined;
-  HenryStickmin: undefined;
   MembersNavigator: undefined;
   WarehousesNavigator: undefined;
   CategoriesNavigator: undefined;
+  HenryStickmin: undefined;
 };
 
 export type MoreStackScreenProps<Screen extends keyof MoreStackParamList> = NativeStackScreenProps<
@@ -149,8 +149,8 @@ export type MoreStackScreenProps<Screen extends keyof MoreStackParamList> = Nati
 
 export type MembersStackParamList = {
   Members: undefined;
+  MemberDetails: { member: Member };
   AddEditMember: { member: Member } | undefined;
-  MemberDetails: { memberId: string };
 };
 
 export type MembersStackScreenProps<Screen extends keyof MembersStackParamList> = NativeStackScreenProps<
@@ -162,8 +162,8 @@ export type MembersStackScreenProps<Screen extends keyof MembersStackParamList> 
 
 export type CategoriesStackParamList = {
   Categories: undefined;
+  CategoryDetails: { category: Category };
   AddEditCategory: { category: Category } | undefined;
-  CategoryDetails: { categoryId: string };
 };
 
 export type CategoriesStackScreenProps<Screen extends keyof CategoriesStackParamList> = NativeStackScreenProps<
@@ -175,8 +175,8 @@ export type CategoriesStackScreenProps<Screen extends keyof CategoriesStackParam
 
 export type WarehousesStackParamList = {
   Warehouses: undefined;
+  WarehouseDetails: { warehouse: Warehouse };
   AddEditWarehouse: { warehouse: Warehouse } | undefined;
-  WarehouseDetails: { warehouseId: string };
 };
 
 export type WarehousesStackScreenProps<Screen extends keyof WarehousesStackParamList> = NativeStackScreenProps<

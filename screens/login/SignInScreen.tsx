@@ -36,35 +36,17 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
     dispatch(eventActions.wipeEvents());
     dispatch(organizationsActions.wipeOrganizations());
     dispatch(userActions.wipeUsers());
-    dispatch(categoryActions.wipeCategories())
-  }, [])
+    dispatch(categoryActions.wipeCategories());
+  }, []);
 
   const onSignInPressed = async () => {
     console.log("Sign in pressed");
     setIsAuthenticating(true);
-
-    if (demoMode) {
-      dispatch(appWideActions.signIn({username: 'itsmejohndoe', name: 'John', surname: 'Doe', email: 'johndoe@example.com'}));
-      await dispatch(organizationsActions.setOrganizations(demoOrganizations));
-    } else {
-      const response = await logIn(dispatch, username, password);
-      if (!response) {
-        Alert.alert('Logowanie nie powiodło się', 'Sprawdź dane logowania i spróbuj ponownie.');
-      } else {
-        const response = await getOrganizations(dispatch);
-        if (!response) {
-          Alert.alert('Ło cie panie!', 'No i co ja mam teraz zrobić 🙈🙈🙈');
-        } else {
-          await dispatch(appWideActions.signIn({
-            username: 'itsmejohndoe',
-            name: 'John',
-            surname: 'Doe',
-            email: 'johndoe@example.com',
-          }));
-        }
-      }
-    }
+    const response = await logIn(dispatch, username, password, demoMode);
     setIsAuthenticating(false);
+    if (!response) {
+      Alert.alert('Logowanie nie powiodło się', 'Sprawdź dane logowania i spróbuj ponownie.');
+    }
   }
 
   const onRegisterPressed = () => {

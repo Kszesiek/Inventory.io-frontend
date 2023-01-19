@@ -38,23 +38,23 @@ import Animated, {Adaptable} from "react-native-reanimated";
 import {useDispatch, useSelector} from "react-redux";
 import {IRootState} from "../store/store";
 import {useEffect} from "react";
-import {eventActions} from "../store/events";
 import {demoData} from "../constants/demoData";
-import {itemActions} from "../store/items";
-import {lendingActions} from "../store/lendings";
-import {userActions} from "../store/users";
 import LoginNavigator from "./LoginStackNavigator";
 import HomeTabNavigator from "./HomeTabNavigator";
 import CreateOrganization from "../screens/organizations/CreateOrganization";
 // import JoinOrganization from "../screens/organizations/JoinOrganization";
 import WelcomeStackNavigator from "./WelcomeStackNavigator";
 import useCachedResources from "../hooks/useCachedResources";
-import {categoryActions} from "../store/categories";
 import {Organization, organizationsActions} from "../store/organizations";
 import Logo from "../assets/images/inventory.png";
 import {TouchableCard} from "../components/Themed/TouchableCard";
-import {membersActions} from "../store/members";
-import {warehousesActions} from "../store/warehouses";
+// import {categoryActions} from "../store/categories";
+// import {eventActions} from "../store/events";
+// import {itemActions} from "../store/items";
+// import {lendingActions} from "../store/lendings";
+// import {membersActions} from "../store/members";
+// import {userActions} from "../store/users";
+// import {warehousesActions} from "../store/warehouses";
 // import LinkingConfiguration from './LinkingConfiguration';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
@@ -174,14 +174,13 @@ function HomeDrawerNavigator(props: {organizations: Organization[]}) {
   useEffect(() => {
     async function loadData () {
       await Promise.all([
-        dispatch(eventActions.loadEvents(demoData[props.organizations[0].id].events)),
-        dispatch(itemActions.loadItems(demoData[props.organizations[0].id].items)),
-        dispatch(lendingActions.loadLendings(demoData[props.organizations[0].id].lendings)),
-        dispatch(userActions.loadUsers(demoData[props.organizations[0].id].users)),
-        dispatch(membersActions.loadMembers(demoData[props.organizations[0].id].users)), // going to change that most likely
-        dispatch(categoryActions.loadCategories(demoData[props.organizations[0].id].categories)),
-        dispatch(warehousesActions.loadWarehouses(demoData[props.organizations[0].id].warehouses)),
-
+        // dispatch(eventActions.loadEvents(demoData[props.organizations[0].id].events)),
+        // dispatch(itemActions.loadItems(demoData[props.organizations[0].id].items)),
+        // dispatch(lendingActions.loadLendings(demoData[props.organizations[0].id].lendings)),
+        // dispatch(userActions.loadUsers(demoData[props.organizations[0].id].users)),
+        // dispatch(membersActions.loadMembers(demoData[props.organizations[0].id].users)), // going to change that most likely
+        // dispatch(categoryActions.loadCategories(demoData[props.organizations[0].id].categories)),
+        // dispatch(warehousesActions.loadWarehouses(demoData[props.organizations[0].id].warehouses)),
       ])
     }
     loadData()
@@ -208,16 +207,16 @@ function HomeDrawerNavigator(props: {organizations: Organization[]}) {
           }}
           listeners={{
             drawerItemPress: (e) => {
-              const isDemo: boolean = demoData.hasOwnProperty(organization.id);
+              // const isDemo: boolean = demoData.hasOwnProperty(organization.id);
               Promise.all([
                 dispatch(organizationsActions.setCurrentOrganization(organization)),
-                dispatch(eventActions.loadEvents(isDemo ? demoData[organization.id].events : [])),
-                dispatch(itemActions.loadItems(isDemo ? demoData[organization.id].items : [])),
-                dispatch(lendingActions.loadLendings(isDemo ? demoData[organization.id].lendings : [])),
-                dispatch(userActions.loadUsers(isDemo ? demoData[organization.id].users : [])),
-                dispatch(membersActions.loadMembers(isDemo ? demoData[organization.id].users : [])), // going to change that most likely
-                dispatch(categoryActions.loadCategories(isDemo ? demoData[organization.id].categories : [])),
-                dispatch(warehousesActions.loadWarehouses(isDemo ? demoData[organization.id].warehouses : [])),
+                // dispatch(eventActions.loadEvents(isDemo ? demoData[organization.id].events : [])),
+                // dispatch(itemActions.loadItems(isDemo ? demoData[organization.id].items : [])),
+                // dispatch(lendingActions.loadLendings(isDemo ? demoData[organization.id].lendings : [])),
+                // dispatch(userActions.loadUsers(isDemo ? demoData[organization.id].users : [])),
+                // dispatch(membersActions.loadMembers(isDemo ? demoData[organization.id].users : [])), // going to change that most likely
+                // dispatch(categoryActions.loadCategories(isDemo ? demoData[organization.id].categories : [])),
+                // dispatch(warehousesActions.loadWarehouses(isDemo ? demoData[organization.id].warehouses : [])),
               ])
             }
           }}

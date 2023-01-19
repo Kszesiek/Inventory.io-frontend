@@ -1,4 +1,4 @@
-import {FlatList, ListRenderItemInfo, StyleProp, StyleSheet, TextStyle} from "react-native";
+import {FlatList, StyleProp, StyleSheet, TextStyle} from "react-native";
 import {Text, useThemeColor, View} from "../../../../components/Themed";
 import {useSelector} from "react-redux";
 import {IRootState} from "../../../../store/store";
@@ -23,12 +23,12 @@ export default function Categories({ navigation, route }: CategoriesStackScreenP
         <Text style={[styles.noContentText, {fontSize: 16}]}>Brak kategorii do wyświetlenia.</Text>
         <Text style={styles.noContentText}>Aby dodać kategorię, użyj przycisku u góry ekranu.</Text>
       </View>}
-    renderItem={(category: ListRenderItemInfo<Category>) => {
-      const parentCategory: Category | undefined = categories.find((cat: Category) => cat.id === category.item.parent_category_id)
+    renderItem={({item} : {item: Category}) => {
+      const parentCategory: Category | undefined = categories.find((cat: Category) => cat.id === item.parent_category_id)
       return (
-        <TouchableCard style={styles.card} onPress={() => navigation.navigate("CategoryDetails", {categoryId: category.item.id})}>
-          <Text style={{...boldedText, fontSize: 16}}>{category.item.name}</Text>
-          <Text style={{textAlign: 'center'}}>skrót: {category.item.short_name}</Text>
+        <TouchableCard style={styles.card} onPress={() => navigation.navigate("CategoryDetails", {category: item})}>
+          <Text style={{...boldedText, fontSize: 16}}>{item.name}</Text>
+          <Text style={{textAlign: 'center'}}>skrót: {item.short_name}</Text>
           {!!parentCategory && <Text style={{textAlign: 'center'}}>Kategoria
               nadrzędna: {parentCategory.name} ({parentCategory.short_name})</Text>}
         </TouchableCard>
