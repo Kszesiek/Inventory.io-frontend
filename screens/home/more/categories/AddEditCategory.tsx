@@ -6,12 +6,19 @@ import {useDispatch, useSelector} from "react-redux";
 import Input from "../../../../components/Input";
 import {OpacityButton} from "../../../../components/Themed/OpacityButton";
 import {writeOutArray} from "../../../../utilities/enlist";
-import {Category, categoryActions} from "../../../../store/categories";
+import {
+  Category,
+  CategoryExtended,
+  CategoryTemplate,
+  isCategory,
+  isCategoryExtended
+} from "../../../../store/categories";
 import {IRootState} from "../../../../store/store";
-import CategoriesChooser from "../../../../components/CategoriesChooser";
+import CategoriesChooser from "../../../../components/choosers/CategoriesChooser";
 import * as React from "react";
 import {Modalize} from "react-native-modalize";
 import {TouchableCard} from "../../../../components/Themed/TouchableCard";
+import {createCategory, getCategory, modifyCategory} from "../../../../endpoints/categories";
 
 export type ValidValuePair = {
   value: string
@@ -21,14 +28,13 @@ export type ValidValuePair = {
 type inputValuesType = {
   name: ValidValuePair,
   short_name: ValidValuePair,
-  parent_category_id: ValidValuePair,
 }
 
 export default function AddEditCategory({ navigation, route }: CategoriesStackScreenProps<'AddEditCategory'>) {
   const dispatch = useDispatch();
-
-  const category = route.params?.category;
+  const demoMode: boolean = useSelector((state: IRootState) => state.appWide.demoMode);
   const categories = useSelector((state: IRootState) => state.categories.categories);
+  const category = categories.find((category) => category.id === route.params?.categoryId);
   const [parentCategory, setParentCategory] = useState<Category | undefined>(categories.find(
     (item: Category) => item.id === category?.parent_category_id) || undefined);
   const categoriesModalizeRef = useRef<Modalize>(null);
@@ -46,10 +52,6 @@ export default function AddEditCategory({ navigation, route }: CategoriesStackSc
         value: category?.short_name || "",
         isInvalid: false,
       },
-      parent_category_id: {
-        value: category?.parent_category_id || "",
-        isInvalid: false,
-      },
     });
 
   useLayoutEffect(() => {
@@ -64,18 +66,28 @@ export default function AddEditCategory({ navigation, route }: CategoriesStackSc
   }
 
   useEffect(() => {
-    setInputs((currentInputValues: typeof inputs) => {
-      return {
-        ...currentInputValues,
-        parent_category_id: {value: parentCategory?.id || undefined, isInvalid: false},
-      }
-    })
-  }, [parentCategory])
+    async function getCategoryExtended() {
+      if (isCategoryExtended(category) || route.params?.categoryId === undefined)
+        return;
+
+      getCategory(dispatch, route.params.categoryId, demoMode);
+    }
+    getCategoryExtended();
+  }, [])
+
+  // useEffect(() => {
+  //   setInputs((currentInputValues: typeof inputs) => {
+  //     return {
+  //       ...currentInputValues,
+  //       parent_category_id: {value: parentCategory?.id || undefined, isInvalid: false},
+  //     }
+  //   })
+  // }, [parentCategory])
 
   async function submitPressed() {
     const nameIsValid: boolean = inputs.name.value.trim().length > 0 && inputs.name.value.trim().length < 100;
     const shortNameIsValid: boolean = inputs.short_name.value.trim().length > 0 && inputs.short_name.value.trim().length < 100;
-    const parentIsValid: boolean = inputs.parent_category_id.value === undefined || categories.findIndex((item) => item.id === inputs.parent_category_id.value) >= 0;
+    // const parentIsValid: boolean = inputs.parent_category_id.value === undefined || categories.findIndex((item) => item.id === inputs.parent_category_id.value) >= 0;
 
     setInputs((currentInputs: inputValuesType) => {
       return {
@@ -87,46 +99,45 @@ export default function AddEditCategory({ navigation, route }: CategoriesStackSc
           value: currentInputs.short_name.value,
           isInvalid: !shortNameIsValid,
         },
-        parent_category_id: {
-          value: currentInputs.parent_category_id.value,
-          isInvalid: !parentIsValid,
-        },
+        // parent_category_id: {
+        //   value: currentInputs.parent_category_id.value,
+        //   isInvalid: !parentIsValid,
+        // },
       }
     });
 
-    if (!nameIsValid || !shortNameIsValid || !parentIsValid) {
+    if (!nameIsValid || !shortNameIsValid) {
       const wrongDataArray: string[] = []
       if (!nameIsValid)
         wrongDataArray.push("name")
       if (!shortNameIsValid)
         wrongDataArray.push("short name")
-      if (!parentIsValid)
-        wrongDataArray.push("parent ID")
       const wrongDataString: string = writeOutArray(wrongDataArray)
 
       Alert.alert("Invalid values", `Some data seems incorrect. Please check ${wrongDataString} and try again.`);
       return;
     }
 
-    const categoryData: Category = {
+    const categoryTemplate: CategoryTemplate = {
       name: inputs.name.value,
       short_name: inputs.short_name.value,
-      parent_category_id: inputs.parent_category_id.value,
-      id: !!category ? category.id : Math.random().toString(),
+      parent_group_id: parentCategory?.id,
     }
 
+    let response: false | undefined | Category | CategoryExtended;
     if (!!category) {
-      const response = await dispatch(categoryActions.modifyCategory(categoryData));
+      response = await modifyCategory(dispatch, category.id, categoryTemplate, demoMode);
 
       console.log("edit response:");
       console.log(response);
     } else {
-      const response = await dispatch(categoryActions.addCategory(categoryData));
+      response = await createCategory(dispatch, categoryTemplate, demoMode);
 
       console.log("add response:");
       console.log(response);
     }
-    navigation.goBack();
+    if (isCategory(response))
+      navigation.replace("CategoryDetails", {categoryId: response.id});
   }
 
   function inputChangedHandler<InputParam extends keyof typeof inputs>(inputIdentifier: InputParam, enteredValue: string) {
@@ -165,7 +176,7 @@ export default function AddEditCategory({ navigation, route }: CategoriesStackSc
     if (parentCategory === undefined || category === undefined)
       return;
 
-    let categoriesPath: string[] = [parentCategory.id];
+    let categoriesPath: number[] = [parentCategory.id];
     let currCategory: Category = parentCategory;
 
     while (currCategory.parent_category_id !== undefined) {
@@ -206,9 +217,10 @@ export default function AddEditCategory({ navigation, route }: CategoriesStackSc
   />
 
   const parentIdComponent = <View key="parent" style={styles.propertyContainer}>
-    <Text style={[styles.propertyLabel, inputs.parent_category_id.isInvalid && {color: cancelColor}]}>Kategoria nadrzędna</Text>
+    <Text style={styles.propertyLabel}>Kategoria nadrzędna</Text>
     <TouchableCard
-      style={[styles.card, inputs.parent_category_id.isInvalid && {backgroundColor: cancelColor}]}
+      style={[styles.card, !!category && {opacity: 0.6,}]}
+      props={{disabled: !!category}}
       onPress={parentPressed}
     >
       {!!parentCategory ?
@@ -216,6 +228,7 @@ export default function AddEditCategory({ navigation, route }: CategoriesStackSc
       :
         <Text style={{fontSize: 16, paddingVertical: 4, fontStyle: 'italic'}}>brak kategorii nadrzędnej</Text>}
     </TouchableCard>
+    {!!category && <Text style={{color: 'yellow', fontStyle: 'italic', paddingLeft: 10, fontSize: 12,}}>Ta właściwość nie może już zostać zmieniona.</Text>}
   </View>
 
   const buttonsComponent = <View key="buttons" style={styles.buttons}>

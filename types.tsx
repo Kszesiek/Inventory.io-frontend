@@ -6,13 +6,8 @@
 import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-// import { DrawerScreenProps } from '@react-navigation/drawer';
-import {LendingForEvent, LendingPrivate} from "./store/lendings";
 import {Event} from "./store/events";
-import {Item} from "./store/items";
-import {Member} from "./store/members";
-import {Category} from "./store/categories";
-import {Warehouse} from "./store/warehouses";
+import {Property} from "./store/properties";
 
 // declare global {
 //   namespace ReactNavigation {
@@ -39,7 +34,7 @@ export type LoginStackScreenProps<Screen extends keyof LoginStackParamList> = Na
 
 export type HomeStackParamList = {
   HomeDrawer: undefined;
-  CreateOrganization: { doesGoBack: boolean } | undefined;
+  CreateOrganizationHome: { doesGoBack: boolean } | undefined;
   JoinOrganization: undefined;
 }
 
@@ -66,7 +61,7 @@ export type HomeStackScreenProps<Screen extends keyof HomeStackParamList> = Nati
 export type HomeTabParamList = {
   HomescreenNavigator: undefined;
   InventoryNavigator: undefined;
-  LendingNavigator: undefined;
+  RentalNavigator: undefined;
   EventNavigator: undefined;
   MoreNavigator: undefined;
   // Members: undefined;
@@ -95,8 +90,9 @@ export type HomescreenStackScreenProps<Screen extends keyof HomescreenStackParam
 
 export type InventoryStackParamList = {
   Inventory: { searchPhrase: string } | undefined;
-  ItemDetails: { item: Item };
-  AddEditItem: { item: Item } | undefined;
+  ItemDetails: { itemId: string };
+  AddEditItem: { itemId: string } | undefined;
+  EditItemProperties: { itemId: string, categoryId: number };
 };
 
 export type InventoryStackScreenProps<Screen extends keyof InventoryStackParamList> = NativeStackScreenProps<
@@ -106,14 +102,15 @@ export type InventoryStackScreenProps<Screen extends keyof InventoryStackParamLi
 
 // LENDING STACK
 
-export type LendingStackParamList = {
-  Lendings: undefined;
-  LendingDetails: { lending: LendingPrivate | LendingForEvent };
-  AddEditLending: { lending: LendingPrivate | LendingForEvent } | undefined;
+export type RentalStackParamList = {
+  Rentals: undefined;
+  RentalDetails: { rentalId: number };
+  AddEditRental: { rentalId: number } | undefined;
+  AddItemsToRental: { rentalId: number };
 };
 
-export type LendingStackScreenProps<Screen extends keyof LendingStackParamList> = NativeStackScreenProps<
-  LendingStackParamList,
+export type RentalStackScreenProps<Screen extends keyof RentalStackParamList> = NativeStackScreenProps<
+  RentalStackParamList,
   Screen
 >;
 
@@ -137,6 +134,7 @@ export type MoreStackParamList = {
   MembersNavigator: undefined;
   WarehousesNavigator: undefined;
   CategoriesNavigator: undefined;
+  PropertiesNavigator: undefined;
   HenryStickmin: undefined;
 };
 
@@ -149,8 +147,8 @@ export type MoreStackScreenProps<Screen extends keyof MoreStackParamList> = Nati
 
 export type MembersStackParamList = {
   Members: undefined;
-  MemberDetails: { member: Member };
-  AddEditMember: { member: Member } | undefined;
+  MemberDetails: { memberId: string };
+  AddEditMember: { memberId: string } | undefined;
 };
 
 export type MembersStackScreenProps<Screen extends keyof MembersStackParamList> = NativeStackScreenProps<
@@ -162,8 +160,9 @@ export type MembersStackScreenProps<Screen extends keyof MembersStackParamList> 
 
 export type CategoriesStackParamList = {
   Categories: undefined;
-  CategoryDetails: { category: Category };
-  AddEditCategory: { category: Category } | undefined;
+  CategoryDetails: { categoryId: number };
+  AddEditCategory: { categoryId: number } | undefined;
+  EditCategoryProperties: {categoryId: number, properties: Property[]};
 };
 
 export type CategoriesStackScreenProps<Screen extends keyof CategoriesStackParamList> = NativeStackScreenProps<
@@ -175,8 +174,8 @@ export type CategoriesStackScreenProps<Screen extends keyof CategoriesStackParam
 
 export type WarehousesStackParamList = {
   Warehouses: undefined;
-  WarehouseDetails: { warehouse: Warehouse };
-  AddEditWarehouse: { warehouse: Warehouse } | undefined;
+  WarehouseDetails: { warehouseId: number };
+  AddEditWarehouse: { warehouseId: number } | undefined;
 };
 
 export type WarehousesStackScreenProps<Screen extends keyof WarehousesStackParamList> = NativeStackScreenProps<
@@ -184,11 +183,24 @@ export type WarehousesStackScreenProps<Screen extends keyof WarehousesStackParam
   Screen
 >;
 
+// PROPERTIES STACK
+
+export type PropertiesStackParamList = {
+  Properties: undefined;
+  PropertyDetails: { propertyId: number };
+  AddEditProperty: { propertyId: number } | undefined;
+};
+
+export type PropertiesStackScreenProps<Screen extends keyof PropertiesStackParamList> = NativeStackScreenProps<
+  PropertiesStackParamList,
+  Screen
+>;
+
 // WELCOME STACK
 
 export type WelcomeStackParamList = {
   Welcome: undefined;
-  CreateOrganization: undefined;
+  CreateOrganizationWelcome: undefined;
   JoinOrganization: undefined;
 };
 

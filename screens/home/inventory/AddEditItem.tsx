@@ -3,24 +3,25 @@ import {Text, useThemeColor, View} from "../../../components/Themed";
 import {InventoryStackScreenProps} from "../../../types";
 import {useDispatch, useSelector} from "react-redux";
 import {useEffect, useLayoutEffect, useRef, useState} from "react";
-import {
-  Item,
-  isItem,
-  itemActions,
-} from "../../../store/items";
+import {Item, ItemTemplate, Value} from "../../../store/items";
 import {writeOutArray} from "../../../utilities/enlist";
 import Input from "../../../components/Input";
 import {OpacityButton} from "../../../components/Themed/OpacityButton";
 import {IRootState} from "../../../store/store";
-import {Category} from "../../../store/categories";
+import {Category, CategoryExtended, isCategory, isCategoryExtended} from "../../../store/categories";
 import {Modalize} from "react-native-modalize";
 import {TouchableCard} from "../../../components/Themed/TouchableCard";
 import * as React from "react";
-import CategoriesChooser from "../../../components/CategoriesChooser";
+import CategoriesChooser from "../../../components/choosers/CategoriesChooser";
 import {Warehouse} from "../../../store/warehouses";
-import WarehouseChooser from "../../../components/WarehouseChooser";
+import WarehouseChooser from "../../../components/choosers/WarehouseChooser";
 import {getAllWarehouses} from "../../../endpoints/warehouses";
-import {getAllCategories} from "../../../endpoints/categories";
+import {getAllCategories, getCategory} from "../../../endpoints/categories";
+import {addItem, modifyItem} from "../../../endpoints/items";
+import {defaultValue, Property} from "../../../store/properties";
+import {getPropertiesForCategory} from "../../../endpoints/properties";
+import Switch from "../../../components/Themed/Switch";
+import Card from "../../../components/Themed/Card";
 
 export type ValidValuePair<Type> = {
   value: Type
@@ -29,8 +30,7 @@ export type ValidValuePair<Type> = {
 
 type inputValuesType = {
   name: ValidValuePair<string>,
-  category_id: ValidValuePair<string>,
-  warehouse_id: ValidValuePair<string | undefined>,
+  description: ValidValuePair<string>,
 }
 
 export default function AddEditItem({ navigation, route }: InventoryStackScreenProps<'AddEditItem'>) {
@@ -38,60 +38,90 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
   const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
   const categories : Category[]  = useSelector((state: IRootState) => state.categories.categories);
   const warehouses : Warehouse[] = useSelector((state: IRootState) => state.warehouses.warehouses);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [areCategoriesLoaded, setAreCategoriesLoaded] = useState<boolean | undefined>(categories.length === 0 ? undefined : true);
   const [areWarehousesLoaded, setAreWarehousesLoaded] = useState<boolean | undefined>(warehouses.length === 0 ? undefined : true);
+  const [arePropertiesLoaded, setArePropertiesLoaded] = useState<boolean | undefined>(undefined);
 
-  const item: Item | undefined = route.params?.item;
-  const isEditing = !!item;
+  const item: Item | undefined = useSelector((state: IRootState) => state.items.items.find((item_) => item_.itemId === route.params?.itemId));
+  const categoryFromState: Category | undefined = useSelector((state: IRootState) => state.categories.categories.find((category) => category.id === item?.categoryId));
+  const warehouseFromState: Warehouse | undefined = useSelector((state: IRootState) => state.warehouses.warehouses.find((warehouse) => warehouse.id === item?.warehouseId));
 
-  const [category, setCategory] = useState<Category | undefined>(!!item ? categories.find(
-    (_category: Category) => _category.id === item.categoryId) : undefined);
+  const [category, setCategory] = useState<CategoryExtended | Category | undefined>(categoryFromState);
+  const [warehouse, setWarehouse] = useState<Warehouse | undefined>(warehouseFromState);
   const categoriesModalizeRef = useRef<Modalize>(null);
-
-  const [warehouse, setWarehouse] = useState<Warehouse | undefined>(!!item ? warehouses.find(
-    (_warehouse: Warehouse) => _warehouse.id === item.warehouseId) : undefined);
   const warehousesModalizeRef = useRef<Modalize>(null);
+
+  const [isExtendedCategoryLoaded, setIsExtendedCategoryLoaded] = useState<boolean | undefined>(isCategoryExtended(category));
 
   const backgroundColor = useThemeColor({}, "background");
   const cancelColor = useThemeColor({}, "delete");
   const tintColor = useThemeColor({}, "tint");
 
+  async function getWarehouses() {
+    setAreWarehousesLoaded(await getAllWarehouses(dispatch, demoMode));
+  }
+  async function getCategories() {
+    setAreCategoriesLoaded(await getAllCategories(dispatch, demoMode));
+  }
+  async function getProperties() {
+    if (!category)
+      return;
+    const properties: Property[] | null = await getPropertiesForCategory(category?.id, demoMode);
+    Array.isArray(properties) && setProperties(properties);
+    setArePropertiesLoaded(!!properties);
+  }
+  async function getExtendedCategory() {
+    setIsExtendedCategoryLoaded(false);
+    const extendedCategory: CategoryExtended | null | undefined = await getCategory(dispatch, (category as Category).id, demoMode);
+    if (!isCategoryExtended(extendedCategory))
+    //   setCategory(extendedCategory);
+    // else
+      console.error("Fetching extended category resulted in " + extendedCategory + ", which means that " +
+        (extendedCategory === null ? "server did not recognize given category!" :
+          "there was an unexpected response from server or other connectivity issues!"));
+    else {
+      setProperties(extendedCategory.properties);
+    }
+    setIsExtendedCategoryLoaded(true);
+  }
+
   useEffect(() => {
-    async function getWarehouses() {
-      setAreWarehousesLoaded(await getAllWarehouses(dispatch, demoMode));
-    }
-    async function getCategories() {
-      setAreCategoriesLoaded(await getAllCategories(dispatch, demoMode));
-    }
-    if (warehouses.length === 0) {
-      getWarehouses();
-    }
-    if (categories.length === 0) {
-      getCategories();
-    }
+    getWarehouses();
+    getProperties();
+    !route.params?.itemId && getCategories();
+    // if (isCategory(category) && !isCategoryExtended(category)) {
+    //   console.log("getExtendedCategory in useEffect[]");
+    //   getExtendedCategory();
+    // }
   }, []);
 
-  const [inputs, setInputs]: [inputValuesType, Function] = useState(
+  useEffect(() => {
+    if (isCategory(category) && !isCategoryExtended(category)) {
+      console.log("getExtendedCategory in useEffect[category]");
+      getExtendedCategory();
+    }
+  }, [category]);
+
+  const [propertyInputs, setPropertyInputs] = useState<{[key: number]: ValidValuePair<string | number | boolean>}>({}); //  | number | boolean | Date
+
+  const [inputs, setInputs] = useState<inputValuesType>(
     {
       name: {
-        value: !!item && isItem(item) ? item.name : "",
+        value: !!item ? item.name : "",
         isInvalid: false,
       },
-      category_id: {
-        value: !!item && isItem(item) ? item.categoryId : "",
-        isInvalid: false,
-      },
-      warehouse_id: {
-        value: !!item && isItem(item) ? item.warehouseId : undefined,
+      description: {
+        value: !!item ? item.description || "" : "",
         isInvalid: false,
       },
     });
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: isEditing ? "Edytuj wypożyczenie" : "Stwórz wypożyczenie"
+      title: !!item ? "Edytuj przedmiot" : "Dodaj przedmiot"
     });
-  }, [navigation, isEditing])
+  }, [navigation, item])
 
   useEffect(() => {
     setInputs((currentInputValues: typeof inputs) => {
@@ -111,15 +141,30 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
     })
   }, [warehouse])
 
+  useEffect(() => {
+    setPropertyInputs((prevState) => {
+      let newState: typeof propertyInputs = {};
+
+      properties.forEach((property) => {
+        newState[property.id] = {
+          value: prevState[property.id]?.value || defaultValue(property),
+          isInvalid: false,
+        };
+      })
+
+      return newState;
+    })
+  }, [properties]);
+
   function cancelPressed() {
     console.log("cancel button pressed");
     navigation.goBack();
   }
 
   async function submitPressed() {
-    const nameIsValid: boolean = inputs.name.value.trim().length >= 0;
-    const categoryIsValid: boolean = categories.findIndex(category => category.id === inputs.category_id.value) !== -1;
-    const warehouseIsValid: boolean = inputs.warehouse_id.value === undefined || warehouses.findIndex(warehouse => warehouse.id === inputs.warehouse_id.value) !== -1;
+    const nameIsValid: boolean = inputs.name.value.trim().length > 0 && inputs.name.value.length < 100;
+    const descriptionIsValid: boolean = inputs.name.value.trim().length >= 0 && inputs.name.value.length < 1000;
+    const categoryIsValid: boolean = !!category; // categories.findIndex(category => category.id === inputs.category_id.value) !== -1;
 
     setInputs((currentInputs: inputValuesType) => {
       return {
@@ -127,25 +172,21 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
           value: currentInputs.name.value,
           isInvalid: !nameIsValid,
         },
-        category_id: {
-          value: currentInputs.category_id.value,
-          isInvalid: !categoryIsValid,
+        description: {
+          value: currentInputs.description.value,
+          isInvalid: !descriptionIsValid,
         },
-        warehouse_id: {
-          value: currentInputs.warehouse_id.value,
-          isInvalid: !warehouseIsValid,
-        }
       }
     });
 
-    if (!nameIsValid || !categoryIsValid || !warehouseIsValid) {
+    if (!nameIsValid || !descriptionIsValid || !categoryIsValid) {
       const wrongDataArray: string[] = []
       if (!categoryIsValid)
         wrongDataArray.push("category")
       if (!nameIsValid)
         wrongDataArray.push("item name")
-      if (!warehouseIsValid)
-        wrongDataArray.push("warehouse")
+      if (!descriptionIsValid)
+        wrongDataArray.push("description")
 
       const wrongDataString: string = writeOutArray(wrongDataArray)
 
@@ -153,33 +194,36 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
       return;
     }
 
-    const itemData: Item = isItem(item) ?
-      {
-        itemId: item.itemId,
-        name: inputs.name.value,
-        categoryId: inputs.category_id.value,
-        warehouseId: inputs.warehouse_id.value,
-      }
-    :
-      {
-        itemId: Math.random().toString(),
-        name: inputs.name.value,
-        categoryId: inputs.category_id.value,
-        warehouseId: inputs.warehouse_id.value,
-      }
+    const itemTemplate: ItemTemplate = {
+      name: inputs.name.value,
+      group_id: category!.id,
+      description: inputs.description.value,
+      status_id: 5,  // This will be added... someday
+      values: properties.map((property) => ({
+        value: propertyInputs[property.id].value,
+        property_id: property.id,
+      } as Value)),
+      warehouse_id: warehouse?.id || undefined,
+    }
 
-    if (isEditing) {
-      const response = await dispatch(itemActions.modifyItem({item: itemData}));
+    console.log(itemTemplate);
+
+    let response: boolean | undefined;
+
+    if (!!item) {
+      response = await modifyItem(dispatch, item.itemId, itemTemplate, demoMode);
 
       console.log("edit response:");
       console.log(response);
     } else {
-      const response = await dispatch(itemActions.addItem({item: itemData}));
+      response = await addItem(dispatch, itemTemplate, demoMode);
 
       console.log("add response:");
       console.log(response);
     }
-    navigation.goBack();
+
+    if (response)
+      navigation.goBack();
   }
 
   function inputChangedHandler<InputParam extends keyof typeof inputs>(inputIdentifier: InputParam, enteredValue: string) {
@@ -190,6 +234,18 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
         [inputIdentifier]: {value: enteredValue, isInvalid: false},
       }
     })
+  }
+
+  function propertyInputChangedHandler<InputParam extends keyof typeof propertyInputs>(inputIdentifier: InputParam, enteredValue: string | number | boolean) {
+    console.log(`${inputIdentifier} value changed`);
+    console.log(`entered value: ${enteredValue}`);
+    setPropertyInputs((currentInputValues) => {
+      return {
+        ...currentInputValues,
+        [inputIdentifier]: {value: enteredValue, isInvalid: false},
+      }
+    });
+    console.log(propertyInputs);
   }
 
   function Categories() {
@@ -249,31 +305,46 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
     // onErrorText="Please enter a description containing under 4000 characters"
     textInputProps={{
       placeholder: "nazwa przedmiotu",
-      maxLength: 40,
+      maxLength: 100,
       onChangeText: inputChangedHandler.bind(null, "name"),
       value: inputs.name.value,
       // autoCorrect: false,  // default is true
       // autoCapitalize: 'sentences',  // default is sentences
     }} />
 
+  const itemDescriptionComponent = <Input
+    label="Opis przedmiotu"
+    isInvalid={inputs.description.isInvalid}
+    // onErrorText="Please enter a description containing under 4000 characters"
+    textInputProps={{
+      placeholder: "opis przedmiotu",
+      maxLength: 1000,
+      onChangeText: inputChangedHandler.bind(null, "description"),
+      value: inputs.description.value,
+      multiline: true,
+      // autoCorrect: false,  // default is true
+      // autoCapitalize: 'sentences',  // default is sentences
+    }} />
+
   const categoryComponent = <View key="category" style={styles.propertyContainer}>
-    <Text style={[styles.propertyLabel, inputs.category_id.isInvalid && {color: cancelColor}]}>Kategoria</Text>
+    <Text style={[styles.propertyLabel, /* inputs.category_id.isInvalid || !category && {color: cancelColor} */]}>Kategoria</Text>
     <TouchableCard
-      style={[styles.card, inputs.category_id.isInvalid && {backgroundColor: cancelColor}, !areCategoriesLoaded && {opacity: 0.6}]}
+      style={[styles.card, /* inputs.category_id.isInvalid || !category && {backgroundColor: cancelColor},  */ (!areCategoriesLoaded || !!route.params?.itemId) && {opacity: 0.6}]}
       onPress={categoryPressed}
-      props={{disabled: !areCategoriesLoaded}}
+      props={{disabled: !areCategoriesLoaded || !!route.params?.itemId}}
     >
       {!!category ?
         <Text style={{fontSize: 18, paddingVertical: 3}}>{category.name} ({category.short_name})</Text>
         :
         <Text style={{fontSize: 16, paddingVertical: 4, fontStyle: 'italic'}}>{areCategoriesLoaded ? "wybierz kategorię..." : "wczytywanie kategorii..."}</Text>}
     </TouchableCard>
+    {!!route.params?.itemId && <Text style={{color: 'yellow', fontStyle: 'italic', paddingLeft: 10, fontSize: 12,}}>Ta właściwość nie może już zostać zmieniona.</Text>}
   </View>
 
   const warehouseComponent = <View key="warehouse" style={styles.propertyContainer}>
-    <Text style={[styles.propertyLabel, inputs.warehouse_id.isInvalid && {color: cancelColor}]}>Magazyn</Text>
+    <Text style={styles.propertyLabel}>Magazyn</Text>
     <TouchableCard
-      style={[styles.card, inputs.warehouse_id.isInvalid && {backgroundColor: cancelColor}, !areWarehousesLoaded && {opacity: 0.6}]}
+      style={[styles.card, !areWarehousesLoaded && {opacity: 0.6}]}
       onPress={warehousePressed}
       props={{disabled: !areWarehousesLoaded}}
     >
@@ -288,6 +359,50 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
     </TouchableCard>
   </View>
 
+  const valuesComponent = <View key="values">
+    {
+      properties.length > 0 && properties.map((property) => {
+        if (property.property_type_id === 1 || property.property_type_id === 2)
+          return <Input
+            key={property.id}
+            label={property.name}
+            isInvalid={false} // inputs.description.isInvalid
+            textInputProps={{
+              placeholder: property.name.toLowerCase() + "...",
+              maxLength: 100,
+              onChangeText: (text) => {
+                if (property.property_type_id === 2 && isNaN(Number(text)))
+                  return;
+
+                propertyInputChangedHandler(property.id, text);
+              },
+              value: propertyInputs[property.id]?.value.toString() || undefined,
+              multiline: false,
+              keyboardType: property.property_type_id === 2 ? "numeric" : "default",
+              // autoCorrect: false,  // default is true
+              // autoCapitalize: 'sentences',  // default is sentences
+            }} />
+        if (property.property_type_id === 3) {
+          return <View style={{marginHorizontal: 4, marginVertical: 8,}} key={property.id}>
+            <Text style={styles.booleanPropertyLabel}>{property.name}</Text>
+            <Card style={styles.booleanPropertyCard} key={property.id}>
+              <Text style={styles.booleanPropertyLabel}>{property.name}</Text>
+              <Switch
+                isEnabled={propertyInputs[property.id]?.value as boolean}
+                setIsEnabled={propertyInputChangedHandler.bind(null, property.id)}
+                // setIsEnabled={(value) => setPropertyInputs((prevState) => ({
+                //   ...prevState,
+                //   [property.id]: {value: value, isInvalid: false},
+                // }))}
+              />
+            </Card>
+          </View>
+        }
+        return;
+      })
+    }
+  </View>
+
   const buttonsComponent = <View style={styles.buttons}>
     <OpacityButton style={[styles.button, {backgroundColor: cancelColor}]} onPress={cancelPressed}>Anuluj</OpacityButton>
     <OpacityButton style={styles.button} onPress={submitPressed}>{!!item ? "Zatwierdź" : "Utwórz"}</OpacityButton>
@@ -295,8 +410,10 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
 
   const listElements = [
     itemNameComponent,
+    itemDescriptionComponent,
     categoryComponent,
     warehouseComponent,
+    route.params?.itemId ? valuesComponent : <></>,
   ]
 
   return <>
@@ -354,10 +471,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 4,
   },
-  propertyContainer: {
-    marginHorizontal: 4,
-    marginVertical: 8,
-  },
   card: {
     alignItems: 'flex-start',
     paddingVertical: 6,
@@ -374,5 +487,20 @@ const styles = StyleSheet.create({
   warehouseDrawerButton: {
     margin: 15,
     paddingVertical: 8,
+  },
+  booleanPropertyCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    marginTop: 4,
+    borderRadius: 10,
+  },
+  booleanPropertyLabel: {
+    fontSize: 16,
+  },
+  propertyContainer: {
+    marginHorizontal: 4,
+    marginVertical: 8,
   },
 });

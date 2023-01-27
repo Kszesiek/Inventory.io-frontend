@@ -1,10 +1,26 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 
-export interface Item{
+export interface Item {
   itemId: string
   name: string
-  categoryId: string
-  warehouseId?: string
+  description?: string,
+  categoryId: number
+  warehouseId?: number
+  values?: Value[]
+}
+
+export interface Value {
+  value: string
+  property_id: number
+}
+
+export function isValue(object: any): object is Value {
+  return (
+    object &&
+    typeof object === 'object' &&
+    typeof object['value'] === 'string' &&
+    typeof object['property_id'] === 'number'
+  )
 }
 
 export function isItem(object: any): object is Item {
@@ -13,9 +29,37 @@ export function isItem(object: any): object is Item {
     typeof object === 'object' &&
     typeof object['itemId'] === 'string' &&
     typeof object['name'] === 'string' &&
-    typeof object['categoryId'] === 'string' &&
-    typeof object['warehouseId'] === ('string' || undefined)
+    typeof object['description'] === 'string' &&
+    typeof object['categoryId'] === 'number' &&
+    typeof object['warehouseId'] === ('number' || undefined) &&
+    (
+      typeof object['properties'] === undefined ||
+      (
+        Array.isArray(object['values']) &&
+        object["values"].every(item => isValue(item))
+      )
+    )
   );
+}
+
+export interface ItemTemplate {
+  name: string
+  description: string
+  status_id: number
+  group_id: number
+  values: Value[]
+  warehouse_id?: number
+}
+
+export function itemFromTemplate(itemTemplate: ItemTemplate, itemId?: string): Item {
+  return {
+    itemId: itemId || Math.random().toString(),
+    name: itemTemplate.name,
+    description: itemTemplate.description,
+    categoryId: itemTemplate.group_id,
+    warehouseId: itemTemplate.warehouse_id,
+    values: itemTemplate.values,
+  } as Item;
 }
 
 export const itemsSlice = createSlice({
@@ -41,7 +85,20 @@ export const itemsSlice = createSlice({
       }
     },
     loadItems: (state, action: PayloadAction<Item[]>) => {
-      state.items = action.payload;
+      action.payload.forEach((item: Item) => {
+        const index = state.items.findIndex(item_ => item_.itemId === item.itemId);
+        if (index >= 0)
+          state.items[index] = item;
+        else
+          state.items.push(item);
+      })
+    },
+    loadItem: (state, action: PayloadAction<Item>) => {
+      const index = state.items.findIndex(item_ => item_.itemId === action.payload.itemId);
+      if (index >= 0)
+        state.items[index] = action.payload;
+      else
+        state.items.push(action.payload);
     },
     wipeItems: (state) => {
       state.items = [];

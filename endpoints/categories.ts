@@ -1,7 +1,7 @@
 import {serverAddress} from "./global";
 import {Dispatch} from "react";
 import axios from "axios";
-import {Category, categoryActions, CategoryTemplate} from "../store/categories";
+import {Category, categoryActions, CategoryExtended, categoryFromTemplate, CategoryTemplate} from "../store/categories";
 import {Organization} from "../store/organizations";
 import {store as OGstore} from "../store/store";
 import {AnyAction} from "@reduxjs/toolkit";
@@ -27,7 +27,7 @@ function getUrl(): string {
   }
 }
 
-export function getDemoCategories(): Category[] {
+export function getDemoCategories(): CategoryExtended[] {
   const currentOrganizationId: string | undefined = store.getState().organizations.currentOrganization?.id;
   if (!currentOrganizationId)
     return [];
@@ -35,7 +35,7 @@ export function getDemoCategories(): Category[] {
 }
 
 export async function getAllCategories (dispatch: Dispatch<AnyAction>, demoMode: boolean = false): Promise<boolean> {
-  const categories = await basicGetCategories(demoMode);
+  const categories: Category[] | null = await basicGetCategories(demoMode);
   if (!categories)
     return false;
 
@@ -43,32 +43,32 @@ export async function getAllCategories (dispatch: Dispatch<AnyAction>, demoMode:
   return true;
 }
 
-export async function getCategory (dispatch: Dispatch<AnyAction>, categoryId: string, demoMode: boolean = false): Promise<Category | null> {
+export async function getCategory (dispatch: Dispatch<AnyAction>, categoryId: number, demoMode: boolean = false): Promise<CategoryExtended | null | undefined> {
   if (demoMode) {
     await new Promise(resolve => setTimeout(resolve, 400));
     return getDemoCategories().find((category) => category.id === categoryId) || null;
   } else try {
-    const response = await axios.get(getUrl() + '/' + categoryId, { validateStatus: (status) => status >= 200 && status < 300 || status === 404 });
+    const response = await axios.get(getUrl() + categoryId.toString(), { validateStatus: (status) => status >= 200 && status < 300 || status === 404 });
 
     console.log("--- GET CATEGORY RESPONSE ---");
     console.log("STATUS: " + response.status);
     console.log(response.data);
 
     if (response.status === 200) {
-      const category: Category = {
+      const category: CategoryExtended = {
         id: response.data.id,
         name: response.data.name,
         short_name: response.data.short_name,
-        parent_category_id: response.data.parent_category_id,
-      } as Category;
+        parent_category_id: response.data.parent_group_id,
+        properties: response.data.properties,
+      } as CategoryExtended;
 
-      // await dispatch(categoryActions.loadCategories(categories)); // TODO: possibly categoryActions.AddOrCreate
+      await dispatch(categoryActions.addOrModifyCategory(category));
       return category;
-    } else
-      return null;
+    } else return null;
   } catch (error) {
     console.log(error);
-    return null;
+    return undefined;
   }
 }
 
@@ -86,12 +86,12 @@ export async function basicGetCategories(demoMode: boolean = false): Promise<nul
     let categories: Category[];
 
     if (response.status === 200) {
-      categories = (response.data as Array<any>).map((obj) => {return {
+      categories = (response.data as Array<any>).map((obj) => ({
         id: obj.id,
         name: obj.name,
         short_name: obj.short_name,
-        parent_category_id: obj.parent_group_id,
-      }});
+        parent_category_id: obj.parent_group_id || undefined,
+      } as Category));
     } else if (response.status === 404) {
       categories = [];
     } else return null;
@@ -103,21 +103,26 @@ export async function basicGetCategories(demoMode: boolean = false): Promise<nul
   }
 }
 
-export async function createCategory(categoryTemplate: CategoryTemplate): Promise<boolean | Category> {
-  try {
-    const response = await axios.post(
-      getUrl(),
-      categoryTemplate,
-      { validateStatus: (status) => status >= 200 && status < 300 || status === 404 });
+export async function createCategory(dispatch: Dispatch<AnyAction>, categoryTemplate: CategoryTemplate, demoMode: boolean = false) {
+  if (demoMode) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    await dispatch(categoryActions.addCategory(categoryFromTemplate(categoryTemplate)));
+  } else try {
+    console.log("I'm here");
+    const url = getUrl();
+    console.log(url);
+    console.log(categoryTemplate);
+    const response = await axios.post(getUrl(), categoryTemplate);
 
-    console.log("--- CREATE CATEGORY RESPONSE ---");
+    console.log("--- POST CATEGORY RESPONSE ---");
     console.log("STATUS: " + response.status);
     console.log(response.data);
 
     if (response.status !== 201)
       return false;
 
-    const category: Category = response.data as Category;
+    const category: Category = categoryFromTemplate(response.data, response.data.id);
+    await dispatch(categoryActions.addCategory(category));
     return category !== undefined ? category : false;
   } catch (error) {
     console.log(error);
@@ -125,22 +130,24 @@ export async function createCategory(categoryTemplate: CategoryTemplate): Promis
   }
 }
 
-export async function modifyCategory(categoryId: string, categoryTemplate: CategoryTemplate, dispatch: Dispatch<AnyAction>): Promise<boolean | Category> {
-  try {
-    const response = await axios.patch(
-      getUrl() + categoryId + "/",
-      categoryTemplate,
-      { validateStatus: (status) => status >= 200 && status < 300 || status === 404 });
+export async function modifyCategory(dispatch: Dispatch<AnyAction>, categoryId: number, categoryTemplate: CategoryTemplate, demoMode: boolean) {
+  if (demoMode) {
+    await new Promise(resolve => setTimeout(resolve, 700));
+    await dispatch(categoryActions.addCategory(categoryFromTemplate(categoryTemplate)));
+  } else try {
+    const url: string = getUrl() + categoryId + "/";
+    const response = await axios.patch(url, categoryTemplate);
+      // { validateStatus: (status) => status >= 200 && status < 300 || status === 404 });
 
-    console.log("--- MODIFY CATEGORY RESPONSE ---");
+    console.log("--- PATCH CATEGORY RESPONSE ---");
     console.log("STATUS: " + response.status);
     console.log(response.data);
 
     if (response.status !== 200)
       return false;
 
-    const category: Category = response.data as Category;
-
+    const category: Category = categoryFromTemplate(response.data, response.data.id);
+    await dispatch(categoryActions.modifyCategory(category));
     return category !== undefined ? category : false;
   } catch (error) {
     console.log(error);
@@ -148,7 +155,7 @@ export async function modifyCategory(categoryId: string, categoryTemplate: Categ
   }
 }
 
-export async function removeCategory(categoryId: string, dispatch: Dispatch<AnyAction>): Promise<boolean> {
+export async function removeCategory(categoryId: number, dispatch: Dispatch<AnyAction>): Promise<boolean> {
   try {
     const response = await axios.delete(
       getUrl() + categoryId + "/",

@@ -1,7 +1,7 @@
 import {FlatList, StyleSheet, TouchableOpacity} from "react-native";
 import {Text, TextInput, useThemeColor, View} from "./Themed";
 import {OpacityButton} from "./Themed/OpacityButton";
-import {ValidValuePair} from "../screens/home/lendings/AddEditLending";
+import {ValidValuePair} from "../screens/home/rentals/AddEditRental";
 import {MaterialIcons} from "@expo/vector-icons";
 import * as React from "react";
 

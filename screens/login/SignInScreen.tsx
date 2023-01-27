@@ -10,16 +10,13 @@ import {OpacityButton} from "../../components/Themed/OpacityButton";
 import {TouchableText} from "../../components/Themed/TouchableText";
 import {InputCard} from "../../components/Themed/InputCard";
 import {useDispatch, useSelector} from "react-redux";
-import {appWideActions} from "../../store/appWide";
 import {organizationsActions} from "../../store/organizations";
-import {demoOrganizations} from "../../constants/demoData";
-import {lendingActions} from "../../store/lendings";
+import {rentalsActions} from "../../store/rentals";
 import {itemActions} from "../../store/items";
 import {eventActions} from "../../store/events";
 import {userActions} from "../../store/users";
 import {IRootState} from "../../store/store";
 import {logIn} from "../../endpoints/auth";
-import {getOrganizations} from "../../endpoints/organizations";
 import {categoryActions} from "../../store/categories";
 
 export default function SignInScreen({ navigation, route }: LoginStackScreenProps<'SignIn'>) {
@@ -31,7 +28,7 @@ export default function SignInScreen({ navigation, route }: LoginStackScreenProp
   const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
 
   useEffect(() => {
-    dispatch(lendingActions.wipeLendings());
+    dispatch(rentalsActions.wipeRentals());
     dispatch(itemActions.wipeItems());
     dispatch(eventActions.wipeEvents());
     dispatch(organizationsActions.wipeOrganizations());

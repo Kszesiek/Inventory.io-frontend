@@ -28,11 +28,11 @@ export default function WelcomeStackNavigator() {
       })}
     >
       <WelcomeStack.Screen name="Welcome" component={Welcome} />
-      <WelcomeStack.Screen name="CreateOrganization" component={CreateOrganization} options={{
+      <WelcomeStack.Screen name="CreateOrganizationWelcome" component={CreateOrganization} options={{
         headerShown: true,
         headerTitle: 'Załóż organizację',
       }} />
-      <WelcomeStack.Screen name="JoinOrganization" component={CreateOrganization} />
+      {/*<WelcomeStack.Screen name="JoinOrganization" component={CreateOrganization} />*/}
 
     </WelcomeStack.Navigator>
   );

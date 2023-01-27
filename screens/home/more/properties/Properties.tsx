@@ -3,61 +3,58 @@ import {Text, useThemeColor, View} from "../../../../components/Themed";
 import {useDispatch, useSelector} from "react-redux";
 import {IRootState} from "../../../../store/store";
 import {TouchableCard} from "../../../../components/Themed/TouchableCard";
-import {MembersStackScreenProps} from "../../../../types";
-import {Member} from "../../../../store/members";
-import React, {useState} from "react";
-import {getAllMembers} from "../../../../endpoints/members";
-import {useFocusEffect} from "@react-navigation/native";
+import {PropertiesStackScreenProps} from "../../../../types";
+import {Property} from "../../../../store/properties";
+import {useEffect, useState} from "react";
+import {getAllProperties} from "../../../../endpoints/properties";
 
-export default function Members({ navigation, route }: MembersStackScreenProps<'Members'>) {
+export default function Members({ navigation, route }: PropertiesStackScreenProps<'Properties'>) {
   const dispatch = useDispatch();
   const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
-  const members: Array<Member> = useSelector((state: IRootState) => state.members.members);
-  const [areMembersLoaded, setAreMembersLoaded] = useState<boolean | undefined>(undefined);
+  const properties: Array<Property> = useSelector((state: IRootState) => state.properties.properties)
+  const [arePropertiesLoaded, setArePropertiesLoaded] = useState<boolean | undefined>(undefined);
 
   const tintColor = useThemeColor({}, 'tint');
   const backgroundColor = useThemeColor({}, 'background');
 
-  useFocusEffect(React.useCallback(() => {
-    async function getMembers() {
-      setAreMembersLoaded(await getAllMembers(dispatch, demoMode));
+  useEffect(() => {
+    async function getProperties() {
+      setArePropertiesLoaded(await getAllProperties(dispatch, demoMode));
     }
-    getMembers();
-  }, []));
+    getProperties();
+  }, []);
 
   const boldedText: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans Bold',
-    color: tintColor,
   }
 
-  if (areMembersLoaded === undefined) {
+  if (arePropertiesLoaded === undefined) {
     return <View style={styles.noContentContainer}>
       <ActivityIndicator color={tintColor} size="large" />
       <Text style={styles.noContentText}>Ładowanie danych z serwera...</Text>
     </View>
   }
 
-  if (!areMembersLoaded) {
+  if (!arePropertiesLoaded) {
     return <View style={styles.noContentContainer}>
-      <Text style={[styles.noContentText, {fontSize: 16}]}>Nie udało się załadować członków organizacji.</Text>
+      <Text style={[styles.noContentText, {fontSize: 16}]}>Nie udało się załadować właściwości.</Text>
       <Text style={styles.noContentText}>Podczas połączenia z serwerem wystąpił problem.</Text>
     </View>
   }
 
   return <FlatList
     style={{...styles.flatList, backgroundColor}}
-    contentContainerStyle={{flexGrow: 1}}
-    data={members}
+    contentContainerStyle={{flexGrow: 1, paddingBottom: 20,}}
+    data={properties}
     ListEmptyComponent={
       <View style={styles.noContentContainer}>
-        <Text style={[styles.noContentText, {fontSize: 16}]}>Brak członków organizacji do wyświetlenia.</Text>
-        <Text style={styles.noContentText}>Aby dodać członka, użyj przycisku u góry ekranu.</Text>
+        <Text style={[styles.noContentText, {fontSize: 16}]}>Brak właściwości przedmiotów do wyświetlenia.</Text>
+        <Text style={styles.noContentText}>Aby dodać właściwość, użyj przycisku u góry ekranu.</Text>
       </View>}
-    renderItem={({item}: {item: Member}) => {
+    renderItem={({item}: {item: Property}) => {
       return (
-        <TouchableCard style={styles.card} onPress={() => navigation.navigate("MemberDetails", { memberId: item.id })}>
-          <Text style={boldedText}>{item.username}</Text>
-          <Text style={{textAlign: 'center'}}>{item.name} {item.surname}</Text>
+        <TouchableCard style={styles.card} onPress={() => navigation.navigate("PropertyDetails", { propertyId: item.id })}>
+          <Text style={boldedText}>{item.name}</Text>
         </TouchableCard>
       )
     }}

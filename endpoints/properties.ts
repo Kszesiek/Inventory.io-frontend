@@ -1,10 +1,18 @@
 import {serverAddress} from "./global";
 import {Dispatch} from "react";
 import axios from "axios";
-import {Property, PropertyTemplate, PropertyUnit, PropertyType, propertyActions} from "../store/properties";
+import {
+  Property,
+  PropertyTemplate,
+  PropertyUnit,
+  PropertyType,
+  propertyActions,
+  propertyFromTemplate
+} from "../store/properties";
 import {store as OGstore} from "../store/store";
 import {AnyAction} from "@reduxjs/toolkit";
 import {Organization} from "../store/organizations";
+import {demoData} from "../constants/demoData";
 
 let store: typeof OGstore;
 let dispatch: Dispatch<AnyAction>;
@@ -26,8 +34,35 @@ function getUrl(): string {
   }
 }
 
-export async function getProperties(dispatch: Dispatch<AnyAction>): Promise<boolean> {
-  try {
+function getDemoProperties(): Property[] {
+  const currentOrganizationId: string | undefined = store.getState().organizations.currentOrganization?.id;
+  if (!currentOrganizationId)
+    return [];
+  return demoData[currentOrganizationId].properties;
+}
+
+export async function getAllProperties(dispatch: Dispatch<AnyAction>, demoMode: boolean = false): Promise<boolean> {
+  const properties: Property[] | null = await basicGetProperties(undefined, undefined, undefined, demoMode);
+  if (!properties)
+    return false;
+
+  await dispatch(propertyActions.loadProperties(properties));
+  return true;
+}
+
+export async function getPropertiesForCategory(categoryId: number, demoMode: boolean = false): Promise<Property[] | null> {
+  const properties: Property[] | null = await basicGetProperties(categoryId, undefined, undefined, demoMode);
+  if (!properties)
+    return null;
+
+  return properties;
+}
+
+export async function basicGetProperties(categoryId?: number, unitId?: number, propertyTypeId?: number, demoMode: boolean = false): Promise<null | Property[]> {
+  if (demoMode) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return getDemoProperties();
+  } else try {
     const response = await axios.get(getUrl(), { validateStatus: (status) => status >= 200 && status < 300 || status === 404 });
 
     console.log("--- GET PROPERTIES RESPONSE ---");
@@ -40,18 +75,22 @@ export async function getProperties(dispatch: Dispatch<AnyAction>): Promise<bool
       properties = response.data;
     } else if (response.status === 404) {
       properties = [];
-    } else return false;
+    } else return null;
 
-    await dispatch(propertyActions.loadProperties(properties));
-    return true;
+    return properties;
   } catch (error) {
     console.log(error);
-    return false;
+    return null;
   }
 }
 
-export async function createProperty(propertyTemplate: PropertyTemplate): Promise<boolean | Property> {
-  try {
+export async function createProperty(dispatch: Dispatch<AnyAction>, propertyTemplate: PropertyTemplate, demoMode: boolean = false): Promise<boolean | Property> {
+  if (demoMode) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const property = propertyFromTemplate(propertyTemplate);
+    await dispatch(propertyActions.addProperty(property));
+    return property;
+  } else try {
     const response = await axios.post(
       getUrl(),
       propertyTemplate,
@@ -64,38 +103,49 @@ export async function createProperty(propertyTemplate: PropertyTemplate): Promis
     if (response.status !== 201)
       return false;
 
-    const property: Property = response.data as Property;
-    return property !== undefined ? property : false;
+    const property: Property = propertyFromTemplate(response.data, response.data.id);
+    if (!!property) {
+      await dispatch(propertyActions.addProperty(property));
+      return property;
+    }
+    return false;
   } catch (error) {
     console.log(error);
     return false;
   }
 }
 
-export async function getProperty(propertyId: string): Promise<Property | boolean> {
-  try {
+export async function getProperty(dispatch: Dispatch<AnyAction>, propertyId: number, demoMode: boolean = false): Promise<Property | undefined | null> {
+  if (demoMode) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return getDemoProperties().find((property) => property.id === propertyId);
+  } else try {
     const response = await axios.get(getUrl() +  + propertyId, { validateStatus: (status) => status >= 200 && status < 300 || status === 404 });
 
     console.log("--- GET PROPERTY RESPONSE ---");
     console.log("STATUS: " + response.status);
     console.log(response.data);
 
-    const property: Property = response.data;
-
     if (response.status !== 200)
-      return false;
+      return null;
 
+    const property: Property = propertyFromTemplate(response.data);
     if (property !== undefined)
       return property;
-    else return false;
+    else return null;
   } catch (error) {
     console.log(error);
-    return false;
+    return undefined;
   }
 }
 
-export async function modifyProperty(propertyId: string, propertyTemplate: PropertyTemplate, dispatch: Dispatch<AnyAction>): Promise<boolean | Property> {
-  try {
+export async function modifyProperty(dispatch: Dispatch<AnyAction>, propertyId: number, propertyTemplate: PropertyTemplate, demoMode: boolean = false): Promise<boolean | Property> {
+  if (demoMode) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const property = propertyFromTemplate(propertyTemplate, propertyId);
+    await dispatch(propertyActions.modifyProperty(property));
+    return property;
+  } else try {
     const response = await axios.patch(
       getUrl() + propertyId + "/",
       propertyTemplate,
@@ -108,16 +158,20 @@ export async function modifyProperty(propertyId: string, propertyTemplate: Prope
     if (response.status !== 200)
       return false;
 
-    const property: Property = response.data as Property;
+    const property: Property = propertyFromTemplate(response.data, response.data.id);
 
-    return property !== undefined ? property : false;
+    if (!!property) {
+      await dispatch(propertyActions.modifyProperty(property));
+      return property;
+    }
+    return false;
   } catch (error) {
     console.log(error);
     return false;
   }
 }
 
-export async function removeProperty(propertyId: string, dispatch: Dispatch<AnyAction>): Promise<boolean> {
+export async function removeProperty(propertyId: number, dispatch: Dispatch<AnyAction>): Promise<boolean> {
   try {
     const response = await axios.delete(
       getUrl() + propertyId + "/",
@@ -139,8 +193,11 @@ export async function removeProperty(propertyId: string, dispatch: Dispatch<AnyA
   }
 }
 
-export async function addPropertyToGroup(propertyId: string, groupId: string, dispatch: Dispatch<AnyAction>) {
-  try {
+export async function addPropertyToGroup(dispatch: Dispatch<AnyAction>, propertyId: number, groupId: number, demoMode: boolean) {
+  if (demoMode) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return true;
+  } else try {
     const response = await axios.post(
       getUrl() + propertyId + "/assignment",
       {
@@ -152,21 +209,18 @@ export async function addPropertyToGroup(propertyId: string, groupId: string, di
     console.log("STATUS: " + response.status);
     console.log(response.data);
 
-    if (response.status === 200)
-    {
-      // TODO: jakiś dispatch kurde ten?
-      return true;
-    } else {
-      return false;
-    }
+    return response.status === 201;
   } catch (error) {
     console.log(error);
     return false;
   }
 }
 
-export async function removePropertyFromGroup(propertyId: string, groupId: string, dispatch: Dispatch<AnyAction>) {
-  try {
+export async function removePropertyFromGroup(dispatch: Dispatch<AnyAction>, propertyId: number, groupId: number, demoMode: boolean = false) {
+  if (demoMode) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return true;
+  } else try {
     const response = await axios.delete(
       getUrl() + propertyId + "/assignment",
       {
@@ -179,13 +233,7 @@ export async function removePropertyFromGroup(propertyId: string, groupId: strin
     console.log("--- REMOVE PROPERTY FROM GROUP RESPONSE ---");
     console.log("STATUS: " + response.status);
 
-    if (response.status === 200)
-    {
-      // TODO: jakiś dispatch kurde ten?
-      return true;
-    } else {
-      return false;
-    }
+    return response.status === 200;
   } catch (error) {
     console.log(error);
     return false;
@@ -211,8 +259,8 @@ export async function getPropertyUnits(dispatch: Dispatch<AnyAction>) {
       units = [];
     } else return false;
 
-    // await dispatch(propertyActions.loadProperties(properties));
-    return true;
+    // await dispatch(propertyActions.loadUnits(units));
+    return units;
   } catch (error) {
     console.log(error);
     return false;
@@ -238,8 +286,8 @@ export async function getPropertyTypes(dispatch: Dispatch<AnyAction>) {
       types = [];
     } else return false;
 
-    // await dispatch(propertyActions.loadProperties(properties));
-    return true;
+    // await dispatch(propertyActions.loadUnits(units));
+    return types;
   } catch (error) {
     console.log(error);
     return false;

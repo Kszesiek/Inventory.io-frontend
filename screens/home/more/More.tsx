@@ -5,7 +5,7 @@ import Logo from "../../../assets/images/inventory.png";
 import {useDispatch, useSelector} from "react-redux";
 import {IRootState} from "../../../store/store";
 import * as React from "react";
-import {FontAwesome5, Ionicons, MaterialCommunityIcons} from "@expo/vector-icons";
+import {AntDesign, FontAwesome5, Ionicons} from "@expo/vector-icons";
 import {MoreStackScreenProps} from "../../../types";
 import {Organization, organizationsActions} from "../../../store/organizations";
 
@@ -14,7 +14,6 @@ export default function More({navigation, route}: MoreStackScreenProps<'More'>) 
 
   const backgroundColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
-  const deleteColor = useThemeColor({}, 'delete');
 
   const currentOrganization: Organization | undefined = useSelector((state: IRootState) => state.organizations.currentOrganization);
 
@@ -55,11 +54,11 @@ export default function More({navigation, route}: MoreStackScreenProps<'More'>) 
         style={styles.subtitle}
       >{currentOrganization?.description || "opis organizacji"}</Text>
 
-      <TouchableCard style={[styles.touchableCard, styles.listCard, styles.listCardTop]}>
-        <Ionicons name='construct' size={22} style={{ color: textColor, marginRight: 10}} />
-        <Text style={styles.cardText}>Ustawienia organizacji</Text>
-      </TouchableCard>
-      <TouchableCard style={[styles.touchableCard, styles.listCard]} onPress={() => navigation.navigate("MembersNavigator")}>
+      {/*<TouchableCard style={[styles.touchableCard, styles.listCard, styles.listCardTop]}>*/}
+      {/*  <Ionicons name='construct' size={22} style={{ color: textColor, marginRight: 10}} />*/}
+      {/*  <Text style={styles.cardText}>Ustawienia organizacji</Text>*/}
+      {/*</TouchableCard>*/}
+      <TouchableCard style={[styles.touchableCard, styles.listCard, styles.listCardTop]} onPress={() => navigation.navigate("MembersNavigator")}>
         <Ionicons name='people' size={22} style={{ color: textColor, marginRight: 10}} />
         <Text style={styles.cardText}>Członkowie</Text>
       </TouchableCard>
@@ -67,63 +66,67 @@ export default function More({navigation, route}: MoreStackScreenProps<'More'>) 
         <Ionicons name='file-tray-stacked' size={22} style={{ color: textColor, marginRight: 10}} />
         <Text style={styles.cardText}>Zarządzanie kategoriami</Text>
       </TouchableCard>
+      <TouchableCard style={[styles.touchableCard, styles.listCard]} onPress={() => navigation.navigate("PropertiesNavigator")}>
+        <AntDesign name='bars' size={22} style={{ color: textColor, marginRight: 10}} />
+        <Text style={styles.cardText}>Zarządzanie właściwościami</Text>
+      </TouchableCard>
       <TouchableCard style={[styles.touchableCard, styles.listCard, styles.listCardBottom]} onPress={() => navigation.navigate("WarehousesNavigator")}>
         <FontAwesome5 name='warehouse' size={20} style={{ color: textColor, marginRight: 10}} />
         <Text style={styles.cardText}>Magazyny</Text>
       </TouchableCard>
 
-      <TouchableCard
-        style={[
-          styles.touchableCard,
-          styles.listCard,
-          styles.listCardTop,
-          {marginTop: 20, backgroundColor: deleteColor}
-        ]}
-        onPress={() => {
-          Alert.alert("Czy chcesz opuścić tę organizację?", "Czy jesteś pewien, że chcesz opuścić tę organizację? Ta operacja jest nieodwracalna.", [
-            {
-              text: "Anuluj",
-              style: "cancel",
-            },
-            {
-              text: "Opuść organizację",
-              style: "default",
-              onPress: () => {
-                console.log("leave organization confirmed");
-                if (!!currentOrganization)
-                  dispatch(organizationsActions.removeOrganization(currentOrganization.id));
-                else
-                  console.log("operation did not succeed (current organization undefined)");
-              }
-            },
-          ]);
-        }}
-      >
-        <Ionicons name="log-out" size={30} style={{ color: textColor, marginRight: 5, marginVertical: -3}} />
-        <Text style={styles.cardText}>Opuść organizację</Text>
-      </TouchableCard>
-      <TouchableCard
-        style={[styles.touchableCard, styles.listCard, styles.listCardBottom, {backgroundColor: deleteColor}]}
-        onPress={() => {
-          Alert.alert("Czy chcesz usunąć tę organizację?", "Czy jesteś pewien, że chcesz usunąć tę organizację? Ta operacja jest nieodwracalna.", [
-            {
-              text: "Anuluj",
-              style: "cancel",
-            },
-            {
-              text: "Usuń organizację",
-              style: "default",
-              onPress: () => {
-                console.log("delete organization confirmed");
+      {/*<TouchableCard*/}
+      {/*  style={[*/}
+      {/*    styles.touchableCard,*/}
+      {/*    styles.listCard,*/}
+      {/*    styles.listCardTop,*/}
+      {/*    {marginTop: 20, backgroundColor: deleteColor}*/}
+      {/*  ]}*/}
+      {/*  onPress={() => {*/}
+      {/*    Alert.alert("Czy chcesz opuścić tę organizację?", "Czy jesteś pewien, że chcesz opuścić tę organizację? Ta operacja jest nieodwracalna.", [*/}
+      {/*      {*/}
+      {/*        text: "Anuluj",*/}
+      {/*        style: "cancel",*/}
+      {/*      },*/}
+      {/*      {*/}
+      {/*        text: "Opuść organizację",*/}
+      {/*        style: "default",*/}
+      {/*        onPress: () => {*/}
+      {/*          console.log("leave organization confirmed");*/}
+      {/*          if (!!currentOrganization)*/}
+      {/*            dispatch(organizationsActions.removeOrganization(currentOrganization.id));*/}
+      {/*          else*/}
+      {/*            console.log("operation did not succeed (current organization undefined)");*/}
+      {/*        }*/}
+      {/*      },*/}
+      {/*    ]);*/}
+      {/*  }}*/}
+      {/*>*/}
+      {/*  <Ionicons name="log-out" size={30} style={{ color: textColor, marginRight: 5, marginVertical: -3}} />*/}
+      {/*  <Text style={styles.cardText}>Opuść organizację</Text>*/}
+      {/*</TouchableCard>*/}
+      {/*<TouchableCard*/}
+      {/*  style={[styles.touchableCard, styles.listCard, styles.listCardBottom, {backgroundColor: deleteColor}]}*/}
+      {/*  onPress={() => {*/}
+      {/*    Alert.alert("Czy chcesz usunąć tę organizację?", "Czy jesteś pewien, że chcesz usunąć tę organizację? Ta operacja jest nieodwracalna.", [*/}
+      {/*      {*/}
+      {/*        text: "Anuluj",*/}
+      {/*        style: "cancel",*/}
+      {/*      },*/}
+      {/*      {*/}
+      {/*        text: "Usuń organizację",*/}
+      {/*        style: "default",*/}
+      {/*        onPress: () => {*/}
+      {/*          console.log("delete organization confirmed");*/}
 
-              }
-            },
-          ]);
-        }}
-      >
-        <MaterialCommunityIcons name="delete-forever" size={30} style={{ color: textColor, marginLeft: -2, marginRight: 8}} />
-        <Text style={styles.cardText}>Usuń organizację</Text>
-      </TouchableCard>
+      {/*        }*/}
+      {/*      },*/}
+      {/*    ]);*/}
+      {/*  }}*/}
+      {/*>*/}
+      {/*  <MaterialCommunityIcons name="delete-forever" size={30} style={{ color: textColor, marginLeft: -2, marginRight: 8}} />*/}
+      {/*  <Text style={styles.cardText}>Usuń organizację</Text>*/}
+      {/*</TouchableCard>*/}
     </ScrollView>
   )
 }

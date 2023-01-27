@@ -7,6 +7,7 @@ import * as React from "react";
 import Inventory from "../screens/home/inventory/Inventory";
 import ItemDetails from "../screens/home/inventory/ItemDetails";
 import AddEditItem from "../screens/home/inventory/AddEditItem";
+import EditItemProperties from "../screens/home/inventory/EditItemProperties";
 
 const InventoryStack = createNativeStackNavigator<InventoryStackParamList>();
 
@@ -42,14 +43,12 @@ export default function InventoryNavigator() {
       })} />
       <InventoryStack.Screen name="ItemDetails" component={ItemDetails} options={({ navigation, route }) => ({
         title: "Szczegóły przedmiotu",
-        // headerRight: () => (
-        //   <TouchableOpacity onPress={() => navigation.navigate("AddEditLending", {lendingId: route.params.lendingId})}>
-        //     <Feather name='edit' size={24} style={{ color: textColor,}} />
-        //   </TouchableOpacity>
-        // ),
       })} />
       <InventoryStack.Screen name="AddEditItem" component={AddEditItem} options={({ navigation, route }) => ({
-        title: route.params && route.params.item ? "Edytuj przedmiot" : "Dodaj przedmiot",
+        title: route.params && route.params.itemId ? "Edytuj przedmiot" : "Dodaj przedmiot",
+      })} />
+      <InventoryStack.Screen name="EditItemProperties" component={EditItemProperties} options={({ navigation, route }) => ({
+        title: "Edytuj właściwości przedmiotu",
       })} />
 
     </InventoryStack.Navigator>

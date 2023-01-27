@@ -7,6 +7,7 @@ import More from "../screens/home/more/More";
 import MembersStackNavigator from "./MembersStackNavigator";
 import CategoriesStackNavigator from "./CategoriesStackNavigator";
 import WarehousesStackNavigator from "./WarehousesStackNavigator";
+import PropertiesStackNavigator from "./PropertiesStackNavigator";
 import * as React from "react";
 import HenryStickmin from "../screens/HenryStickmin";
 
@@ -55,6 +56,13 @@ export default function MoreNavigator() {
       <MoreStack.Screen
         name="CategoriesNavigator"
         component={CategoriesStackNavigator}
+        options={{
+          headerShown: false
+        }}
+      />
+      <MoreStack.Screen
+        name="PropertiesNavigator"
+        component={PropertiesStackNavigator}
         options={{
           headerShown: false
         }}

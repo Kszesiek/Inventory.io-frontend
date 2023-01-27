@@ -1,27 +1,42 @@
 import {Text, useThemeColor, View} from "../../../../components/Themed";
 import {OpacityButton} from "../../../../components/Themed/OpacityButton";
-import {ScrollView, StyleProp, StyleSheet, TextStyle, TouchableOpacity} from "react-native";
+import {ActivityIndicator, ScrollView, StyleProp, StyleSheet, TextStyle, TouchableOpacity} from "react-native";
 import {WarehousesStackScreenProps} from "../../../../types";
 import Detail from "../../../../components/Detail";
 import {useDispatch, useSelector} from "react-redux";
 import {IRootState} from "../../../../store/store";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {Feather} from "@expo/vector-icons";
 import * as React from "react";
 import {Warehouse, warehousesActions} from "../../../../store/warehouses";
 import {Item} from "../../../../store/items";
+import {getFilteredItems} from "../../../../endpoints/items";
 
 export default function WarehouseDetails({ navigation, route }: WarehousesStackScreenProps<'WarehouseDetails'>) {
   const dispatch = useDispatch();
+  const demoMode: boolean = useSelector((state: IRootState) => state.appWide.demoMode);
   const textColor = useThemeColor({}, 'text');
-  const warehouse: Warehouse = route.params.warehouse;
-  const itemsInWarehouse: Item[] = useSelector((state: IRootState) =>
-    state.items.items.filter((item) => item.warehouseId === warehouse.id));
+  const tintColor = useThemeColor({}, 'tint');
+  const errorColor = useThemeColor({}, "delete");
+  const backgroundColor = useThemeColor({}, "background");
+  const warehouses: Warehouse[] = useSelector((state: IRootState) => state.warehouses.warehouses);
+  const warehouse: Warehouse | undefined = warehouses.find((warehouse) => warehouse.id === route.params.warehouseId);
+  const [itemsInWarehouse, setItemsInWarehouse] = useState<Item[] | undefined | null>(undefined);
+  const [isWarehouseLoaded, setIsWarehouseLoaded] = useState<boolean>(false);
+
+
+  useEffect(() => {
+    async function getItemsInWarehouse() {
+      setItemsInWarehouse(await getFilteredItems(dispatch, undefined, undefined, route.params.warehouseId, undefined, demoMode));
+      setIsWarehouseLoaded(true);
+    }
+    getItemsInWarehouse();
+  }, [])
 
   useEffect(() => {
     navigation.setOptions({
       headerRight: !!warehouse ? () => (
-        <TouchableOpacity onPress={() => navigation.navigate("AddEditWarehouse", {warehouse: warehouse})}>
+        <TouchableOpacity onPress={() => navigation.navigate("AddEditWarehouse", {warehouseId: route.params.warehouseId})}>
           <Feather name='edit' size={24} style={{color: textColor}}/>
         </TouchableOpacity>
       ) : undefined,
@@ -30,19 +45,30 @@ export default function WarehouseDetails({ navigation, route }: WarehousesStackS
 
   const property: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans',
-    color: useThemeColor({}, "text"),
+    color: textColor,
   }
-
-  const backgroundColor = useThemeColor({}, "background");
 
   async function deletePressed() {
     console.log("delete button pressed");
-    navigation.replace("Warehouses");
-    await dispatch(warehousesActions.removeWarehouse(warehouse.id));
+    await dispatch(warehousesActions.removeWarehouse(route.params.warehouseId));
+    navigation.goBack();
   }
 
   function editPressed() {
-    navigation.navigate("AddEditWarehouse", {warehouse: warehouse});
+    navigation.navigate("AddEditWarehouse", {warehouseId: route.params.warehouseId});
+  }
+
+  if (!isWarehouseLoaded) {
+    return <View style={styles.loadingView}>
+      <ActivityIndicator color={tintColor} size="large" />
+      <Text style={styles.loadingText}>Wczytywanie danych z serwera...</Text>
+    </View>
+  }
+
+  if (!warehouse) {
+    return <View style={styles.loadingView}>
+      <Text style={styles.loadingText}>Błąd połączenia z serwerem.</Text>
+    </View>
   }
 
   return (
@@ -55,10 +81,17 @@ export default function WarehouseDetails({ navigation, route }: WarehousesStackS
           <Text style={styles.text}>{`${warehouse.postalCode ? `${warehouse.postalCode} ` : ''}${warehouse.city}${warehouse.country ? `, ${warehouse.country}` : ''}`}</Text>
       </Detail>}
       <Detail name="Przedmioty w magazynie" key="items">
-        {itemsInWarehouse.length === 0 ?
+        {
+          itemsInWarehouse === undefined ?
+            <>
+              <ActivityIndicator color={tintColor} size="large" />
+              <Text style={{fontStyle: "italic"}}>Wczytywanie przedmiotów...</Text>
+            </>
+          : itemsInWarehouse === null ?
+              <Text style={{fontStyle: "italic"}}>Błąd połączenia z serwerem.</Text>
+          : !itemsInWarehouse || itemsInWarehouse.length === 0 ?
           <Text style={{fontStyle: "italic"}}>Brak przedmiotów w tym magazynie</Text>
-        :
-          itemsInWarehouse.map((item: Item, index: number) => (
+          : itemsInWarehouse.map((item: Item, index: number) => (
             <Text key={item.itemId}>{index + 1}. {item.name}</Text>
           ))
         }
@@ -73,7 +106,7 @@ export default function WarehouseDetails({ navigation, route }: WarehousesStackS
 
       <View style={{flexGrow: 1}} key="spacer" />
       <View style={styles.editButtonContainer} key="bottomButtons">
-        <OpacityButton style={[styles.editButton, {backgroundColor: useThemeColor({}, "delete")}]} onPress={deletePressed}>Usuń</OpacityButton>
+        <OpacityButton style={[styles.editButton, {backgroundColor: errorColor}]} onPress={deletePressed}>Usuń</OpacityButton>
         <OpacityButton style={styles.editButton} onPress={editPressed}>Edytuj</OpacityButton>
       </View>
     </ScrollView>
@@ -103,5 +136,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Source Sans',
     fontSize: 16,
     marginVertical: 3,
+  },
+  loadingView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontStyle: 'italic',
   },
 })

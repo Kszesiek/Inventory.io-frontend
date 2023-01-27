@@ -1,4 +1,7 @@
-export function enlistItems(items: string[]): string {
+export function enlistItems(items: string[] | undefined): string {
+  if (!items || items.length === 0)
+    return "nic"
+
   let itemsListed: string = ""
   items.slice(0, items.length > 3 ? 2 : 3).forEach(itemName => {  //
     itemsListed += itemName + ', '

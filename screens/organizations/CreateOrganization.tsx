@@ -6,7 +6,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {useState} from "react";
 import {HomeStackScreenProps, WelcomeStackScreenProps} from "../../types";
 import {writeOutArray} from "../../utilities/enlist";
-import {Organization, OrganizationTemplate, organizationsActions, isOrganization} from "../../store/organizations";
+import {OrganizationTemplate, isOrganization} from "../../store/organizations";
 import {OpacityButton} from "../../components/Themed/OpacityButton";
 import {IRootState} from "../../store/store";
 import {createOrganization} from "../../endpoints/organizations";
@@ -22,7 +22,7 @@ type inputValuesType = {
   description: ValidValuePair
 }
 
-export default function CreateOrganization({ navigation, route }: WelcomeStackScreenProps<'CreateOrganization'> | HomeStackScreenProps<'CreateOrganization'>) {
+export default function CreateOrganization({ navigation, route }: WelcomeStackScreenProps<'CreateOrganizationWelcome'> | HomeStackScreenProps<'CreateOrganizationHome'>) {
   const dispatch = useDispatch();
   const backgroundColor = useThemeColor({}, 'background');
   const cancelColor = useThemeColor({}, "delete");
@@ -88,30 +88,20 @@ export default function CreateOrganization({ navigation, route }: WelcomeStackSc
       return;
     }
 
-    if (demoMode) {
-      const organizationData: Organization = {
-        id: Math.random().toString(),
-        name: inputs.name.value,
-        short_name: inputs.short_name.value,
-        description:  inputs.description.value,
-      }
-      await dispatch(organizationsActions.addOrganization(organizationData));
-    } else {
-      const organizationTemplate: OrganizationTemplate = {
-        name: inputs.name.value,
-        short_name: inputs.short_name.value,
-        description:  inputs.description.value,
-      }
-      const response = await createOrganization(organizationTemplate);
-      if (!isOrganization(response)) {
-        Alert.alert('Nie udało się założyć organizacji', 'Sprawdź dane organizacji i spróbuj ponownie.');
-        return;
-      } else {
-        await dispatch(organizationsActions.addOrganization(response));
-      }
+    const organizationTemplate: OrganizationTemplate = {
+      name: inputs.name.value,
+      short_name: inputs.short_name.value,
+      description:  inputs.description.value,
     }
 
-    doesGoBack && navigation.goBack();
+    const response = await createOrganization(dispatch, organizationTemplate, demoMode);
+
+    if (!isOrganization(response)) {
+      Alert.alert('Nie udało się założyć organizacji', 'Sprawdź dane organizacji i spróbuj ponownie.');
+      return;
+    }
+
+    doesGoBack && navigation.canGoBack() && navigation.goBack();
   }
 
   function inputChangedHandler<InputParam extends keyof typeof inputs>(inputIdentifier: InputParam, enteredValue: string) {
@@ -129,13 +119,12 @@ export default function CreateOrganization({ navigation, route }: WelcomeStackSc
     isInvalid={inputs.name.isInvalid}
     // onErrorText="Please enter a description containing under 4000 characters"
     textInputProps={{
-      placeholder: "nazwa twojej organizacji",
+      placeholder: "nazwa twojej organizacji...",
       maxLength: 100,
       onChangeText: inputChangedHandler.bind(null, "name"),
       value: inputs.name.value,
       autoCorrect: false,  // default is true
       // autoCapitalize: 'sentences',  // default is sentences
-      multiline: true,
     }} />
 
   const shortNameComponent = <Input
@@ -143,7 +132,7 @@ export default function CreateOrganization({ navigation, route }: WelcomeStackSc
     isInvalid={inputs.name.isInvalid}
     // onErrorText="Please enter a description containing under 20 characters"
     textInputProps={{
-      placeholder: "skrót twojej organizacji",
+      placeholder: "skrót twojej organizacji...",
       maxLength: 10,
       onChangeText: inputChangedHandler.bind(null, "short_name"),
       value: inputs.short_name.value,
@@ -157,7 +146,7 @@ export default function CreateOrganization({ navigation, route }: WelcomeStackSc
     isInvalid={inputs.name.isInvalid}
     // onErrorText="Please enter a description containing under 4000 characters"
     textInputProps={{
-      placeholder: "opis twojej organizacji",
+      placeholder: "opis twojej organizacji...",
       maxLength: 4000,
       onChangeText: inputChangedHandler.bind(null, "description"),
       value: inputs.description.value,

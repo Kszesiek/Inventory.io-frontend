@@ -1,21 +1,21 @@
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
-import {WarehousesStackParamList} from "../types";
+import {PropertiesStackParamList} from "../types";
 import {useThemeColor} from "../components/Themed";
 import {TouchableOpacity} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
-import Warehouses from "../screens/home/more/warehouses/Warehouses";
-import WarehouseDetails from "../screens/home/more/warehouses/WarehouseDetails";
-import AddEditWarehouse from "../screens/home/more/warehouses/AddEditWarehouse";
+import Properties from "../screens/home/more/properties/Properties";
+import PropertyDetails from "../screens/home/more/properties/PropertyDetails";
+import AddEditProperty from "../screens/home/more/properties/AddEditProperty";
 import * as React from "react";
 
-const WarehousesStack = createNativeStackNavigator<WarehousesStackParamList>();
+const PropertiesStack = createNativeStackNavigator<PropertiesStackParamList>();
 
-export default function MembersNavigator() {
+export default function PropertiesNavigator() {
   const textColor = useThemeColor({}, 'text');
   const headerColor = useThemeColor({}, 'header');
 
   return (
-    <WarehousesStack.Navigator
+    <PropertiesStack.Navigator
       screenOptions={({ navigation }) => ({
         headerTitleAlign: "center",
         headerTintColor: textColor,
@@ -27,10 +27,10 @@ export default function MembersNavigator() {
         ),
       })}
     >
-      <WarehousesStack.Screen name="Warehouses" component={Warehouses} options={({ navigation }) => ({
-        title: "Magazyny",
+      <PropertiesStack.Screen name="Properties" component={Properties} options={({ navigation }) => ({
+        title: "Właściwości przedmiotów",
         headerRight: () => (
-          <TouchableOpacity onPress={() => navigation.navigate("AddEditWarehouse")}>
+          <TouchableOpacity onPress={() => navigation.navigate("AddEditProperty")}>
             <Ionicons name='add' size={36} style={{ color: textColor}}  />
           </TouchableOpacity>
         ),
@@ -40,13 +40,13 @@ export default function MembersNavigator() {
           </TouchableOpacity>
         )
       })} />
-      <WarehousesStack.Screen name="WarehouseDetails" component={WarehouseDetails} options={{
-        title: "Szczegóły magazynu",
+      <PropertiesStack.Screen name="PropertyDetails" component={PropertyDetails} options={{
+        title: "Szczegóły właściwości",
       }} />
-      <WarehousesStack.Screen name="AddEditWarehouse" component={AddEditWarehouse} options={({ navigation, route }) => ({
-        title: route.params && route.params.warehouseId ? "Edytuj magazyn" : "Nowy magazyn",
+      <PropertiesStack.Screen name="AddEditProperty" component={AddEditProperty} options={({ navigation, route }) => ({
+        title: route.params && route.params.propertyId ? "Edytuj właściwość" : "Nowa właściwość",
       })} />
 
-    </WarehousesStack.Navigator>
+    </PropertiesStack.Navigator>
   );
 }

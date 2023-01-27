@@ -41,7 +41,12 @@ export default function LoginNavigator() {
           </TouchableOpacity>
         )
       })} />
-      <LoginStack.Screen name="Register" component={RegisterScreen} />
+      <LoginStack.Screen name="Register" component={RegisterScreen} options={{
+        title: "Utwórz nowe konto",
+        headerTitleAlign: 'center',
+        headerTransparent: false,
+        headerStyle: {backgroundColor: headerColor},
+      }} />
       <LoginStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       <LoginStack.Screen name="ResetPassword" component={ResetPasswordScreen} />
       <LoginStack.Screen name="AppSettings" component={AppSettings} options={{

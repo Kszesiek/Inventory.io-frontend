@@ -4,10 +4,16 @@ export interface UserTemplate {
   username: string
   name: string
   surname: string
+  email: string
+  password: string
 }
 
-export interface User extends UserTemplate{
+export interface User{
   id: string
+  username: string
+  name: string
+  surname: string
+  email: string
 }
 
 export const usersSlice = createSlice({

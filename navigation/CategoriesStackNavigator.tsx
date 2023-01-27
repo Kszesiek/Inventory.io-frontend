@@ -7,6 +7,7 @@ import Categories from "../screens/home/more/categories/Categories";
 import CategoryDetails from "../screens/home/more/categories/CategoryDetails";
 import AddEditCategory from "../screens/home/more/categories/AddEditCategory";
 import * as React from "react";
+import EditCategoryProperties from "../screens/home/more/categories/EditCategoryProperties";
 
 const CategoriesStack = createNativeStackNavigator<CategoriesStackParamList>();
 
@@ -44,7 +45,10 @@ export default function CategoriesNavigator() {
         title: "Szczegóły kategorii",
       }} />
       <CategoriesStack.Screen name="AddEditCategory" component={AddEditCategory} options={({ navigation, route }) => ({
-        title: route.params && route.params.category ? "Edytuj kategorię" : "Nowa kategoria",
+        title: route.params && route.params.categoryId ? "Edytuj kategorię" : "Nowa kategoria",
+      })} />
+      <CategoriesStack.Screen name="EditCategoryProperties" component={EditCategoryProperties} options={({ navigation, route }) => ({
+        title: "Edytuj właściwości kategorii",
       })} />
 
     </CategoriesStack.Navigator>

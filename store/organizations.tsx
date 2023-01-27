@@ -24,6 +24,15 @@ export function isOrganization(object: any): object is Organization {
   );
 }
 
+export function organizationFromTemplate(template: OrganizationTemplate): Organization {
+  return {
+    id: Math.random().toString(),
+    name: template.name,
+    short_name: template.short_name,
+    description: template.description,
+  }
+}
+
 export const organizationsSlice = createSlice({
   name: 'organizations',
   initialState: {
@@ -46,8 +55,11 @@ export const organizationsSlice = createSlice({
       }
     },
     addOrganization: (state, action: PayloadAction<Organization>) => {
-      if (!state.organizations.some(organization => organization.id === action.payload.id)) {
-        state.organizations = state.organizations.concat([action.payload]);
+      if (state.organizations.length === 0) {
+        state.currentOrganization = action.payload;
+        state.organizations = [action.payload];
+      } else if (!state.organizations.some(organization => organization.id === action.payload.id)) {
+        state.organizations = [...state.organizations, action.payload];
       }
     },
     removeOrganization: (state, action: PayloadAction<string>) => {

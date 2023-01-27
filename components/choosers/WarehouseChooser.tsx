@@ -1,10 +1,10 @@
 import React from "react";
-import {View, Text, useThemeColor} from "./Themed";
+import {View, Text, useThemeColor} from "../Themed";
 import {FlatList, StyleProp, StyleSheet, TextStyle} from "react-native";
-import {Warehouse} from "../store/warehouses";
+import {Warehouse} from "../../store/warehouses";
 import {useSelector} from "react-redux";
-import {IRootState} from "../store/store";
-import {TouchableCard} from "./Themed/TouchableCard";
+import {IRootState} from "../../store/store";
+import {TouchableCard} from "../Themed/TouchableCard";
 
 type propsType = {
   selectedWarehouse: Warehouse | undefined
@@ -15,6 +15,7 @@ export default function WarehouseChooser({selectedWarehouse, setSelectedWarehous
   const warehouses: Warehouse[] = useSelector((state: IRootState) => state.warehouses.warehouses);
   const tintColor = useThemeColor({}, 'tint');
   const textColor = useThemeColor({}, 'text');
+  const backgroundColor = useThemeColor({}, 'background');
 
   const boldedText: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans Bold',
@@ -23,7 +24,7 @@ export default function WarehouseChooser({selectedWarehouse, setSelectedWarehous
 
   return (
     <FlatList
-      style={{...styles.flatList, backgroundColor: useThemeColor({}, 'background')}}
+      style={{...styles.flatList, backgroundColor}}
       contentContainerStyle={{flexGrow: 1}}
       data={warehouses}
       ListEmptyComponent={

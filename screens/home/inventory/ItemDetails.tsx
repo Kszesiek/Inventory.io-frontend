@@ -1,4 +1,4 @@
-import {Animated, ScrollView, StyleSheet, TouchableOpacity} from "react-native";
+import {ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity} from "react-native";
 import {Text, useThemeColor, View} from "../../../components/Themed";
 import {useDispatch, useSelector} from "react-redux";
 import {InventoryStackScreenProps} from "../../../types";
@@ -7,14 +7,16 @@ import Detail from "../../../components/Detail";
 import {OpacityButton} from "../../../components/Themed/OpacityButton";
 import {Feather} from "@expo/vector-icons";
 import * as React from "react";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useState} from "react";
 import {Item, itemActions} from "../../../store/items";
-import {Category} from "../../../store/categories";
+import {CategoryExtended} from "../../../store/categories";
 import {Warehouse} from "../../../store/warehouses";
-import {Modalize} from "react-native-modalize";
-import WarehouseChooser from "../../../components/WarehouseChooser";
-import {getAllWarehouses} from "../../../endpoints/warehouses";
-import {getAllCategories} from "../../../endpoints/categories";
+import {getWarehouse} from "../../../endpoints/warehouses";
+import {getCategory} from "../../../endpoints/categories";
+import {Property} from "../../../store/properties";
+import {getPropertiesForCategory} from "../../../endpoints/properties";
+import {getItem} from "../../../endpoints/items";
+import {useFocusEffect} from "@react-navigation/native";
 
 export default function ItemDetails({ navigation, route }: InventoryStackScreenProps<'ItemDetails'>) {
   const dispatch = useDispatch();
@@ -22,25 +24,22 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
 
   const backgroundColor = useThemeColor({}, "background");
   const textColor = useThemeColor({}, "text");
-  const cancelColor = useThemeColor({}, "delete");
   const tintColor = useThemeColor({}, "tint");
 
-  const item: Item = route.params.item;
+  const item: Item | undefined = useSelector((state: IRootState) => state.items.items.find(
+    (item) => item.itemId === route.params.itemId));
 
-  const categories: Category[]  = useSelector((state: IRootState) => state.categories.categories);
-  const warehouses: Warehouse[] = useSelector((state: IRootState) => state.warehouses.warehouses);
-  const category:  Category  | undefined = categories.find(item_ => item_.id === item.categoryId);
-  const warehouse: Warehouse | undefined = warehouses.find(item_ => item_.id === item.warehouseId);
-  const [isWarehouseLoaded, setIsWarehouseLoaded] = useState<boolean | undefined>(warehouse === undefined ? undefined : true);
-  const [isCategoryLoaded,  setIsCategoryLoaded]  = useState<boolean | undefined>(category === undefined ? undefined : true);
+  const [category, setCategory] = useState<CategoryExtended | null | undefined>(undefined);
+  const [warehouse, setWarehouse] = useState<Warehouse | null | undefined>(undefined);
+  const [properties, setProperties] = useState<Property[]>([]);
 
-  const warehouseModalizeRef = useRef<Modalize>(null);
-  const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | undefined>(warehouse);
+  const [isWarehouseLoaded, setIsWarehouseLoaded] = useState<boolean>(false);
+  const [isCategoryLoaded,  setIsCategoryLoaded]  = useState<boolean>(false);
 
   useEffect(() => {
     navigation.setOptions({
       headerRight: !!item ? () => (
-        <TouchableOpacity onPress={() => navigation.navigate("AddEditItem", {item: item})}>
+        <TouchableOpacity onPress={editPressed}>
           <Feather name='edit' size={24} style={{color: textColor}}/>
         </TouchableOpacity>
       ) : undefined,
@@ -49,48 +48,64 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
 
   useEffect(() => {
     async function getItemWarehouse() {
-      // setIsWarehouseLoaded(await getWarehouse(dispatch, item.warehouseId, demoMode));
-      setIsWarehouseLoaded(await getAllWarehouses(dispatch, demoMode));
+      if (!item || item.warehouseId === undefined || item.warehouseId === null)
+        return;
+
+      const itemWarehouse = await getWarehouse(dispatch, item.warehouseId, demoMode);
+
+      setWarehouse(itemWarehouse);
+      setIsWarehouseLoaded(true);
     }
     async function getItemCategory() {
-      // setIsWarehouseLoaded(await getCategory(dispatch, item.categoryId, demoMode));
-      setIsCategoryLoaded(await getAllCategories(dispatch, demoMode));
+      if (!item)
+        return;
+      const itemCategory = await getCategory(dispatch, item.categoryId, demoMode);
+      if (itemCategory !== undefined)
+        setCategory(itemCategory);
+      setIsCategoryLoaded(true);
     }
-    if (category === undefined) {
-      getItemWarehouse();
+
+    async function getItemProperties() {
+      if (!item)
+        return;
+
+      const properties: Property[] | null = await getPropertiesForCategory(item.categoryId);
+      if (!!properties)
+        setProperties(properties);
     }
-    if (warehouse === undefined) {
-      getItemCategory();
-    }
-  }, []);
+
+    getItemProperties();
+    getItemCategory();
+    getItemWarehouse();
+  }, [item]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      getItem(dispatch, route.params.itemId, demoMode).then(() => {
+      });
+    }, [])
+  );
 
   async function deletePressed() {
     console.log("delete button pressed");
     navigation.replace("Inventory");
-    await dispatch(itemActions.removeItem({itemId: item.itemId}));
+    await dispatch(itemActions.removeItem({itemId: route.params.itemId}));
   }
 
   function editPressed() {
-    navigation.navigate("AddEditItem", {item: item});
-  }
-
-  function changeWarehousePressed() {
-    warehouseModalizeRef.current?.open();
+    navigation.navigate("AddEditItem", {itemId: route.params.itemId}); //  category: category || undefined, warehouse: warehouse || undefined
   }
 
   function warehouseDescription(): JSX.Element {
-    if (isWarehouseLoaded === false) return (
-      <Text style={{fontStyle: 'italic', fontSize: 13}}>błąd połączenia z serwerem</Text>
-    );
-    else if (isWarehouseLoaded === undefined) return (
-      <Text style={{fontStyle: 'italic', fontSize: 13}}>ładowanie danych...</Text>
-    );
-    else if (item.warehouseId === undefined) return (
-      <Text style={{fontStyle: 'italic', fontSize: 13}}>nie przyporządkowano do magazynu</Text>
-    );
-    else if (warehouse === undefined) return (
-      <Text style={{fontStyle: 'italic', fontSize: 13}}>nieznany magazyn</Text>
-    );
+    if (!item || item.warehouseId === undefined || item.warehouseId === null)
+      return <Text style={styles.detailsReplacementText}>nie przyporządkowano do magazynu</Text>
+    else if (!isWarehouseLoaded)
+      return <ActivityIndicator color={tintColor} size="large" />
+        // <Text style={styles.detailsReplacementText}>ładowanie danych...</Text>
+    else if (warehouse === undefined)
+      return <Text style={styles.detailsReplacementText}>błąd połączenia z serwerem</Text>
+    else if (warehouse === null)
+      return <Text style={styles.detailsReplacementText}>nieznany magazyn</Text>
     else return (
       <>
         <Text style={{fontFamily: 'Source Sans Bold', paddingBottom: 5,}}>{warehouse.name}</Text>
@@ -102,77 +117,73 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
     );
   }
 
-  function chooseWarehouse() {
-    return (
-      <Animated.View style={{flex: 1, marginTop: 10,}}>
-        <Text style={[styles.warehouseDrawerTitle, {color: tintColor}]}>Wybierz magazyn</Text>
-        <WarehouseChooser
-          selectedWarehouse={selectedWarehouse}
-          setSelectedWarehouse={setSelectedWarehouse}
-        />
-        <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-          <OpacityButton
-            style={[styles.warehouseDrawerButton, {backgroundColor: cancelColor}]}
-            onPress={() => warehouseModalizeRef.current?.close()}
-          >
-            Anuluj
-          </OpacityButton>
-          <OpacityButton
-            style={styles.warehouseDrawerButton}
-            onPress={async () => {
-              await dispatch(itemActions.modifyItem({item: {...item, warehouseId: selectedWarehouse?.id || undefined}}))
-              warehouseModalizeRef.current?.close();
-            }}
-          >
-            Potwierdź
-          </OpacityButton>
-        </View>
-      </Animated.View>
-    )
+  function categoryDescription(): JSX.Element {
+    if (!isCategoryLoaded)
+      return <Text style={styles.detailsReplacementText}>wczytywanie danych...</Text>
+    else if (category === undefined)
+      return <Text style={styles.detailsReplacementText}>błąd połączenia z serwerem</Text>
+    else if (category === null)
+      return <Text style={styles.detailsReplacementText}>nieznana kateogria</Text>
+    else
+      return <Text style={styles.text}>{category.name + " (" + category.short_name + ")"}</Text>
+  }
+
+  if (!item) {
+    return <View style={styles.loadingView}>
+      <Text style={styles.loadingText}>Błąd połączenia z serwerem.</Text>
+    </View>
   }
 
   return (
-    <>
-      <ScrollView contentContainerStyle={{backgroundColor, ...styles.container}}>
-        <Detail name="Nazwa przedmiotu">
-          <Text style={styles.text}>{item.name}</Text>
-        </Detail>
-        <Detail name="Kategoria">
-          <Text style={styles.text}>{!!category ? category.name + " (" + category.short_name + ")" : <Text style={{fontStyle: 'italic', fontSize: 13}}>{isCategoryLoaded ? "nieznana kategoria" : "wczytywanie danych..."}</Text>}</Text>
-        </Detail>
-        <Detail name="Magazyn">
-          {warehouseDescription()}
-          {isWarehouseLoaded && <OpacityButton
-            style={styles.warehouseButton}
-            textStyle={{fontSize: 15}}
-            onPress={changeWarehousePressed}
-          >
-            Zmień magazyn
-          </OpacityButton>}
-        </Detail>
+    <ScrollView contentContainerStyle={{backgroundColor, ...styles.container}}>
+      <Detail name="Nazwa przedmiotu">
+        <Text style={styles.text}>{item.name}</Text>
+      </Detail>
+      <Detail name="Opis przedmiotu">
+        <Text style={styles.text}>{(!!item.description && item.description.length > 0) ? item.description : <Text style={styles.detailsReplacementText}>przedmiot nie posiada opisu</Text>}</Text>
+      </Detail>
+      <Detail name="Kategoria">
+        {categoryDescription()}
+      </Detail>
+      <Detail name="Magazyn">
+        {warehouseDescription()}
+      </Detail>
+      <Detail name="Właściwości">
+        {
+          properties.length > 0 && item.values?.map((value) => {
+            const property: Property | undefined = properties.find((property) => property.id === value.property_id);
+            return !!property ? <Text key={property.id}>{property?.name}: {property.property_type_id !== 3 ? value.value : value.value === 'true' ? "Tak  ✔️" : "Nie  ❌"}</Text> : undefined;
+          })
+        }
+        {
+          properties.length > 0 && item.values && !!category && <OpacityButton
+                style={styles.propertiesButton}
+                textStyle={styles.propertiesButtonText}
+                onPress={() => navigation.navigate("EditItemProperties", {itemId: route.params.itemId, categoryId: category.id})}
+            >
+                Edytuj właściwości przedmiotu
+            </OpacityButton>
+        }
+      </Detail>
 
-        <View style={{flexGrow: 1}}/>
-        <View style={styles.editButtonContainer}>
-          <OpacityButton
-            style={[styles.editButton, {backgroundColor: useThemeColor({}, "delete")}]}
-            onPress={deletePressed}
-          >
-            Usuń
-          </OpacityButton>
-          <OpacityButton
-            style={styles.editButton}
-            onPress={editPressed}
-          >
-            Edytuj
-          </OpacityButton>
-        </View>
-      </ScrollView>
-      <Modalize
-        ref={warehouseModalizeRef}
-        modalStyle={{...styles.modalStyle, backgroundColor}}
-        customRenderer={chooseWarehouse()}
-      />
-    </>
+
+
+      <View style={{flexGrow: 1}}/>
+      <View style={styles.editButtonContainer}>
+        <OpacityButton
+          style={[styles.editButton, {backgroundColor: useThemeColor({}, "delete")}]}
+          onPress={deletePressed}
+        >
+          Usuń
+        </OpacityButton>
+        <OpacityButton
+          style={styles.editButton}
+          onPress={editPressed}
+        >
+          Edytuj
+        </OpacityButton>
+      </View>
+    </ScrollView>
   );
 }
 
@@ -195,32 +206,49 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     paddingVertical: 8,
   },
+  propertiesButton: {
+    paddingVertical: 4,
+    alignSelf: 'center',
+    marginTop: 8,
+  },
+  propertiesButtonText: {
+    fontSize: 14,
+  },
   text: {
     fontSize: 16,
   },
-  ordinalNumber: {
-    fontSize: 12,
+  detailsReplacementText: {
+    fontStyle: 'italic',
+    fontSize: 13,
   },
-  warehouseButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 5,
-    marginTop: 10,
-    alignSelf: 'center',
-  },
-  modalStyle: {
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    marginTop: 25,
+  loadingView: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  warehouseDrawerButton: {
-    margin: 15,
-    paddingVertical: 8,
+  loadingText: {
+    fontStyle: 'italic',
   },
-  warehouseDrawerTitle: {
-    fontSize: 22,
-    marginVertical: 5,
-    marginHorizontal: 20,
-    textAlign: 'center',
-  },
+  // warehouseButton: {
+  //   paddingHorizontal: 20,
+  //   paddingVertical: 5,
+  //   marginTop: 10,
+  //   alignSelf: 'center',
+  // },
+  // modalStyle: {
+  //   borderTopLeftRadius: 30,
+  //   borderTopRightRadius: 30,
+  //   marginTop: 25,
+  //   flex: 1,
+  // },
+  // warehouseDrawerButton: {
+  //   margin: 15,
+  //   paddingVertical: 8,
+  // },
+  // warehouseDrawerTitle: {
+  //   fontSize: 22,
+  //   marginVertical: 5,
+  //   marginHorizontal: 20,
+  //   textAlign: 'center',
+  // },
 })

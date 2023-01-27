@@ -1,10 +1,17 @@
 import { useState, useEffect } from 'react';
-import {Image, StyleSheet} from "react-native";
+import {StyleSheet} from "react-native";
 import {View, Text} from "../../components/Themed";
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import {OpacityButton} from "../../components/Themed/OpacityButton";
+import {Item} from "../../store/items";
+import {getItem} from "../../endpoints/items";
+import {useDispatch, useSelector} from "react-redux";
+import {IRootState} from "../../store/store";
+import {HomescreenStackScreenProps} from "../../types";
 
-export default function BarcodeScanner() {
+export default function BarcodeScanner({ navigation, route }: HomescreenStackScreenProps<'BarcodeScanner'>) {
+  const dispatch = useDispatch();
+  const demoMode: boolean = useSelector((state: IRootState) => state.appWide.demoMode);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
 
@@ -17,19 +24,25 @@ export default function BarcodeScanner() {
     getBarCodeScannerPermissions();
   }, []);
 
-  const handleBarCodeScanned = ({ type, data }: {type: string, data: string}) => {
+  const handleBarcodeScanned = async ({ type, data }: {type: string, data: string}) => {
     setScanned(true);
-    alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+    console.log(data);
+    const item: Item | undefined | null = await getItem(dispatch, data, demoMode);
+    if (!!item) {
+      navigation.goBack();
+      navigation.getParent()?.navigate('InventoryNavigator', {
+        screen: 'ItemDetails',
+        params: {
+          itemId: data,
+        },
+      });
+    }
+    // alert(`Bar code with type ${type} and data ${data} has been scanned!`);
   };
 
   if (hasPermission === null) {
     return (
-      <View style={styles.container}>
-        <Image
-          source={{uri: "https://c.tenor.com/r34MXk3BlvoAAAAi/henry-stickmin-henry.gif"}}
-          style={{width: '100%', flex: 1, resizeMode: 'contain'}}
-        />
-      </View>
+      <View style={styles.container} />
     )}
 
   if (!hasPermission) {
@@ -45,7 +58,7 @@ export default function BarcodeScanner() {
     <View style={styles.container}>
       <View style={styles.barcodeScannerView}>
         <BarCodeScanner
-          onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+          onBarCodeScanned={scanned ? undefined : handleBarcodeScanned}
           style={styles.barcodeScanner}
         />
       </View>

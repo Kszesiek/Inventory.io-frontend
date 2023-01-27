@@ -18,56 +18,63 @@ import {OpacityButton} from "../../../components/Themed/OpacityButton";
 import * as React from "react";
 import {Modalize} from "react-native-modalize";
 import {Category} from "../../../store/categories";
-import CategoriesChooser from "../../../components/CategoriesChooser";
+import CategoriesChooser from "../../../components/choosers/CategoriesChooser";
 import {getAllItems, getFilteredItems} from "../../../endpoints/items";
 import {getAllCategories} from "../../../endpoints/categories";
+import {Warehouse} from "../../../store/warehouses";
+import {useFocusEffect} from "@react-navigation/native";
+import WarehouseChooser from "../../../components/choosers/WarehouseChooser";
+import {getAllWarehouses} from "../../../endpoints/warehouses";
 
 export default function Inventory({ navigation, route }: InventoryStackScreenProps<'Inventory'>) {
   const dispatch = useDispatch();
+  const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
 
   const backgroundColor = useThemeColor({}, 'background');
   const cardBackgroundColor = useThemeColor({}, 'cardBackground');
   const tintColor = useThemeColor({}, 'tint');
 
-  const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
-
   const [areItemsLoaded, setAreItemsLoaded] = useState<boolean | undefined>(undefined);
   const [areCategoriesLoaded, setAreCategoriesLoaded] = useState<boolean | undefined>(undefined);
+  const [areWarehousesLoaded, setAreWarehousesLoaded] = useState<boolean | undefined>(undefined);
 
   const categories = useSelector((state: IRootState) => state.categories.categories);
-  const [itemsToDisplay, setItemsToDisplay] = useState<Item[]>();
+  const [itemsToDisplay, setItemsToDisplay] = useState<Item[]>([]);
 
   // changed instantly
   const [selectedCategory, setSelectedCategory] = useState<Category | undefined>(undefined);
-  const [selectedFilters, setSelectedFilters] = useState<any[]>([]);
+  const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | undefined>(undefined);
   const [textInput, setTextInput] = useState<string>(route.params?.searchPhrase || "");
 
   // changed when pressing search button
-  const [chosenCategory, setChosenCategory] = useState<Category | undefined>(undefined);
-  const [chosenFilters, setChosenFilters] = useState<any[]>([]);
-  const [chosenText, setChosenText] = useState<string>(route.params?.searchPhrase || "");
+  // const [chosenCategory, setChosenCategory] = useState<Category | undefined>(undefined);
+  // const [chosenWarehouse, setChosenWarehouse] = useState<Warehouse | undefined>(undefined);
+  // const [chosenText, setChosenText] = useState<string>(route.params?.searchPhrase || "");
 
   const categoriesModalizeRef = useRef<Modalize>(null);
-  const filtersModalizeRef = useRef<Modalize>(null);
+  const warehouseModalizeRef = useRef<Modalize>(null);
 
-  async function fetchItems() {
-    const loadedItems = await getAllItems(dispatch, demoMode);
-    setAreItemsLoaded(!!loadedItems);
-    if(!!loadedItems)
-      setItemsToDisplay(loadedItems);
-  }
   async function fetchCategories() {
     setAreCategoriesLoaded(await getAllCategories(dispatch, demoMode));
   }
 
-  useEffect(() => {
-    fetchItems();
+  async function fetchWarehouses() {
+    setAreWarehousesLoaded(await getAllWarehouses(dispatch, demoMode));
+  }
+
+  useFocusEffect(React.useCallback(() => {
+    searchButtonPressed();
     fetchCategories();
-  }, [])
+    fetchWarehouses();
+  }, []));
+
+  useEffect(() => {
+    searchButtonPressed();
+  }, [selectedCategory, selectedWarehouse]);
 
   const itemTitle: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans Bold',
-    color: useThemeColor({}, "tint"),
+    color: tintColor,
     fontSize: 15,
     marginBottom: 5,
   }
@@ -77,25 +84,26 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
     const searchPhrase = route.params?.searchPhrase || ""
     setTextInput(searchPhrase);
     setSelectedCategory(undefined);
-    setChosenText(searchPhrase);
-    setChosenCategory(undefined);
+    setSelectedWarehouse(undefined);
   }, [route.params?.searchPhrase]);
 
-  // for every change in categories, filters or phrase to search
-  useEffect(() => {
-    demoMode && getMatchingItems();
-  }, [chosenText, chosenCategory, chosenFilters])
-
-  function searchButtonPressed() {
-    console.log("search button pressed");
-    setChosenText(textInput);
-    setChosenCategory(selectedCategory);
-    setChosenFilters(selectedFilters);
+  async function searchButtonPressed() {
+    console.log("searchButtonPressed");
+    console.log("TextInput: " + textInput);
+    console.log("CategoryId: " + selectedCategory?.id);
+    console.log("WarehouseId: " + selectedWarehouse?.id);
+    if (!demoMode) {
+      setAreItemsLoaded(undefined);
+      const loadedItems = await getFilteredItems(dispatch, textInput, selectedCategory?.id, selectedWarehouse?.id, undefined, demoMode);
+      setAreItemsLoaded(!!loadedItems);
+      if(!!loadedItems)
+        setItemsToDisplay(loadedItems);
+    }
   }
 
   function cardPressed(item: Item) {
     console.log("Item pressed");
-    navigation.navigate("ItemDetails", { item: item });
+    navigation.navigate("ItemDetails", { itemId: item.itemId });
   }
 
   function Categories() {
@@ -115,18 +123,26 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
     )
   }
 
-  function Filters() {
+  function Warehouse() {
     return (
-      <>
-        <Text style={[styles.modalTitle, {color: tintColor}]}>Filtry</Text>
-        <OpacityButton
-          style={styles.bottomDrawerConfirmButton}
-          onPress={() => filtersModalizeRef.current?.close()}
-        >
-          Potwierdź
-        </OpacityButton>
-      </>
-      )
+      <Animated.View style={{flex: 1, marginTop: 10,}}>
+        <Text style={[styles.warehouseDrawerTitle, {color: tintColor}]}>Wybierz magazyn</Text>
+        <WarehouseChooser
+          selectedWarehouse={selectedWarehouse}
+          setSelectedWarehouse={setSelectedWarehouse}
+        />
+        <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+          <OpacityButton
+            style={styles.warehouseDrawerButton}
+            onPress={async () => {
+              warehouseModalizeRef.current?.close();
+            }}
+          >
+            Potwierdź
+          </OpacityButton>
+        </View>
+      </Animated.View>
+    )
   }
 
   function categoriesPressed() {
@@ -134,50 +150,39 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
     categoriesModalizeRef.current?.open();
   }
 
-  function filtersPressed() {
-    console.log("filters pressed");
-    filtersModalizeRef.current?.open();
+  function warehousePressed() {
+    console.log("warehouse pressed");
+    warehouseModalizeRef.current?.open();
   }
 
-  async function getMatchingItems() {
-    setAreItemsLoaded(undefined);
-
-    const loadedItems = await getFilteredItems(dispatch, chosenText, chosenCategory?.id, demoMode);
-
-    setAreItemsLoaded(!!loadedItems);
-
-    if(!!loadedItems)
-      setItemsToDisplay(loadedItems);
-  }
-
-  if (areItemsLoaded === undefined) {
-    return <View style={styles.noContentContainer}>
-      <ActivityIndicator color={tintColor} size="large" />
-      <Text style={styles.noContentText}>Ładowanie danych z serewra...</Text>
-    </View>
-  }
-
-  if (!areItemsLoaded) {
-    return <View style={styles.noContentContainer}>
-      <Text style={[styles.noContentText, {fontSize: 16}]}>Nie udało się załadować wydarzeń.</Text>
-      <Text style={styles.noContentText}>Podczas połączenia z serwerem wystąpił problem.</Text>
-    </View>
-  }
+  // if (areItemsLoaded === undefined) {
+  //   return <View style={styles.noContentContainer}>
+  //     <ActivityIndicator color={tintColor} size="large" />
+  //     <Text style={styles.noContentText}>Ładowanie danych z serwera...</Text>
+  //   </View>
+  // }
+  //
+  // if (!areItemsLoaded) {
+  //   return <View style={styles.noContentContainer}>
+  //     <Text style={[styles.noContentText, {fontSize: 16}]}>Nie udało się załadować przedmiotów.</Text>
+  //     <Text style={styles.noContentText}>Podczas połączenia z serwerem wystąpił problem.</Text>
+  //   </View>
+  // }
 
   return (
     <>
       <FlatList
       style={{backgroundColor}}
       contentContainerStyle={styles.flatList}
-      data={itemsToDisplay}
+      data={areItemsLoaded ? itemsToDisplay : []}
       ListHeaderComponent={
         <View>
           <View key="filterbar" style={styles.filterBar}>
             <TouchableCard style={styles.filterButton} onPress={categoriesPressed}>
               <Text style={{textAlign: 'center'}} numberOfLines={1}>Kategoria: {!!selectedCategory ? selectedCategory.name : "wszystkie"}</Text>
             </TouchableCard>
-            <TouchableCard style={styles.filterButton} onPress={filtersPressed}>
-              <Text style={{textAlign: 'center'}} numberOfLines={1}>Filtry</Text>
+            <TouchableCard style={styles.filterButton} onPress={warehousePressed}>
+              <Text style={{textAlign: 'center'}} numberOfLines={1}>Magazyn: {!!selectedWarehouse ? selectedWarehouse.name : "wszystkie"}</Text>
             </TouchableCard>
           </View>
           <View key="searchbar" style={{...styles.searchBar, backgroundColor: cardBackgroundColor}}>
@@ -201,11 +206,26 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
           </View>
         </View>
       }
-      ListEmptyComponent={
-        <View style={styles.noContentContainer}>
-          <Text style={[styles.noContentText, {fontSize: 16}]}>Brak przedmiotów do wyświetlenia{!!chosenCategory && " w tej kategorii"}.</Text>
-          <Text style={styles.noContentText}>Aby dodać przedmiot, użyj przycisku u góry ekranu.</Text>
-        </View>}
+      ListEmptyComponent={() => {
+        if (areItemsLoaded === undefined) return (
+            <View style={styles.noContentContainer}>
+              <ActivityIndicator color={tintColor} size="large" />
+              <Text style={[styles.noContentText, {fontSize: 16}]}>Ładowanie danych z serwera....</Text>
+            </View>)
+
+        if (!areItemsLoaded) return (
+          <View style={styles.noContentContainer}>
+            <Text style={[styles.noContentText, {fontSize: 16}]}>Błąd podczas połączenia z serwerem.</Text>
+            <Text style={styles.noContentText}>Nie udało się pobrać przedmiotów z serwera.</Text>
+          </View>)
+
+        return (
+          <View style={styles.noContentContainer}>
+            <Text style={[styles.noContentText, {fontSize: 16}]}>Brak przedmiotów do wyświetlenia{!!selectedCategory && " w tej kategorii"}.</Text>
+            <Text style={styles.noContentText}>Aby dodać przedmiot, użyj przycisku u góry ekranu.</Text>
+          </View>
+        );
+      }}
       renderItem={({item}) => {
         return (
           <TouchableCard key={item.itemId} style={styles.card} onPress={() => cardPressed(item)}>
@@ -221,10 +241,10 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
       customRenderer={Categories()}
     />
     <Modalize
-      ref={filtersModalizeRef}
+      ref={warehouseModalizeRef}
       modalStyle={{...styles.modalStyle, backgroundColor}}
     >
-      {Filters()}
+      {Warehouse()}
     </Modalize>
   </>
   );
@@ -307,5 +327,15 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     paddingHorizontal: 20,
     paddingVertical: 10,
+  },
+  warehouseDrawerTitle: {
+    fontSize: 22,
+    marginVertical: 5,
+    marginHorizontal: 20,
+    textAlign: 'center',
+  },
+  warehouseDrawerButton: {
+    margin: 15,
+    paddingVertical: 8,
   },
 })

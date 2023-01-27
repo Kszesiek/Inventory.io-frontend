@@ -1,4 +1,4 @@
-import {ActivityIndicator, FlatList, ListRenderItemInfo, StyleProp, StyleSheet, TextStyle} from "react-native";
+import {ActivityIndicator, FlatList, StyleProp, StyleSheet, TextStyle} from "react-native";
 import {Text, useThemeColor, View} from "../../../../components/Themed";
 import {useDispatch, useSelector} from "react-redux";
 import {IRootState} from "../../../../store/store";
@@ -12,14 +12,14 @@ export default function Warehouses({ navigation, route }: WarehousesStackScreenP
   const dispatch = useDispatch();
   const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
   const warehouses: Array<Warehouse> | null = useSelector((state: IRootState) => state.warehouses.warehouses);
-  const [isDataLoaded, setIsDataLoaded] = useState<boolean | undefined>(undefined);
+  const [areWarehousesLoaded, setAreWarehousesLoaded] = useState<boolean | undefined>(undefined);
 
   const tintColor = useThemeColor({}, 'tint');
   const backgroundColor = useThemeColor({}, 'background');
 
   useEffect(() => {
     async function getWarehouses() {
-      setIsDataLoaded(await getAllWarehouses(dispatch, demoMode));
+      setAreWarehousesLoaded(await getAllWarehouses(dispatch, demoMode));
     }
     getWarehouses();
   }, []);
@@ -29,14 +29,14 @@ export default function Warehouses({ navigation, route }: WarehousesStackScreenP
     color: tintColor,
   }
 
-  if (isDataLoaded === undefined) {
+  if (areWarehousesLoaded === undefined) {
     return <View style={styles.noContentContainer}>
       <ActivityIndicator color={tintColor} size="large" />
       <Text style={styles.noContentText}>Ładowanie danych z serewra...</Text>
     </View>
   }
 
-  if (!isDataLoaded) {
+  if (!areWarehousesLoaded) {
     return <View style={styles.noContentContainer}>
       <Text style={[styles.noContentText, {fontSize: 16}]}>Nie udało się załadować magazynów.</Text>
       <Text style={styles.noContentText}>Podczas połączenia z serwerem wystąpił problem.</Text>
@@ -52,13 +52,15 @@ export default function Warehouses({ navigation, route }: WarehousesStackScreenP
         <Text style={[styles.noContentText, {fontSize: 16}]}>Brak magazynów do wyświetlenia.</Text>
         <Text style={styles.noContentText}>Aby dodać magazyn, użyj przycisku u góry ekranu.</Text>
       </View>}
-    renderItem={(warehouse: ListRenderItemInfo<Warehouse>) => {
+    renderItem={({item}) => {
       return (
-        <TouchableCard style={styles.card} onPress={() => navigation.navigate("WarehouseDetails", { warehouse: warehouse.item })}>
-          <Text style={boldedText}>{warehouse.item.name}</Text>
+        <TouchableCard style={styles.card} onPress={() => navigation.navigate("WarehouseDetails", { warehouseId: item.id })}>
+          <Text style={boldedText}>{item.name}</Text>
           {/*<Text style={{textAlign: 'center'}}>{warehouse.item.longitude}, {warehouse.item.latitude}</Text>*/}
-          <Text style={{textAlign: 'center'}}>{warehouse.item.street} {warehouse.item.streetNumber}</Text>
-          <Text style={{textAlign: 'center'}}>{`${warehouse.item.postalCode && `${warehouse.item.postalCode} `}${warehouse.item.city}${warehouse.item.country && `, ${warehouse.item.country}`}`}</Text>
+          {item.street && item.streetNumber && item.city && <>
+            <Text style={{textAlign: 'center'}}>{item.street} {item.streetNumber}</Text>
+            <Text style={{textAlign: 'center'}}>{`${item.postalCode ? `${item.postalCode} ` : ""}${item.city}${item.country ? `, ${item.country}` : ""}`}</Text>
+          </>}
         </TouchableCard>
       )
     }}

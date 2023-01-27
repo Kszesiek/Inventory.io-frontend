@@ -1,14 +1,15 @@
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
-import {LendingStackParamList} from "../types";
+import {RentalStackParamList} from "../types";
 import {useThemeColor} from "../components/Themed";
 import {TouchableOpacity} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
-import Lendings from "../screens/home/lendings/Lendings";
-import LendingDetails from "../screens/home/lendings/LendingDetails";
-import AddEditLending from "../screens/home/lendings/AddEditLending";
+import Rentals from "../screens/home/rentals/Rentals";
+import RentalDetails from "../screens/home/rentals/RentalDetails";
+import AddEditRental from "../screens/home/rentals/AddEditRental";
 import * as React from "react";
+import AddItemsToRental from "../screens/home/rentals/AddItemsToRental";
 
-const LendingStack = createNativeStackNavigator<LendingStackParamList>();
+const LendingStack = createNativeStackNavigator<RentalStackParamList>();
 
 export default function LendingNavigator() {
   const textColor = useThemeColor({}, 'text');
@@ -27,10 +28,10 @@ export default function LendingNavigator() {
         ),
       })}
     >
-      <LendingStack.Screen name="Lendings" component={Lendings} options={({ navigation }) => ({
+      <LendingStack.Screen name="Rentals" component={Rentals} options={({ navigation }) => ({
         title: "Wypożyczenia",
         headerRight: () => (
-          <TouchableOpacity onPress={() => navigation.navigate("AddEditLending")}>
+          <TouchableOpacity onPress={() => navigation.navigate("AddEditRental")}>
             <Ionicons name='add' size={36} style={{ color: textColor}}  />
           </TouchableOpacity>
         ),
@@ -40,18 +41,20 @@ export default function LendingNavigator() {
           </TouchableOpacity>
         )
       })} />
-      <LendingStack.Screen name="LendingDetails" component={LendingDetails} options={({ navigation, route }) => ({
+      <LendingStack.Screen name="RentalDetails" component={RentalDetails} options={({ navigation, route }) => ({
         title: "Szczegóły wypożyczenia",
         // headerRight: () => (
-        //   <TouchableOpacity onPress={() => navigation.navigate("AddEditLending", {lendingId: route.params.lendingId})}>
+        //   <TouchableOpacity onPress={() => navigation.navigate("AddEditRental", {lendingId: route.params.lendingId})}>
         //     <Feather name='edit' size={24} style={{ color: textColor,}} />
         //   </TouchableOpacity>
         // ),
       })} />
-      <LendingStack.Screen name="AddEditLending" component={AddEditLending} options={({ navigation, route }) => ({
-        title: route.params && route.params.lending ? "Edytuj wydarzenie" : "Nowe wydarzenie",
+      <LendingStack.Screen name="AddEditRental" component={AddEditRental} options={({ navigation, route }) => ({
+        title: route.params && route.params.rentalId ? "Edytuj wypożyczenie" : "Nowe wypożyczenie",
       })} />
-
+      <LendingStack.Screen name="AddItemsToRental" component={AddItemsToRental} options={({ navigation, route }) => ({
+        title: "Wybierz przedmioty",
+      })} />
     </LendingStack.Navigator>
   );
 }

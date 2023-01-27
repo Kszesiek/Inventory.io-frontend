@@ -32,7 +32,7 @@ export default function Welcome({ navigation, route }: WelcomeStackScreenProps<'
         delay: 1500,
         useNativeDriver: true,
       }),
-    ]).start(secondAnimation);
+    ]).start(() => navigation.navigate("CreateOrganizationWelcome"));  // .start(secondAnimation);
   }, [fadeAnim]);
 
   function secondAnimation() {
@@ -83,7 +83,7 @@ export default function Welcome({ navigation, route }: WelcomeStackScreenProps<'
 
   function createOrganizationPressed() {
     console.log("Create organization pressed");
-    somethingPressed(() => navigation.navigate("CreateOrganization"));
+    somethingPressed(() => navigation.navigate("CreateOrganizationWelcome"));
   }
 
   function joinOrganizationPressed() {

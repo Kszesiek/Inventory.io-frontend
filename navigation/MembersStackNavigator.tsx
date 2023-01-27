@@ -44,7 +44,7 @@ export default function MembersNavigator() {
         title: "Szczegóły użytkownika",
       }} />
       <MembersStack.Screen name="AddEditMember" component={AddEditMember} options={({ navigation, route }) => ({
-        title: route.params && route.params.member ? "Edytuj użytkownika" : "Nowy użytkownik",
+        title: route.params && route.params.memberId ? "Edytuj użytkownika" : "Dodaj użytkownika",
       })} />
 
     </MembersStack.Navigator>

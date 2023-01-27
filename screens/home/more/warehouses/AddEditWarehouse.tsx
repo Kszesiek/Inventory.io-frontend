@@ -2,14 +2,16 @@ import {Alert, ScrollView, StyleSheet} from "react-native";
 import {useThemeColor, View} from "../../../../components/Themed";
 import {WarehousesStackScreenProps} from "../../../../types";
 import {useLayoutEffect, useState} from "react";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import Input from "../../../../components/Input";
 import {OpacityButton} from "../../../../components/Themed/OpacityButton";
 import {writeOutArray} from "../../../../utilities/enlist";
-import {Warehouse, warehousesActions} from "../../../../store/warehouses";
+import {Warehouse, WarehouseTemplate} from "../../../../store/warehouses";
 import * as Location from 'expo-location';
 import * as React from "react";
 import {LocationButton} from "../../../../components/LocationButton";
+import {createWarehouse, modifyWarehouse} from "../../../../endpoints/warehouses";
+import {IRootState} from "../../../../store/store";
 
 export type ValidValuePair<ValueType> = {
   value: ValueType
@@ -20,33 +22,20 @@ type inputValuesType = {
   name: ValidValuePair<string>,
   // latitude: ValidValuePair<number>,
   // longitude: ValidValuePair<number>,
-  country: ValidValuePair<string | undefined>,
+  country: ValidValuePair<string>,
   city: ValidValuePair<string>,
-  postalCode: ValidValuePair<string | undefined>,
+  postalCode: ValidValuePair<string>,
   street: ValidValuePair<string>,
   streetNumber: ValidValuePair<string>,
 }
 
 export default function AddEditWarehouse({ navigation, route }: WarehousesStackScreenProps<'AddEditWarehouse'>) {
   const dispatch = useDispatch();
-
-  const warehouse = route.params?.warehouse;
+  const demoMode: boolean = useSelector((state: IRootState) => state.appWide.demoMode);
+  const warehouse: Warehouse | undefined = useSelector((state: IRootState) => state.warehouses.warehouses.find((warehouse) => warehouse.id === route.params?.warehouseId));
 
   const backgroundColor = useThemeColor({}, "background");
   const cancelColor = useThemeColor({}, "delete");
-
-    // const [location, setLocation] = useState<Location.LocationObject | null>(null
-    // !!warehouse ?
-    //   {
-    //     coords: {
-    //       longitude: warehouse.longitude,
-    //       latitude: warehouse.latitude,
-    //     },
-    //     timestamp: Date.now(),
-    //   } as Location.LocationObject
-    // :
-    //   null
-    // );
 
   const [inputs, setInputs]: [inputValuesType, Function] = useState(
     {
@@ -63,23 +52,23 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
       //   isInvalid: false,
       // },
       country: {
-        value: !!warehouse ? warehouse.country || "" : "",
+        value: warehouse?.country || "",
         isInvalid: false,
       },
       city: {
-        value: !!warehouse ? warehouse.city : "",
+        value: warehouse?.city || "",
         isInvalid: false,
       },
       postalCode: {
-        value: !!warehouse ? warehouse.postalCode || "" : "",
+        value: warehouse?.postalCode || "",
         isInvalid: false,
       },
       street: {
-        value: !!warehouse ? warehouse.street : "",
+        value: warehouse?.street || "",
         isInvalid: false,
       },
       streetNumber: {
-        value: !!warehouse ? warehouse.streetNumber : "",
+        value: warehouse?.streetNumber || "",
         isInvalid: false,
       },
     });
@@ -110,10 +99,10 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
     // const longitudeIsValid: boolean = inputs.longitude.value >= -90 && inputs.longitude.value <= 90;
     // const latitudeIsValid: boolean = inputs.longitude.value >= -180 && inputs.longitude.value <= 180;
     const countryIsValid: boolean = inputs.country.value === undefined || inputs.country.value.trim().length < 100;
-    const cityIsValid: boolean = inputs.city.value.trim().length > 0 && inputs.city.value.trim().length < 100;
+    const cityIsValid: boolean = inputs.city.value === undefined || inputs.city.value.trim().length < 100;
     const postalCodeIsValid: boolean = inputs.postalCode.value === undefined || inputs.postalCode.value.trim().length < 100;
-    const streetIsValid: boolean = inputs.street.value.trim().length > 0 && inputs.street.value.trim().length < 100;
-    const streetNumberIsValid: boolean = inputs.streetNumber.value.trim().length > 0 && inputs.streetNumber.value.trim().length < 100;
+    const streetIsValid: boolean = inputs.street.value === undefined || inputs.street.value.trim().length < 100;
+    const streetNumberIsValid: boolean = inputs.streetNumber.value === undefined || inputs.streetNumber.value.trim().length < 100;
 
     setInputs((currentInputs: inputValuesType) => {
       return {
@@ -176,30 +165,30 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
       return;
     }
 
-    const warehouseData: Warehouse = {
+    const warehouseTemplate: WarehouseTemplate = {
       name: inputs.name.value,
       // longitude: inputs.longitude.value,
       // latitude: inputs.latitude.value,
       country: !!inputs.country.value && inputs.country.value.length > 0 ? inputs.country.value : undefined,
-      city: inputs.city.value,
-      postalCode: !!inputs.postalCode.value && inputs.postalCode.value.length > 0 ? inputs.postalCode.value : undefined,
-      street: inputs.street.value,
-      streetNumber: inputs.streetNumber.value,
-      id: !!warehouse ? warehouse.id : Math.random().toString()
+      city: !!inputs.city.value && inputs.city.value.length > 0 ? inputs.city.value : undefined,
+      postal_code: !!inputs.postalCode.value && inputs.postalCode.value.length > 0 ? inputs.postalCode.value : undefined,
+      street: !!inputs.street.value && inputs.street.value.length > 0 ? inputs.street.value : undefined,
+      street_number: !!inputs.streetNumber.value && inputs.streetNumber.value.length > 0 ? inputs.streetNumber.value : undefined,
     }
 
+    let response: Warehouse | undefined | boolean;
     if (!!warehouse) {
-      const response = await dispatch(warehousesActions.modifyWarehouse(warehouseData));
+      response = await modifyWarehouse(dispatch, warehouse.id, warehouseTemplate, demoMode);
 
       console.log("edit response:");
       console.log(response);
     } else {
-      const response = await dispatch(warehousesActions.addWarehouse(warehouseData));
+      response = await createWarehouse(dispatch, warehouseTemplate, demoMode);
 
       console.log("add response:");
       console.log(response);
     }
-    navigation.goBack();
+    !!response && navigation.goBack();
   }
 
   function inputChangedHandler<InputParam extends keyof typeof inputs>(inputIdentifier: InputParam, enteredValue: string) {

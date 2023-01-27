@@ -1,46 +1,71 @@
 import {Text, useThemeColor, View} from "../../../../components/Themed";
 import {OpacityButton} from "../../../../components/Themed/OpacityButton";
-import {ScrollView, StyleProp, StyleSheet, TextStyle, TouchableOpacity} from "react-native";
+import {ActivityIndicator, ScrollView, StyleProp, StyleSheet, TextStyle, TouchableOpacity} from "react-native";
 import {MembersStackScreenProps} from "../../../../types";
 import Detail from "../../../../components/Detail";
-import {useDispatch} from "react-redux";
-import {useEffect} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {useEffect, useState} from "react";
 import {Feather} from "@expo/vector-icons";
 import * as React from "react";
 import {Member, membersActions} from "../../../../store/members";
+import {IRootState} from "../../../../store/store";
+import {getFilteredItems} from "../../../../endpoints/items";
+import {getMember} from "../../../../endpoints/members";
+import {demoData} from "../../../../constants/demoData";
 
 export default function MemberDetails({ navigation, route }: MembersStackScreenProps<'MemberDetails'>) {
   const dispatch = useDispatch();
+  const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
   const textColor = useThemeColor({}, 'text');
-  const member: Member = route.params.member;
-
   const deleteColor = useThemeColor({}, "delete");
+  const backgroundColor = useThemeColor({}, "background");
+  const members: Member[] = useSelector((state: IRootState) => state.members.members);
+  const member: Member | undefined = members.find((member) => member.id === route.params.memberId);
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: !!member ? () => (
-        <TouchableOpacity onPress={() => navigation.navigate("AddEditMember", {member: member})}>
-          <Feather name='edit' size={24} style={{color: textColor}}/>
-        </TouchableOpacity>
-      ) : undefined,
-    })
-  }, [member])
+  // useEffect(() => {
+  //   async function fetchMember() {
+  //     await getMember(route.params.memberId, demoMode);
+  //     setIsMemberLoaded(true);
+  //   }
+  //   fetchMember();
+  // }, []);
+
+  // useEffect(() => {
+  //   navigation.setOptions({
+  //     headerRight: !!member ? () => (
+  //       <TouchableOpacity onPress={() => navigation.navigate("AddEditMember", {memberId: route.params.memberId})}>
+  //         <Feather name='edit' size={24} style={{color: textColor}}/>
+  //       </TouchableOpacity>
+  //     ) : undefined,
+  //   })
+  // }, [member])
 
   const property: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans',
-    color: useThemeColor({}, "text"),
+    color: textColor,
   }
-
-  const backgroundColor = useThemeColor({}, "background");
 
   async function deletePressed() {
     console.log("delete button pressed");
+    await
     navigation.replace("Members");
-    await dispatch(membersActions.removeMember(member.id));
   }
 
   function editPressed() {
-    navigation.navigate("AddEditMember", {member: member});
+    navigation.navigate("AddEditMember", {memberId: route.params.memberId});
+  }
+
+  // if (!isMemberLoaded) {
+  //   return <View style={styles.loadingView}>
+  //     <ActivityIndicator color={tintColor} size="large" />
+  //     <Text style={styles.loadingText}>Wczytywanie danych z serwera...</Text>
+  //   </View>
+  // }
+
+  if (!member) {
+    return <View style={styles.loadingView}>
+      <Text style={styles.loadingText}>Błąd połączenia z serwerem.</Text>
+    </View>
   }
 
   return (
@@ -61,7 +86,7 @@ export default function MemberDetails({ navigation, route }: MembersStackScreenP
       <View style={{flexGrow: 1}}/>
       <View style={styles.editButtonContainer}>
         <OpacityButton style={[styles.editButton, {backgroundColor: deleteColor}]} onPress={deletePressed}>Usuń</OpacityButton>
-        <OpacityButton style={styles.editButton} onPress={editPressed}>Edytuj</OpacityButton>
+        {/*<OpacityButton style={styles.editButton} onPress={editPressed}>Edytuj</OpacityButton>*/}
       </View>
     </ScrollView>
   );
@@ -80,9 +105,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     backgroundColor: 'transparent',
-    // elevation: 10,
-    // borderTopLeftRadius: 10,
-    // borderTopRightRadius: 10,
   },
   editButton: {
     margin: 15,
@@ -93,5 +115,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Source Sans',
     fontSize: 16,
     marginVertical: 3,
+  },
+  loadingView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontStyle: 'italic',
   },
 })

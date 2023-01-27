@@ -7,8 +7,12 @@ export interface MemberTemplate {
   email: string
 }
 
-export interface Member extends MemberTemplate {
+export interface Member {
   id: string
+  username: string
+  name: string
+  surname: string
+  email: string
 }
 
 export function isMember(object: any): object is Member {
@@ -21,6 +25,16 @@ export function isMember(object: any): object is Member {
     typeof object['surname'] === 'string' &&
     typeof object['email'] === 'string'
   );
+}
+
+export function memberFromTemplate(memberTemplate: MemberTemplate, memberId?: string): Member {
+  return {
+    id: memberId || Math.random().toString(),
+    username: memberTemplate.username,
+    name: memberTemplate.name,
+    surname: memberTemplate.surname,
+    email: memberTemplate.email,
+  }
 }
 
 export const membersSlice = createSlice({
@@ -44,6 +58,17 @@ export const membersSlice = createSlice({
       if (index >= 0) {
         state.members[index] = action.payload;
       }
+    },
+    updateOrAddMember: (state, action: PayloadAction<Member>) => {
+      const newMembers: typeof state.members = state.members.filter((member) => member.id !== action.payload.id);
+      newMembers.push(action.payload);
+      state.members = newMembers;
+    },
+    updateOrAddMembers: (state, action: PayloadAction<Member[]>) => {
+      const memberIndexes: string[] = action.payload.map((member) => member.id);
+      const newMembers: typeof state.members = state.members.filter((member) => !memberIndexes.includes(member.id));
+      newMembers.push(...action.payload);
+      state.members = newMembers;
     },
     loadMembers: (state, action) => {
       state.members = action.payload;

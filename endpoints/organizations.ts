@@ -1,8 +1,13 @@
 import axios from "axios";
 import { serverAddress } from "./global";
-import {Organization, organizationsActions, OrganizationTemplate} from "../store/organizations";
+import {
+  isOrganization,
+  Organization,
+  organizationFromTemplate,
+  organizationsActions,
+  OrganizationTemplate
+} from "../store/organizations";
 import {Dispatch} from "react";
-import {Category, CategoryTemplate} from "../store/categories";
 import {AnyAction} from "@reduxjs/toolkit";
 import {demoOrganizations} from "../constants/demoData";
 
@@ -35,8 +40,13 @@ export async function getOrganizations(dispatch: Dispatch<any>, demoMode: boolea
   }
 }
 
-export async function createOrganization(organizationTemplate: OrganizationTemplate): Promise<boolean | Organization> {
-  try {
+export async function createOrganization(dispatch: Dispatch<AnyAction>, organizationTemplate: OrganizationTemplate, demoMode: boolean = false): Promise<boolean | Organization> {
+  if (demoMode) {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    const organization = organizationFromTemplate(organizationTemplate)
+    dispatch(organizationsActions.addOrganization(organization));
+    return organization;
+  } else try {
     const response = await axios.post(url, organizationTemplate);
 
     console.log("--- CREATE ORGANIZATION RESPONSE ---");
@@ -47,14 +57,17 @@ export async function createOrganization(organizationTemplate: OrganizationTempl
       return false;
 
     const organization: Organization = response.data as Organization;
-    return organization !== undefined ? organization : false;
+    if (isOrganization(organization)) {
+      await dispatch(organizationsActions.addOrganization(organization));
+      return organization;
+    } else return false;
   } catch (error) {
     console.log(error);
     return false;
   }
 }
 
-export async function getOrganization(organizationId: string): Promise<Organization | false> {
+export async function getOrganization(organizationId: string): Promise<Organization | null> {
   try {
     const response = await axios.get(url + organizationId);
 
@@ -63,23 +76,23 @@ export async function getOrganization(organizationId: string): Promise<Organizat
     console.log(response.data);
 
     if (response.status !== 200)
-      return false;
+      return null;
 
     const organization: Organization = response.data;
     if (organization !== undefined)
       return organization;
-    else return false;
+    else return null;
   } catch (error) {
     console.log(error);
-    return false;
+    return null;
   }
 }
 
-export async function modifyOrganization(organizationId: string, categoryTemplate: CategoryTemplate, dispatch: Dispatch<AnyAction>): Promise<boolean | Category> {
+export async function modifyOrganization(organizationId: string, organizationTemplate: OrganizationTemplate, dispatch: Dispatch<AnyAction>): Promise<null | Organization> {
   try {
     const response = await axios.patch(
       url + organizationId + "/",
-      categoryTemplate,
+      organizationTemplate,
       { validateStatus: (status) => status >= 200 && status < 300 || status === 404 });
 
     console.log("--- MODIFY ORGANIZATION RESPONSE ---");
@@ -87,14 +100,14 @@ export async function modifyOrganization(organizationId: string, categoryTemplat
     console.log(response.data);
 
     if (response.status !== 200)
-      return false;
+      return null;
 
     const organization: Organization = response.data as Organization;
 
-    return organization !== undefined ? organization : false;
+    return organization !== undefined ? organization : null;
   } catch (error) {
     console.log(error);
-    return false;
+    return null;
   }
 }
 

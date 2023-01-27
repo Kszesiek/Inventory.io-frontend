@@ -1,11 +1,11 @@
 import * as React from "react";
 import {Animated, ScrollView, StyleSheet, useWindowDimensions} from "react-native";
 import {useRef, useState} from "react";
-import {View, Text, useThemeColor, TouchableOpacity} from "./Themed";
-import {Category} from "../store/categories";
+import {View, Text, useThemeColor, TouchableOpacity} from "../Themed";
+import {Category} from "../../store/categories";
 import {useSelector} from "react-redux";
-import {IRootState} from "../store/store";
-import {TouchableCard} from "./Themed/TouchableCard";
+import {IRootState} from "../../store/store";
+import {TouchableCard} from "../Themed/TouchableCard";
 import {Ionicons} from "@expo/vector-icons";
 
 type props = {
@@ -40,7 +40,7 @@ export default function CategoriesChooser({currentCategory, setCurrentCategory}:
     let categoriesPath: Category[] = [currentCategory];
     let currCategory: Category = currentCategory;
 
-    while (currCategory.parent_category_id !== undefined) {
+    while (currCategory.parent_category_id !== null && currCategory.parent_category_id !== undefined) {
       currCategory = categories.find((item: Category) => item.id === currCategory.parent_category_id)!;
       categoriesPath.push(currCategory);
     }
@@ -74,7 +74,7 @@ export default function CategoriesChooser({currentCategory, setCurrentCategory}:
     ]).start();
   }
 
-  function goToSubcategory(whichWindow: 1 | 2, newCategoryId: string | undefined, animationDirection?: 'forwards' | 'backwards') {
+  function goToSubcategory(whichWindow: 1 | 2, newCategoryId: number | undefined, animationDirection?: 'forwards' | 'backwards') {
     const newWindow = whichWindow === 1 ? 2 : 1;
     if (newWindow === 1) {
       setFirstCategoriesList(categories.filter((item) => item.parent_category_id === newCategoryId));
@@ -86,7 +86,7 @@ export default function CategoriesChooser({currentCategory, setCurrentCategory}:
     changeScreen(animationDirection || (!!currentCategory && newCategoryId === currentCategory.parent_category_id) ? 'backwards' : 'forwards');
   }
 
-  function goBackInCategoriesTree(categoryId: string) {
+  function goBackInCategoriesTree(categoryId: number) {
     let newCategoriesTree: typeof categoriesTree = categoriesTree;
     while(newCategoriesTree.length > 0 && newCategoriesTree.slice(-1)[0].id !== categoryId) {
       newCategoriesTree = newCategoriesTree.slice(0, -1);
@@ -182,7 +182,7 @@ export default function CategoriesChooser({currentCategory, setCurrentCategory}:
           </TouchableOpacity>
 
           {categoriesTree.map((item: Category) => {return (
-            <View style={{flexDirection: 'row', backgroundColor: 'transparent'}} key={item.name}>
+            <View style={{flexDirection: 'row', backgroundColor: 'transparent'}} key={item.id}>
               <Ionicons name='chevron-forward' size={16} style={{ color: textColor, alignSelf: 'center'}} />
               <TouchableOpacity
                 style={[

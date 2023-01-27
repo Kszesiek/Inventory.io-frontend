@@ -53,8 +53,6 @@ export default function HomescreenNavigator(props: {navigation: any, route: any}
           title: 'Skanuj kod kreskowy przedmiotu',
         }}
       />
-
-
     </HomescreenStack.Navigator>
   );
 }

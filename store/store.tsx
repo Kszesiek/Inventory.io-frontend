@@ -2,7 +2,7 @@ import {combineReducers, configureStore} from "@reduxjs/toolkit";
 
 import eventsReducer from './events';
 import itemsReducer from './items';
-import lendingsReducer from './lendings';
+import rentalsReducer from './rentals';
 import organizationsReducer from './organizations';
 import categoriesReducer from './categories';
 import propertiesReducer from './properties';
@@ -13,7 +13,7 @@ import warehousesReducer from './warehouses';
 const rootReducer = combineReducers({
   events: eventsReducer,
   items: itemsReducer,
-  lendings: lendingsReducer,
+  rentals: rentalsReducer,
   organizations: organizationsReducer,
   categories: categoriesReducer,
   properties: propertiesReducer,

@@ -1,22 +1,23 @@
 import {StyleProp, StyleSheet, ViewStyle} from "react-native";
-import {useThemeColor, Text} from "./Themed";
+import {useThemeColor, Text, TouchableOpacityProps} from "./Themed";
 import {TouchableCard} from "./Themed/TouchableCard";
 import {useState} from "react";
 import Card from "./Themed/Card";
 
 type dataItem = {
   label: string,
-  key: string,
+  key: string | number,
 }
 
 type propsType<TDataItem, TDataKey> = {
   data: TDataItem[]
   onPress?: (chosenKey: TDataKey) => void
   style?: ViewStyle
+  touchableOpacityProps?: TouchableOpacityProps
   defaultOption?: TDataKey
 }
 
-export default function HighlightChooser<TDataItem extends dataItem, TDataKey extends TDataItem['key']>({data, onPress, style, defaultOption}: propsType<TDataItem, TDataKey>) {
+export default function HighlightChooser<TDataItem extends dataItem, TDataKey extends TDataItem['key']>({data, onPress, style, defaultOption, touchableOpacityProps}: propsType<TDataItem, TDataKey>) {
   const [chosenKey, setChosenKey] = useState(defaultOption || data[0].key);
   const backgroundColor = useThemeColor({}, 'cardBackground');
   const buttonTextColor = useThemeColor({}, 'buttonText');
@@ -34,9 +35,10 @@ export default function HighlightChooser<TDataItem extends dataItem, TDataKey ex
   return <Card style={{...styles.container, backgroundColor, ...style}}>
     {data.map((item: TDataItem) => {
       return <TouchableCard
-        key={item.key}
+        key={typeof item.key === 'number' ? `${item.key}` : item.key}
         style={[styles.card, item.key === chosenKey && chosenCardStyle]}
         onPress={() => onCardPressed(item.key as TDataKey)}
+        props={touchableOpacityProps}
       >
         <Text style={[styles.text, item.key === chosenKey && {color: buttonTextColor}]}>{item.label}</Text>
       </TouchableCard>

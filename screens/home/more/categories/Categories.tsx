@@ -1,23 +1,51 @@
-import {FlatList, StyleProp, StyleSheet, TextStyle} from "react-native";
+import {ActivityIndicator, FlatList, StyleProp, StyleSheet, TextStyle} from "react-native";
 import {Text, useThemeColor, View} from "../../../../components/Themed";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {IRootState} from "../../../../store/store";
 import {TouchableCard} from "../../../../components/Themed/TouchableCard";
 import {CategoriesStackScreenProps} from "../../../../types";
 import {Category} from "../../../../store/categories";
+import {useEffect, useState} from "react";
+import {getAllCategories} from "../../../../endpoints/categories";
 
 export default function Categories({ navigation, route }: CategoriesStackScreenProps<'Categories'>) {
-  const categories: Array<Category> = useSelector((state: IRootState) => state.categories.categories)
+  const dispatch = useDispatch();
+  const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
+  const [areCategoriesLoaded, setAreCategoriesLoaded] = useState<boolean | undefined>(undefined);
+  const categories: Array<Category> = useSelector((state: IRootState) => state.categories.categories);
+  const tintColor = useThemeColor({}, 'tint');
+  const backgroundColor = useThemeColor({}, 'background');
+
+  useEffect(() => {
+    async function getCategories() {
+      setAreCategoriesLoaded(await getAllCategories(dispatch, demoMode));
+    }
+    getCategories();
+  }, []);
 
   const boldedText: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans Bold',
     color: useThemeColor({}, "tint"),
   }
 
+  if (areCategoriesLoaded === undefined) {
+    return <View style={styles.noContentContainer}>
+      <ActivityIndicator color={tintColor} size="large" />
+      <Text style={styles.noContentText}>Ładowanie danych z serewra...</Text>
+    </View>
+  }
+
+  if (!areCategoriesLoaded) {
+    return <View style={styles.noContentContainer}>
+      <Text style={[styles.noContentText, {fontSize: 16}]}>Nie udało się załadować kategorii.</Text>
+      <Text style={styles.noContentText}>Podczas połączenia z serwerem wystąpił problem.</Text>
+    </View>
+  }
+
   return <FlatList
-    style={{...styles.flatList, backgroundColor: useThemeColor({}, 'background')}}
+    style={{...styles.flatList, backgroundColor}}
     contentContainerStyle={{flexGrow: 1}}
-    data={categories.slice(0, 20)}
+    data={categories}
     ListEmptyComponent={
       <View style={styles.noContentContainer}>
         <Text style={[styles.noContentText, {fontSize: 16}]}>Brak kategorii do wyświetlenia.</Text>
@@ -26,7 +54,7 @@ export default function Categories({ navigation, route }: CategoriesStackScreenP
     renderItem={({item} : {item: Category}) => {
       const parentCategory: Category | undefined = categories.find((cat: Category) => cat.id === item.parent_category_id)
       return (
-        <TouchableCard style={styles.card} onPress={() => navigation.navigate("CategoryDetails", {category: item})}>
+        <TouchableCard style={styles.card} onPress={() => navigation.navigate("CategoryDetails", {categoryId: item.id})}>
           <Text style={{...boldedText, fontSize: 16}}>{item.name}</Text>
           <Text style={{textAlign: 'center'}}>skrót: {item.short_name}</Text>
           {!!parentCategory && <Text style={{textAlign: 'center'}}>Kategoria

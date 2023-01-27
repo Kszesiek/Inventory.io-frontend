@@ -4,7 +4,7 @@ import {useThemeColor} from "../components/Themed";
 import {TouchableOpacity} from "react-native";
 import {Feather, Ionicons} from "@expo/vector-icons";
 import * as React from "react";
-import LendingNavigator from "./LendingStackNavigator";
+import RentalNavigator from "./RentalStackNavigator";
 import EventNavigator from "./EventStackNavigator";
 import HomescreenNavigator from "./HomescreenStackNavigator";
 import InventoryNavigator from "./InventoryStackNavigator";
@@ -76,8 +76,8 @@ export default function HomeTabNavigator(props: {navigation: any, route: any}) {
           ),
         }} />
       <HomeTab.Screen
-        name="LendingNavigator"
-        component={LendingNavigator}
+        name="RentalNavigator"
+        component={RentalNavigator}
         options={{
           tabBarLabel: "Wypożyczenia",
           tabBarIcon: ({color, size}) => (

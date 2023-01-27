@@ -5,15 +5,15 @@ type props = {
   label: string
   textInputProps?: TextInputProps
   isInvalid: boolean
-  // onErrorText: string
+  labelStyle?: TextStyle
   style?: ViewStyle
 }
 
-export default function Input({label, textInputProps, style, isInvalid}: props) {
+export default function Input({label, labelStyle, textInputProps, style, isInvalid}: props) {
   const cardBackground = useThemeColor({}, "cardBackground");
   const errorColor = useThemeColor({}, "delete");
 
-  const inputStyle: TextStyle[] = [styles.card, {backgroundColor: cardBackground}, styles.input]
+  const inputStyle: TextStyle[] = [styles.card, styles.input, {backgroundColor: cardBackground}]
 
   if (textInputProps?.multiline) {
     inputStyle.push(styles.multilineInput);
@@ -23,8 +23,8 @@ export default function Input({label, textInputProps, style, isInvalid}: props) 
   }
 
   return (
-    <View style={[styles.container, style]}>
-      <Text style={[styles.label, isInvalid && {color: errorColor}]}>{label}</Text>
+    <View style={[styles.container, {backgroundColor: 'transparent'}, style]}>
+      <Text style={[styles.label, labelStyle, isInvalid && {color: errorColor}]}>{label}</Text>
       <TextInput style={inputStyle} {...textInputProps} />
     </View>
   )
