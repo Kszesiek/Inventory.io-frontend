@@ -9,7 +9,7 @@ import {useEffect, useRef, useState} from "react";
 import {Feather} from "@expo/vector-icons";
 import * as React from "react";
 import {Category, categoryActions, CategoryExtended, isCategoryExtended} from "../../../../store/categories";
-import {getCategory} from "../../../../endpoints/categories";
+import {getCategory, removeCategory} from "../../../../endpoints/categories";
 import {Modalize} from "react-native-modalize";
 import {Property} from "../../../../store/properties";
 import PropertiesChooser from "../../../../components/choosers/PropertiesChooser";
@@ -35,15 +35,12 @@ export default function CategoryDetails({ navigation, route }: CategoriesStackSc
   useFocusEffect(
     React.useCallback(() => {
     async function getExtendedCategory() {
-      if (route.params.categoryId === undefined || isCategoryExtendedLoaded !== undefined)
-        return;
-
       const extendedCategory: CategoryExtended | null | undefined = await getCategory(dispatch, route.params.categoryId, demoMode);
       setIsCategoryExtendedLoaded(!!extendedCategory);
       !!extendedCategory && setCategory(extendedCategory);
     }
     getExtendedCategory();
-  }, [category]));
+  }, [!!category]));
 
   useEffect(() => {
     navigation.setOptions({
@@ -60,7 +57,8 @@ export default function CategoryDetails({ navigation, route }: CategoriesStackSc
       return;
 
     console.log("delete button pressed");
-    navigation.replace("Categories");
+    navigation.goBack();
+    removeCategory(dispatch, route.params.categoryId, demoMode);
     await dispatch(categoryActions.removeCategory(category.id));
   }
 

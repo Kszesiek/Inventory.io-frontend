@@ -14,7 +14,6 @@ import {Warehouse} from "../../../store/warehouses";
 import {getWarehouse} from "../../../endpoints/warehouses";
 import {getCategory} from "../../../endpoints/categories";
 import {Property} from "../../../store/properties";
-import {getPropertiesForCategory} from "../../../endpoints/properties";
 import {getItem} from "../../../endpoints/items";
 import {useFocusEffect} from "@react-navigation/native";
 
@@ -31,7 +30,7 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
 
   const [category, setCategory] = useState<CategoryExtended | null | undefined>(undefined);
   const [warehouse, setWarehouse] = useState<Warehouse | null | undefined>(undefined);
-  const [properties, setProperties] = useState<Property[]>([]);
+  // const [properties, setProperties] = useState<Property[]>([]);
 
   const [isWarehouseLoaded, setIsWarehouseLoaded] = useState<boolean>(false);
   const [isCategoryLoaded,  setIsCategoryLoaded]  = useState<boolean>(false);
@@ -65,16 +64,16 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
       setIsCategoryLoaded(true);
     }
 
-    async function getItemProperties() {
-      if (!item)
-        return;
+    // async function getItemProperties() {
+    //   if (!item)
+    //     return;
+    //
+    //   const properties: Property[] | null = await getPropertiesForCategory(item.categoryId);
+    //   if (!!properties)
+    //     setProperties(properties);
+    // }
 
-      const properties: Property[] | null = await getPropertiesForCategory(item.categoryId);
-      if (!!properties)
-        setProperties(properties);
-    }
-
-    getItemProperties();
+    // getItemProperties();
     getItemCategory();
     getItemWarehouse();
   }, [item]);
@@ -150,13 +149,16 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
       </Detail>
       <Detail name="Właściwości">
         {
-          properties.length > 0 && item.values?.map((value) => {
-            const property: Property | undefined = properties.find((property) => property.id === value.property_id);
+          (!category?.properties || category.properties.length === 0) ? <Text style={styles.detailsReplacementText}>Brak właściwości przypisanych do tej kategorii</Text> : undefined
+        }
+        {
+          category?.properties && category.properties.length > 0 && item.values?.map((value) => {
+            const property: Property | undefined = category.properties.find((property) => property.id === value.property_id);
             return !!property ? <Text key={property.id}>{property?.name}: {property.property_type_id !== 3 ? value.value : value.value === 'true' ? "Tak  ✔️" : "Nie  ❌"}</Text> : undefined;
           })
         }
         {
-          properties.length > 0 && item.values && !!category && <OpacityButton
+          category?.properties && category.properties.length > 0 && item.values !== undefined && <OpacityButton
                 style={styles.propertiesButton}
                 textStyle={styles.propertiesButtonText}
                 onPress={() => navigation.navigate("EditItemProperties", {itemId: route.params.itemId, categoryId: category.id})}

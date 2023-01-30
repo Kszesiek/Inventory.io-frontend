@@ -112,11 +112,12 @@ export async function getRental(dispatch: Dispatch<AnyAction>, rentalId: number,
   }
 }
 
-export async function addRental(dispatch: Dispatch<AnyAction>, rentalTemplate: RentalTemplate, demoMode: boolean = false): Promise<boolean> {
+export async function addRental(dispatch: Dispatch<AnyAction>, rentalTemplate: RentalTemplate, demoMode: boolean = false): Promise<Rental | false> {
   if (demoMode) {
     await new Promise(resolve => setTimeout(resolve, 600));
-    await dispatch(rentalsActions.addRental(rentalFromTemplate(rentalTemplate)));
-    return true;
+    const rental: Rental = rentalFromTemplate(rentalTemplate);
+    await dispatch(rentalsActions.addRental(rental));
+    return rental;
   } else try {
     const response = await axios.post(getUrl(), rentalTemplate);
 
@@ -124,18 +125,24 @@ export async function addRental(dispatch: Dispatch<AnyAction>, rentalTemplate: R
     console.log("STATUS: " + response.status);
     console.log(response.data);
 
-    return true;
+    const rental: Rental = rentalFromTemplate(response.data, response.data.id);
+    if (!!rental) {
+      await dispatch(rentalsActions.addRental(rental));
+      return rental;
+    }
+    else return false;
   } catch (error) {
     console.log(error);
     return false;
   }
 }
 
-export async function modifyRental(dispatch: Dispatch<AnyAction>, rentalTemplate: RentalTemplate, rentalId: number, demoMode: boolean = false): Promise<boolean> {
+export async function modifyRental(dispatch: Dispatch<AnyAction>, rentalTemplate: RentalTemplate, rentalId: number, demoMode: boolean = false): Promise<Rental | false> {
   if (demoMode) {
     await new Promise(resolve => setTimeout(resolve, 600));
-    await dispatch(rentalsActions.modifyRental(rentalFromTemplate(rentalTemplate, rentalId)));
-    return true;
+    const rental: Rental = rentalFromTemplate(rentalTemplate, rentalId)
+    await dispatch(rentalsActions.modifyRental(rental));
+    return rental;
   } else try {
     const response = await axios.patch(getUrl() + rentalId, rentalTemplate);
 
@@ -144,8 +151,13 @@ export async function modifyRental(dispatch: Dispatch<AnyAction>, rentalTemplate
     console.log(response.data);
 
     if (response.status === 200 || response.status === 201)
-      await dispatch(rentalsActions.modifyRental(rentalFromTemplate(response.data, response.data.id)))
-    return true;
+    {
+      const rental = rentalFromTemplate(response.data, response.data.id);
+      await dispatch(rentalsActions.modifyRental(rental));
+      return rental;
+    }
+
+    return false;
   } catch (error) {
     console.log(error);
     return false;
@@ -183,6 +195,31 @@ export async function removeItemFromRental(rentalId: number, itemId: string, dem
     console.log(response.data);
 
     return true;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}
+
+export async function removeRental(dispatch: Dispatch<AnyAction>, rentalId: number, demoMode: boolean = false): Promise<boolean> {
+  if (demoMode) {
+    await new Promise(resolve => setTimeout(resolve, 600));
+    await dispatch(rentalsActions.removeRental(rentalId));
+    return true;
+  } else try {
+    const response = await axios.delete(getUrl() + rentalId);
+
+    console.log("--- DELETE RENTAL RESPONSE ---");
+    console.log("STATUS: " + response.status);
+    console.log(response.data);
+
+    if (response.status === 200)
+    {
+      await dispatch(rentalsActions.removeRental(rentalId));
+      return true;
+    }
+
+    return false;
   } catch (error) {
     console.log(error);
     return false;

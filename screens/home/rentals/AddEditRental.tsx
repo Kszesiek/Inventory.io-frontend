@@ -192,18 +192,24 @@ export default function AddEditRental({ navigation, route }: RentalStackScreenPr
       description: inputs.description.value,
     }
 
+    let response: Rental | false;
     if (!!route.params?.rentalId) {
-      const response = await modifyRental(dispatch, rentalTemplate, route.params.rentalId, demoMode);
+      response = await modifyRental(dispatch, rentalTemplate, route.params.rentalId, demoMode);
 
       console.log("edit response:");
       console.log(response);
     } else {
-      const response = await addRental(dispatch, rentalTemplate, demoMode);
+      response = await addRental(dispatch, rentalTemplate, demoMode);
 
       console.log("add response:");
       console.log(response);
     }
-    navigation.goBack();
+
+    if (!!response)
+      if (route.params?.rentalId)
+        navigation.goBack();
+      else
+        navigation.replace("RentalDetails", {rentalId: response.rentalId});
   }
 
   function inputChangedHandler<InputParam extends keyof typeof inputs>(inputIdentifier: InputParam, enteredValue: string, index?: number) {

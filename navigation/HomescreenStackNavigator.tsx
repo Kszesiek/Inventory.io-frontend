@@ -8,6 +8,7 @@ import Homescreen from "../screens/home/Homescreen";
 import BarcodeScanner from "../screens/home/BarcodeScanner";
 import {useDispatch} from "react-redux";
 import {appWideActions} from "../store/appWide";
+import {logOut} from "../endpoints/auth";
 
 const HomescreenStack = createNativeStackNavigator<HomescreenStackParamList>();
 
@@ -40,7 +41,10 @@ export default function HomescreenNavigator(props: {navigation: any, route: any}
             </TouchableOpacity>
           ),
           headerRight: ({tintColor}) => (
-            <TouchableOpacity onPress={() => dispatch(appWideActions.signOut())}>
+            <TouchableOpacity onPress={() => {
+              dispatch(appWideActions.signOut());
+              logOut();
+            }}>
               <Ionicons name="log-out" color={tintColor} size={32} style={{padding: 10}} />
             </TouchableOpacity>
           ),

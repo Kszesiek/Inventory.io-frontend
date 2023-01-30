@@ -6,7 +6,7 @@ import {useDispatch, useSelector} from "react-redux";
 import Input from "../../../../components/Input";
 import {OpacityButton} from "../../../../components/Themed/OpacityButton";
 import {writeOutArray} from "../../../../utilities/enlist";
-import {isProperty, Property, PropertyTemplate} from "../../../../store/properties";
+import {Property, PropertyTemplate} from "../../../../store/properties";
 import {createProperty, modifyProperty} from "../../../../endpoints/properties";
 import {IRootState} from "../../../../store/store";
 import HighlightChooser from "../../../../components/HighlightChooser";
@@ -87,7 +87,7 @@ export default function AddEditProperty({ navigation, route }: PropertiesStackSc
 
     console.log(route.params?.propertyId !== undefined)
 
-    let response: Property | boolean;
+    let response: Property | false;
     if (route.params?.propertyId !== undefined) {
       response = await modifyProperty(dispatch, route.params.propertyId, propertyTemplate, demoMode);
 
@@ -100,7 +100,14 @@ export default function AddEditProperty({ navigation, route }: PropertiesStackSc
       console.log(response);
     }
 
-    isProperty(response) && navigation.goBack();
+    if (!!response)
+      if (!!route.params?.propertyId) {
+        navigation.goBack();
+      } else {
+        navigation.replace("PropertyDetails", {propertyId: response.id});
+      }
+
+    // isProperty(response) && navigation.goBack();
     // isProperty(response) && navigation.replace("PropertyDetails", {propertyId: response.id});
   }
 

@@ -8,9 +8,10 @@ import {IRootState} from "../../../../store/store";
 import {useEffect, useState} from "react";
 import {Feather} from "@expo/vector-icons";
 import * as React from "react";
-import {Warehouse, warehousesActions} from "../../../../store/warehouses";
+import {Warehouse} from "../../../../store/warehouses";
 import {Item} from "../../../../store/items";
 import {getFilteredItems} from "../../../../endpoints/items";
+import {removeWarehouse} from "../../../../endpoints/warehouses";
 
 export default function WarehouseDetails({ navigation, route }: WarehousesStackScreenProps<'WarehouseDetails'>) {
   const dispatch = useDispatch();
@@ -23,7 +24,6 @@ export default function WarehouseDetails({ navigation, route }: WarehousesStackS
   const warehouse: Warehouse | undefined = warehouses.find((warehouse) => warehouse.id === route.params.warehouseId);
   const [itemsInWarehouse, setItemsInWarehouse] = useState<Item[] | undefined | null>(undefined);
   const [isWarehouseLoaded, setIsWarehouseLoaded] = useState<boolean>(false);
-
 
   useEffect(() => {
     async function getItemsInWarehouse() {
@@ -50,7 +50,8 @@ export default function WarehouseDetails({ navigation, route }: WarehousesStackS
 
   async function deletePressed() {
     console.log("delete button pressed");
-    await dispatch(warehousesActions.removeWarehouse(route.params.warehouseId));
+    const response: boolean = await removeWarehouse(dispatch, route.params.warehouseId, demoMode);
+    if (response)
     navigation.goBack();
   }
 

@@ -85,7 +85,7 @@ async function basicGetMembers(demoMode: boolean = false): Promise<null | undefi
   }
 }
 
-export async function getMember(memberId: string, demoMode: boolean = false): Promise<null | undefined | Member> {
+export async function getMember(dispatch: Dispatch<AnyAction>, memberId: string, demoMode: boolean = false): Promise<null | undefined | Member> {
   if (demoMode) {
     await new Promise(resolve => setTimeout(resolve, 500));
     return getDemoMember(memberId);
@@ -101,7 +101,7 @@ export async function getMember(memberId: string, demoMode: boolean = false): Pr
     if (response.status === 200) {
       const obj = response.data;
       member = memberFromTemplate(obj, obj.id);
-
+      membersActions.updateOrAddMember(member);
       return member;
     } else return null;
   } catch (error) {
@@ -120,6 +120,23 @@ export async function addMember(userId: string, roleId: number, demoMode: boolea
     console.log("--- POST MEMBER RESPONSE ---");
     console.log("STATUS: " + response.status);
     return true;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}
+
+export async function removeMember(userId: string, demoMode: boolean = false): Promise<boolean> {
+  if (demoMode) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    membersActions.removeMember(userId);
+    return true;
+  } else try {
+    const response = await axios.delete(getUrl() + userId);
+
+    console.log("--- DELETE MEMBER RESPONSE ---");
+    console.log("STATUS: " + response.status);
+    return response.status === 200;
   } catch (error) {
     console.log(error);
     return false;

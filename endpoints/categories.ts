@@ -155,17 +155,20 @@ export async function modifyCategory(dispatch: Dispatch<AnyAction>, categoryId: 
   }
 }
 
-export async function removeCategory(categoryId: number, dispatch: Dispatch<AnyAction>): Promise<boolean> {
-  try {
+export async function removeCategory(dispatch: Dispatch<AnyAction>, categoryId: number, demoMode: boolean = false): Promise<boolean> {
+  if (demoMode) {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    dispatch(categoryActions.removeCategory(categoryId));
+    return true;
+  } else try {
     const response = await axios.delete(
-      getUrl() + categoryId + "/",
-      { validateStatus: (status) => status >= 200 && status < 300 || status === 404 });
+      getUrl() + categoryId,
+      {validateStatus: (status) => status >= 200 && status < 300 || status === 404});
 
     console.log("--- REMOVE CATEGORY RESPONSE ---");
     console.log("STATUS: " + response.status);
 
-    if (response.status === 200)
-    {
+    if (response.status === 200) {
       dispatch(categoryActions.removeCategory(categoryId));
       return true;
     } else {

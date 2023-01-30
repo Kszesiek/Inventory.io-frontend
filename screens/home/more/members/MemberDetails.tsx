@@ -1,17 +1,13 @@
 import {Text, useThemeColor, View} from "../../../../components/Themed";
 import {OpacityButton} from "../../../../components/Themed/OpacityButton";
-import {ActivityIndicator, ScrollView, StyleProp, StyleSheet, TextStyle, TouchableOpacity} from "react-native";
+import {ScrollView, StyleProp, StyleSheet, TextStyle} from "react-native";
 import {MembersStackScreenProps} from "../../../../types";
 import Detail from "../../../../components/Detail";
 import {useDispatch, useSelector} from "react-redux";
-import {useEffect, useState} from "react";
-import {Feather} from "@expo/vector-icons";
 import * as React from "react";
-import {Member, membersActions} from "../../../../store/members";
+import {Member} from "../../../../store/members";
 import {IRootState} from "../../../../store/store";
-import {getFilteredItems} from "../../../../endpoints/items";
-import {getMember} from "../../../../endpoints/members";
-import {demoData} from "../../../../constants/demoData";
+import {removeMember} from "../../../../endpoints/members";
 
 export default function MemberDetails({ navigation, route }: MembersStackScreenProps<'MemberDetails'>) {
   const dispatch = useDispatch();
@@ -47,8 +43,9 @@ export default function MemberDetails({ navigation, route }: MembersStackScreenP
 
   async function deletePressed() {
     console.log("delete button pressed");
-    await
-    navigation.replace("Members");
+    const response: boolean = await removeMember(route.params.memberId);
+    if (response)
+      navigation.goBack();
   }
 
   function editPressed() {
@@ -76,7 +73,7 @@ export default function MemberDetails({ navigation, route }: MembersStackScreenP
       <Detail name="Imię i nazwisko">
         <Text style={[styles.text, property]}>{member.name} {member.surname}</Text>
       </Detail>
-      <Detail name="adres e-mail">
+      <Detail name="Adres e-mail">
         <Text style={[styles.text, property]}>{member.email}</Text>
       </Detail>
       <Detail name="ID użytkownika">

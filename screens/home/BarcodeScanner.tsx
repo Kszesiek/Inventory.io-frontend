@@ -37,7 +37,8 @@ export default function BarcodeScanner({ navigation, route }: HomescreenStackScr
         },
       });
     }
-    // alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+    else alert(`Odczytano kod kreskowy, jednak nie odpowiada on żadnemu z przedmiotów tej organizacji`);
+      // alert(`Bar code with type ${type} and data ${data} has been scanned!`);
   };
 
   if (hasPermission === null) {

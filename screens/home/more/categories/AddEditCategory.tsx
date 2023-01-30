@@ -10,7 +10,6 @@ import {
   Category,
   CategoryExtended,
   CategoryTemplate,
-  isCategory,
   isCategoryExtended
 } from "../../../../store/categories";
 import {IRootState} from "../../../../store/store";
@@ -18,7 +17,7 @@ import CategoriesChooser from "../../../../components/choosers/CategoriesChooser
 import * as React from "react";
 import {Modalize} from "react-native-modalize";
 import {TouchableCard} from "../../../../components/Themed/TouchableCard";
-import {createCategory, getCategory, modifyCategory} from "../../../../endpoints/categories";
+import {createCategory, getAllCategories, getCategory, modifyCategory} from "../../../../endpoints/categories";
 
 export type ValidValuePair = {
   value: string
@@ -66,14 +65,19 @@ export default function AddEditCategory({ navigation, route }: CategoriesStackSc
   }
 
   useEffect(() => {
-    async function getCategoryExtended() {
-      if (isCategoryExtended(category) || route.params?.categoryId === undefined)
-        return;
+      async function getCategoryExtended() {
+        if (isCategoryExtended(category) || route.params?.categoryId === undefined)
+          return;
 
-      getCategory(dispatch, route.params.categoryId, demoMode);
-    }
-    getCategoryExtended();
-  }, [])
+        getCategory(dispatch, route.params.categoryId, demoMode);
+      }
+      async function getCategories() {
+        await getAllCategories(dispatch, demoMode);
+      }
+
+      getCategories();
+      getCategoryExtended();
+  }, []);
 
   // useEffect(() => {
   //   setInputs((currentInputValues: typeof inputs) => {
@@ -125,8 +129,8 @@ export default function AddEditCategory({ navigation, route }: CategoriesStackSc
     }
 
     let response: false | undefined | Category | CategoryExtended;
-    if (!!category) {
-      response = await modifyCategory(dispatch, category.id, categoryTemplate, demoMode);
+    if (!!route.params?.categoryId) {
+      response = await modifyCategory(dispatch, route.params.categoryId, categoryTemplate, demoMode);
 
       console.log("edit response:");
       console.log(response);
@@ -136,8 +140,12 @@ export default function AddEditCategory({ navigation, route }: CategoriesStackSc
       console.log("add response:");
       console.log(response);
     }
-    if (isCategory(response))
-      navigation.replace("CategoryDetails", {categoryId: response.id});
+    if (!!response)
+      if (!!route.params?.categoryId) {
+        navigation.goBack();
+      } else {
+        navigation.replace("CategoryDetails", {categoryId: response.id});
+      }
   }
 
   function inputChangedHandler<InputParam extends keyof typeof inputs>(inputIdentifier: InputParam, enteredValue: string) {

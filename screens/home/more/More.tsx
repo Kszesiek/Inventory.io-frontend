@@ -2,16 +2,14 @@ import {Alert, Image, ScrollView, StyleSheet, TouchableWithoutFeedback} from "re
 import {useThemeColor, View, Text} from "../../../components/Themed";
 import {TouchableCard} from "../../../components/Themed/TouchableCard";
 import Logo from "../../../assets/images/inventory.png";
-import {useDispatch, useSelector} from "react-redux";
+import {useSelector} from "react-redux";
 import {IRootState} from "../../../store/store";
 import * as React from "react";
 import {AntDesign, FontAwesome5, Ionicons} from "@expo/vector-icons";
 import {MoreStackScreenProps} from "../../../types";
-import {Organization, organizationsActions} from "../../../store/organizations";
+import {Organization} from "../../../store/organizations";
 
 export default function More({navigation, route}: MoreStackScreenProps<'More'>) {
-  const dispatch = useDispatch();
-
   const backgroundColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
 

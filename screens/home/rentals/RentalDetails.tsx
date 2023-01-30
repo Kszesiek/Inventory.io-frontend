@@ -1,4 +1,4 @@
-import {rentalsActions, Rental} from "../../../store/rentals";
+import {Rental} from "../../../store/rentals";
 import {Text, useThemeColor, View} from "../../../components/Themed";
 import {displayDateTimePeriod} from "../../../utilities/date";
 import {OpacityButton} from "../../../components/Themed/OpacityButton";
@@ -6,17 +6,17 @@ import {ScrollView, StyleProp, StyleSheet, TextStyle, TouchableOpacity} from "re
 import {RentalStackScreenProps} from "../../../types";
 import Detail from "../../../components/Detail";
 import {useDispatch, useSelector} from "react-redux";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useState} from "react";
 import {Feather} from "@expo/vector-icons";
 import * as React from "react";
 import {IRootState} from "../../../store/store";
 import {Member} from "../../../store/members";
-import {getMember} from "../../../endpoints/members";
+import {getAllMembers} from "../../../endpoints/members";
 import {Item} from "../../../store/items";
 import {getFilteredItems} from "../../../endpoints/items";
-import {Modalize} from "react-native-modalize";
 import {TouchableCard} from "../../../components/Themed/TouchableCard";
 import {useFocusEffect} from "@react-navigation/native";
+import {removeRental} from "../../../endpoints/rentals";
 
 export default function RentalDetails({ navigation, route }: RentalStackScreenProps<'RentalDetails'>) {
   const dispatch = useDispatch();
@@ -41,7 +41,7 @@ export default function RentalDetails({ navigation, route }: RentalStackScreenPr
     async function getRentalUser() {
       if (!rental)
         return;
-      setIsUserLoaded(!!(await getMember(rental.userId, demoMode)));
+      setIsUserLoaded(await getAllMembers(dispatch, demoMode));
     }
     async function getRentalItems() {
       if (!rental)
@@ -70,8 +70,8 @@ export default function RentalDetails({ navigation, route }: RentalStackScreenPr
 
   async function deletePressed() {
     console.log("delete button pressed");
-    await dispatch(rentalsActions.removeRental(route.params.rentalId));
-    navigation.goBack();
+    const response = await removeRental(dispatch, route.params.rentalId, demoMode);
+    response && navigation.goBack();
   }
 
   function editPressed() {
@@ -104,7 +104,7 @@ export default function RentalDetails({ navigation, route }: RentalStackScreenPr
           <Text key={index} style={styles.text}><Text style={styles.ordinalNumber}>{index + 1}.</Text> {item.name}</Text>
         )) : <Text style={styles.replacementText}>Brak przedmiotów przypisanych do tego wypożyczenia.</Text>}
         <TouchableCard style={[styles.openModalButton, {backgroundColor: tintColor}]} onPress={() => navigation.navigate("AddItemsToRental", {rentalId: route.params.rentalId})}>
-          <Text style={{textAlign: 'center'}} numberOfLines={1}>Zmień przypsane przedmioty</Text>
+          <Text style={{textAlign: 'center', color: 'white'}} numberOfLines={1}>Zmień przypisane przedmioty</Text>
         </TouchableCard>
       </Detail>
 

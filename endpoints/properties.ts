@@ -84,7 +84,7 @@ export async function basicGetProperties(categoryId?: number, unitId?: number, p
   }
 }
 
-export async function createProperty(dispatch: Dispatch<AnyAction>, propertyTemplate: PropertyTemplate, demoMode: boolean = false): Promise<boolean | Property> {
+export async function createProperty(dispatch: Dispatch<AnyAction>, propertyTemplate: PropertyTemplate, demoMode: boolean = false): Promise<false | Property> {
   if (demoMode) {
     await new Promise(resolve => setTimeout(resolve, 500));
     const property = propertyFromTemplate(propertyTemplate);
@@ -139,7 +139,7 @@ export async function getProperty(dispatch: Dispatch<AnyAction>, propertyId: num
   }
 }
 
-export async function modifyProperty(dispatch: Dispatch<AnyAction>, propertyId: number, propertyTemplate: PropertyTemplate, demoMode: boolean = false): Promise<boolean | Property> {
+export async function modifyProperty(dispatch: Dispatch<AnyAction>, propertyId: number, propertyTemplate: PropertyTemplate, demoMode: boolean = false): Promise<false | Property> {
   if (demoMode) {
     await new Promise(resolve => setTimeout(resolve, 500));
     const property = propertyFromTemplate(propertyTemplate, propertyId);
@@ -171,18 +171,20 @@ export async function modifyProperty(dispatch: Dispatch<AnyAction>, propertyId: 
   }
 }
 
-export async function removeProperty(propertyId: number, dispatch: Dispatch<AnyAction>): Promise<boolean> {
-  try {
-    const response = await axios.delete(
-      getUrl() + propertyId + "/",
-      { validateStatus: (status) => status >= 200 && status < 300 || status === 404 });
+export async function removeProperty(dispatch: Dispatch<AnyAction>, propertyId: number, demoMode: boolean = false): Promise<boolean> {
+  if (demoMode) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    await dispatch(propertyActions.removeProperty(propertyId));
+    return true;
+  } else try {
+    const response = await axios.delete(getUrl() + propertyId, { validateStatus: (status) => status >= 200 && status < 300 || status === 404 });
 
     console.log("--- REMOVE PROPERTY RESPONSE ---");
     console.log("STATUS: " + response.status);
 
     if (response.status === 200)
     {
-      dispatch(propertyActions.removeProperty(propertyId));
+      await dispatch(propertyActions.removeProperty(propertyId));
       return true;
     } else {
       return false;

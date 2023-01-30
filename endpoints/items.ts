@@ -165,10 +165,12 @@ export async function getItem(dispatch: Dispatch<AnyAction>, itemId: string, dem
   }
 }
 
-export async function addItem(dispatch: Dispatch<AnyAction>, itemTemplate: ItemTemplate, demoMode: boolean = false) {
+export async function addItem(dispatch: Dispatch<AnyAction>, itemTemplate: ItemTemplate, demoMode: boolean = false): Promise<Item | false> {
   if (demoMode) {
     await new Promise(resolve => setTimeout(resolve, 700));
-    await dispatch(itemActions.addItem({item: itemFromTemplate(itemTemplate)}));
+    const item: Item = itemFromTemplate(itemTemplate);
+    await dispatch(itemActions.addItem({item: item}));
+    return item;
   } else try {
     const response = await axios.post(getUrl(), itemTemplate);
 
@@ -176,18 +178,21 @@ export async function addItem(dispatch: Dispatch<AnyAction>, itemTemplate: ItemT
     console.log("STATUS: " + response.status);
     console.log(response.data);
 
-    await dispatch(itemActions.loadItem(itemFromTemplate(response.data, response.data.id)));
-    return true;
+    const item: Item = itemFromTemplate(response.data, response.data.id);
+    await dispatch(itemActions.loadItem(item));
+    return item;
   } catch (error) {
     console.log(error);
     return false;
   }
 }
 
-export async function modifyItem(dispatch: Dispatch<AnyAction>, itemId: string, itemTemplate: ItemTemplate, demoMode: boolean = false) {
+export async function modifyItem(dispatch: Dispatch<AnyAction>, itemId: string, itemTemplate: ItemTemplate, demoMode: boolean = false): Promise<Item | false> {
   if (demoMode) {
     await new Promise(resolve => setTimeout(resolve, 700));
-    await dispatch(itemActions.modifyItem({item: itemFromTemplate(itemTemplate, itemId)}));
+    const item: Item = itemFromTemplate(itemTemplate, itemId);
+    await dispatch(itemActions.modifyItem({item: item}));
+    return item;
   } else try {
     const response = await axios.patch(getUrl() + itemId, itemTemplate);
 
@@ -195,8 +200,9 @@ export async function modifyItem(dispatch: Dispatch<AnyAction>, itemId: string, 
     console.log("STATUS: " + response.status);
     console.log(response.data);
 
-    await dispatch(itemActions.loadItem(itemFromTemplate(response.data, response.data.id)));
-    return true;
+    const item: Item = itemFromTemplate(response.data, response.data.id);
+    await dispatch(itemActions.loadItem(item));
+    return item;
   } catch (error) {
     console.log(error);
     return false;

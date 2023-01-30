@@ -208,7 +208,7 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
 
     console.log(itemTemplate);
 
-    let response: boolean | undefined;
+    let response: false | Item;
 
     if (!!item) {
       response = await modifyItem(dispatch, item.itemId, itemTemplate, demoMode);
@@ -223,7 +223,10 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
     }
 
     if (response)
-      navigation.goBack();
+      if (route.params?.itemId)
+        navigation.goBack();
+      else
+        navigation.replace("ItemDetails", {itemId: response.itemId});
   }
 
   function inputChangedHandler<InputParam extends keyof typeof inputs>(inputIdentifier: InputParam, enteredValue: string) {
@@ -413,7 +416,7 @@ export default function AddEditItem({ navigation, route }: InventoryStackScreenP
     itemDescriptionComponent,
     categoryComponent,
     warehouseComponent,
-    route.params?.itemId ? valuesComponent : <></>,
+    // valuesComponent,
   ]
 
   return <>

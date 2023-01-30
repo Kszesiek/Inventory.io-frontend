@@ -7,27 +7,30 @@ import {useDispatch, useSelector} from "react-redux";
 import {useEffect, useState} from "react";
 import {Feather} from "@expo/vector-icons";
 import * as React from "react";
-import {mapPropertyType, Property, propertyActions} from "../../../../store/properties";
+import {mapPropertyType, Property} from "../../../../store/properties";
 import {IRootState} from "../../../../store/store";
-import {getProperty} from "../../../../endpoints/properties";
+import {getProperty, removeProperty} from "../../../../endpoints/properties";
+import {useFocusEffect} from "@react-navigation/native";
 
 export default function PropertyDetails({ navigation, route }: PropertiesStackScreenProps<'PropertyDetails'>) {
   const dispatch = useDispatch();
-  const demoData: boolean = useSelector((state: IRootState) => state.appWide.demoMode);
+  const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
   const textColor = useThemeColor({}, 'text');
   const deleteColor = useThemeColor({}, "delete");
   const tintColor = useThemeColor({}, 'tint');
+  const backgroundColor = useThemeColor({}, "background");
   const properties = useSelector((state: IRootState) => state.properties.properties);
   const [property, setProperty] = useState<Property | null | undefined>(properties.find((property) => property.id === route.params.propertyId));
   const [isPropertyLoaded, setIsPropertyLoaded] = useState<boolean>(false);
 
-  useEffect(() => {
-    async function getItemProperty() {
-      setProperty(await getProperty(dispatch, route.params.propertyId, demoData));
-      setIsPropertyLoaded(true);
-    }
-    getItemProperty();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      async function getItemProperty() {
+        setProperty(await getProperty(dispatch, route.params.propertyId, demoMode));
+        setIsPropertyLoaded(true);
+      }
+      getItemProperty();
+  }, []));
 
   useEffect(() => {
     navigation.setOptions({
@@ -41,15 +44,13 @@ export default function PropertyDetails({ navigation, route }: PropertiesStackSc
 
   const itemProp: StyleProp<TextStyle> = {
     fontFamily: 'Source Sans',
-    color: useThemeColor({}, "text"),
+    color: textColor,
   }
-
-  const backgroundColor = useThemeColor({}, "background");
 
   async function deletePressed() {
     console.log("delete button pressed");
-    navigation.replace("Properties");
-    await dispatch(propertyActions.removeProperty(route.params.propertyId));
+    removeProperty(dispatch, route.params.propertyId, demoMode);
+    navigation.goBack();
   }
 
   function editPressed() {

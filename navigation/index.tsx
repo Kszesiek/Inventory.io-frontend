@@ -114,7 +114,7 @@ function CustomHomeDrawerContent(props: DrawerContentComponentProps) {
 
   function createOrganizationPressed() {
     console.log("create organization pressed");
-    props.navigation.navigate("CreateOrganization", { doesGoBack: true });
+    props.navigation.navigate("CreateOrganizationHome", { doesGoBack: true });
   }
 
   function profileSettingsPressed() {
@@ -153,6 +153,8 @@ function CustomHomeDrawerContent(props: DrawerContentComponentProps) {
 
 function HomeDrawerNavigator(props: {organizations: Organization[]}) {
   const headerColor = useThemeColor({}, 'header');
+  const tintBackgroundColor = useThemeColor({}, "tintBackground");
+  const tintColor = useThemeColor({}, "tint")
   const dispatch = useDispatch();
   useEffect(() => {
     async function loadData () {
@@ -175,8 +177,8 @@ function HomeDrawerNavigator(props: {organizations: Organization[]}) {
       screenOptions={{
         headerShown: false,
         drawerStyle: {backgroundColor: headerColor},
-        drawerActiveBackgroundColor: useThemeColor({}, "tintBackground"),
-        drawerActiveTintColor: useThemeColor({}, "tint"),
+        drawerActiveBackgroundColor: tintBackgroundColor,
+        drawerActiveTintColor: tintColor,
       }}
       drawerContent={(props) => <CustomHomeDrawerContent {...props} />}
     >

@@ -1,7 +1,7 @@
 import {FlatList, StyleSheet, TouchableOpacity} from "react-native";
 import {Text, useThemeColor, View} from "../../../components/Themed";
 import {InventoryStackScreenProps} from "../../../types";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {useEffect, useState} from "react";
 import {Item} from "../../../store/items";
 import Input from "../../../components/Input";
@@ -9,10 +9,11 @@ import {IRootState} from "../../../store/store";
 import * as React from "react";
 import {addItemValue, deleteItemValue, updateItemValue} from "../../../endpoints/items";
 import {Property} from "../../../store/properties";
-import {getPropertiesForCategory} from "../../../endpoints/properties";
 import Switch from "../../../components/Themed/Switch";
 import Card from "../../../components/Themed/Card";
 import {MaterialIcons} from "@expo/vector-icons";
+import {getCategory} from "../../../endpoints/categories";
+import {CategoryExtended} from "../../../store/categories";
 
 export type ValidValuePair<Type> = {
   value: Type
@@ -20,6 +21,7 @@ export type ValidValuePair<Type> = {
 }
 
 export default function EditItemProperties({ navigation, route }: InventoryStackScreenProps<'EditItemProperties'>) {
+  const dispatch = useDispatch();
   const demoMode = useSelector((state: IRootState) => state.appWide.demoMode);
   const [properties, setProperties] = useState<Property[]>([]);
 
@@ -30,12 +32,13 @@ export default function EditItemProperties({ navigation, route }: InventoryStack
   const cardColor = useThemeColor({}, 'cardBackground');
 
   useEffect(() => {
-    async function getProperties() {
-      const properties: Property[] | null = await getPropertiesForCategory(route.params.categoryId, demoMode);
+    async function getItemCategory() {
+      const category: CategoryExtended | null | undefined = await getCategory(dispatch, route.params.categoryId, demoMode);
+      const properties: Property[] | undefined = category?.properties;
       Array.isArray(properties) && setProperties(properties);
     }
 
-    getProperties();
+    getItemCategory();
   }, []);
 
   const [propertyInputs, setPropertyInputs] = useState<{[key: number]: ValidValuePair<string | number | boolean | undefined>}>({});

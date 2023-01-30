@@ -15,6 +15,9 @@ const HomeTab = createBottomTabNavigator<HomeTabParamList>();
 export default function HomeTabNavigator(props: {navigation: any, route: any}) {
   const textColor = useThemeColor({}, 'text');
   const headerColor = useThemeColor({}, 'header');
+  const tintColor = useThemeColor({}, "tint");
+  const tintBackgroundColor = useThemeColor({}, "tintBackground");
+
 
   return (
     <HomeTab.Navigator
@@ -29,8 +32,8 @@ export default function HomeTabNavigator(props: {navigation: any, route: any}) {
         ),
         headerTintColor: textColor,
         headerStyle: {backgroundColor: headerColor},
-        tabBarActiveBackgroundColor: useThemeColor({}, "tintBackground"),
-        tabBarActiveTintColor: useThemeColor({}, "tint"),
+        tabBarActiveBackgroundColor: tintBackgroundColor,
+        tabBarActiveTintColor: tintColor,
         tabBarInactiveBackgroundColor: headerColor,
         tabBarStyle: {
           height: 55,
@@ -84,15 +87,15 @@ export default function HomeTabNavigator(props: {navigation: any, route: any}) {
             <Ionicons name="push" size={size} color={color} />
           ),
         }} />
-      <HomeTab.Screen
-        name="EventNavigator"
-        component={EventNavigator}
-        options={{
-          tabBarLabel: "Wydarzenia",
-          tabBarIcon: ({color, size}) => (
-            <Ionicons name="calendar" size={size} color={color} />
-          ),
-        }} />
+      {/*<HomeTab.Screen*/}
+      {/*  name="EventNavigator"*/}
+      {/*  component={EventNavigator}*/}
+      {/*  options={{*/}
+      {/*    tabBarLabel: "Wydarzenia",*/}
+      {/*    tabBarIcon: ({color, size}) => (*/}
+      {/*      <Ionicons name="calendar" size={size} color={color} />*/}
+      {/*    ),*/}
+      {/*  }} />*/}
       <HomeTab.Screen
         name="MoreNavigator"
         component={MoreNavigator}

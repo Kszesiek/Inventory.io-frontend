@@ -147,3 +147,26 @@ export async function modifyWarehouse(dispatch: Dispatch<AnyAction>, warehouseId
     return false;
   }
 }
+
+export async function removeWarehouse(dispatch: Dispatch<AnyAction>, warehouseId: number,demoMode: boolean = false): Promise<boolean> {
+  if (demoMode) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    await dispatch(warehousesActions.removeWarehouse(warehouseId));
+    return true;
+  } else try {
+    const response = await axios.delete(getUrl() + warehouseId);
+
+    console.log("--- DELETE WAREHOUSE RESPONSE ---");
+    console.log("STATUS: " + response.status);
+    console.log(response.data);
+
+    if (response.status !== 200)
+      return false;
+
+    await dispatch(warehousesActions.removeWarehouse(warehouseId));
+    return true;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}

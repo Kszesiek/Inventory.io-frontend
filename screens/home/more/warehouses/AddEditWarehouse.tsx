@@ -188,7 +188,11 @@ export default function AddEditWarehouse({ navigation, route }: WarehousesStackS
       console.log("add response:");
       console.log(response);
     }
-    !!response && navigation.goBack();
+    if (!!response)
+      if (route.params?.warehouseId)
+        navigation.goBack();
+      else
+        navigation.replace("WarehouseDetails", {warehouseId: response.id});
   }
 
   function inputChangedHandler<InputParam extends keyof typeof inputs>(inputIdentifier: InputParam, enteredValue: string) {
