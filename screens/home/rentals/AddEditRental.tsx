@@ -273,7 +273,7 @@ export default function AddEditRental({ navigation, route }: RentalStackScreenPr
         searchPlaceholder="Wyszukaj użytkownika..."
         textStyle={{color: textColor}}
         closeOnBackPressed={true}
-        theme={backgroundColor === colors.dark.background ? 'DARK' : "LIGHT"}
+        theme={backgroundColor === colors.theme.dark.background ? 'DARK' : "LIGHT"}
         style={{...styles.dropdown, backgroundColor: cardColor}}
         dropDownContainerStyle={{...styles.dropdown, backgroundColor: cardColor}}
         searchTextInputStyle={{borderColor: backgroundColor, elevation: 5, backgroundColor: cardColor}}

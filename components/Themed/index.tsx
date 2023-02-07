@@ -11,24 +11,30 @@ import {
   TextStyle,
 } from 'react-native';
 
-import Colors, {CSSColorToHex} from '../../constants/Colors';
+import Colors, {
+  CSSColorToHex,
+  isThemeColorName, possibleAccentColors,
+  possibleThemeColors,
+} from '../../constants/Colors';
 import useColorScheme from '../../hooks/useColorScheme';
 import {useSelector} from "react-redux";
 import {IRootState} from "../../store/store";
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
-  colorName: keyof typeof Colors.light & keyof typeof Colors.dark
+  colorName: typeof possibleThemeColors[number] | typeof possibleAccentColors[number]
 ) {
   const colorScheme = useColorScheme();
-  const theme: "light" | "dark" | null | undefined = useSelector((state: IRootState) => state.appWide.theme === 'auto' ? colorScheme : state.appWide.theme);
-  const colorFromProps = props[theme];
+  const themeName = useSelector((state: IRootState) => state.appWide.theme === 'auto' ? colorScheme : state.appWide.theme);
+  const accentName = useSelector((state: IRootState) => state.appWide.accent);
 
-  if (colorFromProps) {
+  const colorFromProps = props[themeName];
+  if (colorFromProps)
     return colorFromProps;
-  } else {
-    return Colors[theme][colorName];
-  }
+  else if (isThemeColorName(colorName))
+    return Colors.theme[themeName][colorName];
+  else
+    return Colors.accent[accentName][colorName];
 }
 
 export type ThemeProps = {

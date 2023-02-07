@@ -1,37 +1,141 @@
-export default {
-  light: {
-    header: '#fff',
-    background: '#F9FBFC',
-    cardBackground: '#fff',
-    textInput: '#fff',
-    text: '#333',
-    buttonText: '#fff',
-    tintDark: '#0059c1',
-    tintLight: "#81b0ff",
-    tint: '#4285F4',
-    tintSecondary: "#81b0ff",
-    tintBackground: '#E8F0FE',
-    tabIconDefault: '#ccc',
-    delete: '#EF5350',
-    transparent: 'transparent',
+export const possibleThemes = <const> [
+  'light',
+  'dark',
+];
+
+export const possibleAccents = <const> [
+  "OG Frozen Gold",
+  "Button Blue",
+  "Amplitron Orange",
+  "SSPW Waffle",
+];
+
+export const possibleThemeColors = <const> [
+  'header',
+  'background',
+  'cardBackground',
+  'textInput',
+  'text',
+  'buttonText',
+  'tabIconDefault',
+  'delete',
+  'transparent',
+];
+
+export const possibleAccentColors = <const> [
+  'tint',
+  'tintLight',
+  'tintDark',
+  'tintSecondary',
+  'tintBackground',
+];
+
+export type themeColor = {
+  readonly [themeColorName in typeof possibleThemeColors[number]]: string
+  // transparent: 'transparent', // TODO: This should be restricted to 'transparent' only
+  // header: string,
+  // background: string,
+  // cardBackground: string,
+  // textInput: string,
+  // text: string,
+  // buttonText: string,
+  // tabIconDefault: string,
+  // delete: string,
+}
+
+export type accentColor = {
+  readonly [accentColorName in typeof possibleAccentColors[number]]: string
+  // tint: string,
+  // tintLight: string,
+  // tintDark: string,
+  // tintSecondary: string,
+  // tintBackground: string,
+}
+
+export function isThemeColorName(name: any): name is keyof themeColor {
+  return (
+    !!name &&
+    typeof name === 'string' &&
+    possibleThemeColors.some((value) => value === name)
+  )
+}
+
+export function isAccentColorName(name: any): name is keyof accentColor {
+  return (
+    !!name &&
+    typeof name === 'string' &&
+    possibleAccentColors.some((value) => value === name)
+
+  )
+}
+
+type AllColors = {
+  theme: {
+    readonly [themeName in typeof possibleThemes[number]]: themeColor
   },
-  dark: {
-    header: '#152430',
-    background: '#1E2E3D',
-    cardBackground: '#273444',
-    textInput: '#1E2835',
-    text: '#fff',
-    buttonText: '#fff',
-    tintDark: '#957a23',
-    tintLight: '#fdda80',
-    tint: '#c8a951',
-    tintSecondary: '#2a3534',
-    tintBackground: '#121f2b',
-    tabIconDefault: '#7c7c7c',
-    delete: '#D32F2F',
-    transparent: 'transparent',
+  accent: {
+    readonly [accentName in typeof possibleAccents[number]]: accentColor
+  },
+}
+
+const allColors: AllColors = {
+  theme: {
+    light: {
+      header: '#fff',
+      background: '#F9FBFC',
+      cardBackground: '#fff',
+      textInput: '#fff',
+      text: '#333',
+      buttonText: '#fff',
+      tabIconDefault: '#ccc',
+      delete: '#EF5350',
+      transparent: 'transparent',
+    },
+    dark: {
+      header: '#152430',
+      background: '#1E2E3D',
+      cardBackground: '#273444',
+      textInput: '#1E2835',
+      text: '#fff',
+      buttonText: '#fff',
+      tabIconDefault: '#7c7c7c',
+      delete: '#D32F2F',
+      transparent: 'transparent',
+    },
+  },
+  accent: {
+    "OG Frozen Gold": {
+      tint: '#c8a951',
+      tintLight: '#fdda80',
+      tintDark: '#957a23',
+      tintSecondary: '#2a3534',
+      tintBackground: '#121f2b',
+    },
+    "Button Blue": {
+      tint: '#4285F4',
+      tintLight: '#81b0ff',
+      tintDark: '#0059c1',
+      tintSecondary: '#81b0ff',
+      tintBackground: '#E8F0FE',
+    },
+    "Amplitron Orange": {
+      tint: '#EC6725',
+      tintLight: '#ff9853',
+      tintDark: '#b43700',
+      tintSecondary: 'magenta',
+      tintBackground: '#101726',
+    },
+    "SSPW Waffle": {
+      tint: '#FF9425',
+      tintLight: '#FFB25B',
+      tintDark: '#c66500',
+      tintSecondary: 'magenta',
+      tintBackground: '#1D1F2A',
+    },
   },
 };
+
+export default allColors;
 
 export function CSSColorToHex(color: string) {
   const colors = {"aliceblue":"#f0f8ff","antiquewhite":"#faebd7","aqua":"#00ffff","aquamarine":"#7fffd4","azure":"#f0ffff",

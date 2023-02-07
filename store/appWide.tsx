@@ -1,10 +1,12 @@
 import {createSlice} from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {possibleAccents, possibleThemes} from "../constants/Colors";
 
 export const appWideSlice = createSlice({
   name: 'appWide',
   initialState: {
-    theme: 'auto' as 'auto' | 'light' | 'dark',
+    theme: 'auto' as 'auto' | typeof possibleThemes[number],
+    accent: 'OG Frozen Gold' as typeof possibleAccents[number],
     demoMode: true,
     username: undefined as string | undefined,
     name: undefined as string | undefined,
@@ -13,8 +15,11 @@ export const appWideSlice = createSlice({
     organizationName: undefined as string | undefined,
   },
   reducers: {
-    setTheme: (state, action: {payload: 'auto' | 'light' | 'dark'}) => {
+    setTheme: (state, action: {payload: 'auto' | typeof possibleThemes[number]}) => {
       state.theme = action.payload;
+    },
+    setAccent: (state, action: {payload: typeof possibleAccents[number]}) => {
+      state.accent = action.payload;
     },
     setDemoMode: (state, action: {payload: boolean}) => {
       state.demoMode = action.payload;
