@@ -68,8 +68,16 @@ export async function getAllItems(dispatch: Dispatch<AnyAction>, demoMode: boole
   return items;
 }
 
-export async function getFilteredItems(dispatch: Dispatch<AnyAction>, searchedText?: string, categoryId?: number, warehouseId?: number, rentalId?: number, demoMode: boolean = false): Promise<null | Item[]> {
+export async function getFilteredItems(
+  dispatch: Dispatch<AnyAction>,
+  searchedText?: string,
+  categoryId?: number,
+  warehouseId?: number,
+  rentalId?: number,
+  demoMode: boolean = false
+): Promise<null | Item[]> {
   if (demoMode) {
+    await new Promise(resolve => setTimeout(resolve, 700));
     const items: Item[] = getDemoItems();
     const itemsCategorised = items.filter((item) => {
       if (categoryId === undefined)
@@ -143,7 +151,12 @@ export async function basicGetItems(searchedText?: string, categoryId?: number, 
 export async function getItem(dispatch: Dispatch<AnyAction>, itemId: string, demoMode: boolean = false): Promise<null | Item> {
   if (demoMode) {
     await new Promise(resolve => setTimeout(resolve, 700));
-    return getDemoItem(itemId);
+    const item = getDemoItem(itemId);
+    if (!item)
+      return null;
+
+    await dispatch(itemActions.loadItem(item));
+    return item;
   } else try {
     const response = await axios.get(getUrl() + itemId, { validateStatus: (status) => status >= 200 && status < 300 || status === 404 });
 

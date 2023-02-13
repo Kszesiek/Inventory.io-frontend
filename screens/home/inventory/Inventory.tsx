@@ -19,7 +19,7 @@ import * as React from "react";
 import {Modalize} from "react-native-modalize";
 import {Category} from "../../../store/categories";
 import CategoriesChooser from "../../../components/choosers/CategoriesChooser";
-import {getAllItems, getFilteredItems} from "../../../endpoints/items";
+import {getFilteredItems} from "../../../endpoints/items";
 import {getAllCategories} from "../../../endpoints/categories";
 import {Warehouse} from "../../../store/warehouses";
 import {useFocusEffect} from "@react-navigation/native";
@@ -45,11 +45,6 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
   const [selectedCategory, setSelectedCategory] = useState<Category | undefined>(undefined);
   const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | undefined>(undefined);
   const [textInput, setTextInput] = useState<string>(route.params?.searchPhrase || "");
-
-  // changed when pressing search button
-  // const [chosenCategory, setChosenCategory] = useState<Category | undefined>(undefined);
-  // const [chosenWarehouse, setChosenWarehouse] = useState<Warehouse | undefined>(undefined);
-  // const [chosenText, setChosenText] = useState<string>(route.params?.searchPhrase || "");
 
   const categoriesModalizeRef = useRef<Modalize>(null);
   const warehouseModalizeRef = useRef<Modalize>(null);
@@ -92,13 +87,12 @@ export default function Inventory({ navigation, route }: InventoryStackScreenPro
     console.log("TextInput: " + textInput);
     console.log("CategoryId: " + selectedCategory?.id);
     console.log("WarehouseId: " + selectedWarehouse?.id);
-    if (!demoMode) {
-      setAreItemsLoaded(undefined);
-      const loadedItems = await getFilteredItems(dispatch, textInput, selectedCategory?.id, selectedWarehouse?.id, undefined, demoMode);
-      setAreItemsLoaded(!!loadedItems);
-      if(!!loadedItems)
-        setItemsToDisplay(loadedItems);
-    }
+
+    setAreItemsLoaded(undefined);
+    const loadedItems = await getFilteredItems(dispatch, textInput, selectedCategory?.id, selectedWarehouse?.id, undefined, demoMode);
+    setAreItemsLoaded(!!loadedItems);
+    if(!!loadedItems)
+      setItemsToDisplay(loadedItems);
   }
 
   function cardPressed(item: Item) {

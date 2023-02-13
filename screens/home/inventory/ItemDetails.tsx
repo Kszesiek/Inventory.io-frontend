@@ -24,6 +24,7 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
   const backgroundColor = useThemeColor({}, "background");
   const textColor = useThemeColor({}, "text");
   const tintColor = useThemeColor({}, "tint");
+  const deleteColor = useThemeColor({}, "delete");
 
   const item: Item | undefined = useSelector((state: IRootState) => state.items.items.find(
     (item) => item.itemId === route.params.itemId));
@@ -32,6 +33,7 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
   const [warehouse, setWarehouse] = useState<Warehouse | null | undefined>(undefined);
   // const [properties, setProperties] = useState<Property[]>([]);
 
+  const [isItemLoaded, setIsItemLoaded] = useState<boolean>(!!item);
   const [isWarehouseLoaded, setIsWarehouseLoaded] = useState<boolean>(false);
   const [isCategoryLoaded,  setIsCategoryLoaded]  = useState<boolean>(false);
 
@@ -80,8 +82,10 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
 
   useFocusEffect(
     React.useCallback(() => {
-      getItem(dispatch, route.params.itemId, demoMode).then(() => {
-      });
+      (async () => {
+        const item = await getItem(dispatch, route.params.itemId, demoMode);
+        setIsItemLoaded(!!item);
+      })();
     }, [])
   );
 
@@ -127,11 +131,16 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
       return <Text style={styles.text}>{category.name + " (" + category.short_name + ")"}</Text>
   }
 
-  if (!item) {
+  if (!isItemLoaded)
+    return <View style={styles.loadingView}>
+      <ActivityIndicator color={tintColor} size="large" />
+      <Text style={styles.loadingText}>Wczytywanie danych z serwera...</Text>
+    </View>
+
+  if (!item)
     return <View style={styles.loadingView}>
       <Text style={styles.loadingText}>Błąd połączenia z serwerem.</Text>
     </View>
-  }
 
   return (
     <ScrollView contentContainerStyle={{backgroundColor, ...styles.container}}>
@@ -149,7 +158,9 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
       </Detail>
       <Detail name="Właściwości">
         {
-          (!category?.properties || category.properties.length === 0) ? <Text style={styles.detailsReplacementText}>Brak właściwości przypisanych do tej kategorii</Text> : undefined
+          (!category?.properties || category.properties.length === 0) ?
+            <Text style={styles.detailsReplacementText}>Brak właściwości przypisanych do tej kategorii</Text>
+            : undefined
         }
         {
           category?.properties && category.properties.length > 0 && item.values?.map((value) => {
@@ -173,7 +184,7 @@ export default function ItemDetails({ navigation, route }: InventoryStackScreenP
       <View style={{flexGrow: 1}}/>
       <View style={styles.editButtonContainer}>
         <OpacityButton
-          style={[styles.editButton, {backgroundColor: useThemeColor({}, "delete")}]}
+          style={[styles.editButton, {backgroundColor: deleteColor}]}
           onPress={deletePressed}
         >
           Usuń
@@ -220,7 +231,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   detailsReplacementText: {
-    fontStyle: 'italic',
+    fontStyle: "italic",
     fontSize: 13,
   },
   loadingView: {
